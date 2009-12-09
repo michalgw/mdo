@@ -27,11 +27,20 @@
 {                                                                        }
 {************************************************************************}
 
+{$I ..\mdo.inc}
+
 unit MDO;
 
 interface
 uses
-  Windows, SysUtils, Classes, MDOHeader, MDOExternals, MDOUtils, DB, MDOConst;
+  {$IFDEF MDO_FPC}
+    {$IFDEF UNIX}
+  cthreads,
+    {$ENDIF}
+  {$ELSE}
+  Windows,
+  {$ENDIF}
+  SysUtils, Classes, MDOHeader, MDOExternals, MDOUtils, DB, MDOConst;
 
 type
   TTraceFlag = (tfQPrepare, tfQExecute, tfQFetch, tfError, tfStmt, tfConnect,
@@ -313,6 +322,13 @@ const
     SGeneratorNotDefined
   );
 
+// LoginDialog procedure for database
+type
+  TLoginDialogProc = function(const DBName: String; var DBUserName, DBPassword: String): Boolean;
+
+var
+  LoginDialogProc: TLoginDialogProc = nil;
+
 var
   MDOCS: TRTLCriticalSection;
 
@@ -332,6 +348,9 @@ function GeTMDODataBaseErrorMessages: TMDODataBaseErrorMessages;
 implementation
 
 uses
+  {$IFNDEF MDO_FPC}
+  DBLogDlg,
+  {$ENDIF}
   MDOIntf;
 
 var
@@ -509,10 +528,19 @@ end;
 
 initialization
   IsMultiThread := True;
+  {$IFDEF MDO_FPC}
+  InitCriticalSection(MDOCS);
+  {$ELSE}
   InitializeCriticalSection(MDOCS);
+  LoginDialogProc := @DBLogDlg.LoginDialog; // VCL DBLogDlg
+  {$ENDIF}
   MDODataBaseErrorMessages := [ShowSQLMessage, ShowMDOMessage];
 
 finalization
+  {$IFDEF MDO_FPC}
+  DoneCriticalsection(MDOCS);
+  {$ELSE}
   DeleteCriticalSection(MDOCS);
+  {$ENDIF}
 
 end.

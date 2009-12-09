@@ -1,0 +1,92 @@
+object frmMain: TfrmMain
+  Left = 291
+  Height = 324
+  Top = 110
+  Width = 305
+  Caption = 'Backup Service'
+  ClientHeight = 324
+  ClientWidth = 305
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  LCLVersion = '0.9.29'
+  object Label12: TLabel
+    Left = 0
+    Height = 14
+    Top = 310
+    Width = 305
+    Align = alBottom
+    Alignment = taCenter
+    Caption = 'Mercury Database Objects'
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label1: TLabel
+    Left = 16
+    Height = 14
+    Top = 8
+    Width = 66
+    Caption = 'Database file:'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    Left = 16
+    Height = 14
+    Top = 48
+    Width = 54
+    Caption = 'Backup file'
+    ParentColor = False
+  end
+  object Button1: TButton
+    Left = 112
+    Height = 25
+    Top = 240
+    Width = 75
+    Caption = 'Backup'
+    OnClick = Button1Click
+    TabOrder = 2
+  end
+  object mmoLog: TMemo
+    Left = 16
+    Height = 129
+    Top = 104
+    Width = 265
+    TabOrder = 3
+  end
+  object edtBkFile: TEdit
+    Left = 16
+    Height = 21
+    Top = 64
+    Width = 265
+    TabOrder = 1
+  end
+  object edtDbFile: TFileNameEdit
+    Left = 16
+    Height = 21
+    Top = 24
+    Width = 240
+    DialogOptions = []
+    FilterIndex = 0
+    HideDirectories = False
+    ButtonWidth = 23
+    NumGlyphs = 0
+    MaxLength = 0
+    TabOrder = 0
+  end
+  object MDOBackupService1: TMDOBackupService
+    LoginPrompt = False
+    Params.Strings = (
+      'user_name=sysdba'
+      'password=masterkey'
+    )
+    Protocol = TCP
+    ServerName = 'localhost'
+    TraceFlags = []
+    BlockingFactor = 0
+    Options = []
+    left = 16
+    top = 240
+  end
+end

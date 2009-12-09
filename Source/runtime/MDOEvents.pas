@@ -27,13 +27,21 @@
 {                                                                        }
 {************************************************************************}
 
+{$I ..\mdo.inc}
+
 unit MDOEvents;
 
 interface
 
 uses
-  SysUtils, Windows, Messages, Classes, Graphics, Controls, Forms, Dialogs, DB,
-  MDOHeader, MDOExternals, MDO, MDODatabase;
+  {$IFDEF MDO_FPC}
+    {$IFDEF UNIX}
+  cthreads,
+    {$ENDIF}
+  {$ELSE}
+  Windows, Messages, Graphics, Controls, Forms, Dialogs,
+  {$ENDIF}
+  SysUtils, Classes, DB, MDOHeader, MDOExternals, MDO, MDODatabase;
 
 const
   MaxEvents = 15;
@@ -103,7 +111,11 @@ begin
   try
     TMDOEvents( param).HandleEvent;
   except
+    {$IFDEF MDO_FPC}
+    Classes.ApplicationHandleException(nil);
+    {$ELSE}
     Application.HandleException( nil);
+    {$ENDIF}
   end;
 end;
 
@@ -115,7 +127,11 @@ begin
   EnterCriticalSection( TMDOEvents( ptr).CS);
   TMDOEvents( ptr).UpdateResultBuffer( length, updated);
   if TMDOEvents( ptr).Queued then
+    {$IFDEF MDO_FPC}
+    BeginThread( nil, 8192, @HandleEvent, ptr, 0, ThreadID);
+    {$ELSE}
     CloseHandle( CreateThread( nil, 8192, @HandleEvent, ptr, 0, ThreadID));
+    {$ENDIF}
   LeaveCriticalSection( TMDOEvents( ptr).CS);
 end;
 
@@ -129,7 +145,11 @@ begin
   FIBLoaded := False;
   CheckFBLoaded;
   FIBLoaded := True;
-  InitializeCriticalSection( CS);
+  {$IFDEF MDO_FPC}
+  InitCriticalSection(CS);
+  {$ELSE}
+  InitializeCriticalSection(CS);
+  {$ENDIF}
   FEvents := TStringList.Create;
   with TStringList( FEvents) do
   begin
@@ -146,7 +166,11 @@ begin
     SetDatabase( nil);
     TStringList(FEvents).OnChange := nil;
     FEvents.Free;
-    DeleteCriticalSection( CS);
+    {$IFDEF MDO_FPC}
+    DoneCriticalsection(CS);
+    {$ELSE}
+    DeleteCriticalSection(CS);
+    {$ENDIF}
   end;
   inherited Destroy;
 end;
@@ -227,7 +251,11 @@ begin
         if (Status[i] <> 0) and not CancelAlerts then
             FOnEventAlert( self, Events[Events.Count-i-1], Status[i], CancelAlerts);
         except
+          {$IFDEF MDO_FPC}
+          Classes.ApplicationHandleException(nil);
+          {$ELSE}
           Application.HandleException( nil);
+          {$ENDIF}
         end;
       end;
     end;
@@ -246,7 +274,11 @@ begin
     if RegisteredState then RegisterEvents;
   except
     if csDesigning in ComponentState then
+      {$IFDEF MDO_FPC}
+      Classes.ApplicationHandleException(nil)
+      {$ELSE}
       Application.HandleException( self)
+      {$ENDIF}
     else raise;
   end;
 end;

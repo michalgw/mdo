@@ -27,13 +27,18 @@
 {                                                                        }
 {************************************************************************}
 
+{$I ..\mdo.inc}
+
 unit MDOExtract;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, MDODatabase, MDODatabaseInfo, MDOSQL,
-  MDOUtils, MDOHeader, MDO, MDOIntf;
+  {$IFNDEF MDO_FPC}
+  Windows, Messages,
+  {$ENDIF}
+  SysUtils, Classes, MDODatabase, MDODatabaseInfo, MDOSQL, MDOUtils, MDOHeader,
+  MDO, MDOIntf;
 
 type
   TExtractObjectTypes =
@@ -96,7 +101,7 @@ type
     procedure ExtractObject(ObjectType : TExtractObjectTypes; ObjectName : 
             String = ''; ExtractTypes : TExtractTypes = []);
     function GetArrayField(FieldName : String): string;
-    function GetCharacterSets(CharSetId, Collation : Short;	CollateOnly : 
+    function GetCharacterSets(CharSetId, Collation : Smallint;	CollateOnly :
             Boolean): string;
     function GetFieldType(FieldType, FieldSubType, FieldScale, FieldSize, 
             FieldPrec, FieldLen : Integer): string;
@@ -371,11 +376,11 @@ function TMDOExtract.ExtractListTable(RelationName, NewName : String;
       'ORDER BY RELC.RDB$CONSTRAINT_NAME';
   
   var
-    Collation, CharSetId : Short;
-    i : Short;
+    Collation, CharSetId : Smallint;
+    i : Smallint;
     ColList, Column, Constraint : String;
-    SubType : Short;
-    IntChar : Short;
+    SubType : Smallint;
+    IntChar : Smallint;
     qryTables, qryPrecision, qryConstraints, qryRelConstraints : TMDOSQL;
     PrecisionKnown, ValidRelation : Boolean;
     FieldScale, FieldType : Integer;
@@ -800,7 +805,7 @@ begin
   
 end;
 
-function TMDOExtract.GetCharacterSets(CharSetId, Collation : Short;	CollateOnly 
+function TMDOExtract.GetCharacterSets(CharSetId, Collation : Smallint;	CollateOnly
         : Boolean): string;
 var
   CharSetSQL: TMDOSQL;
@@ -2324,11 +2329,12 @@ begin
   end;
 end;
 
+resourcestring
+  CreateProcedureStr1 = 'CREATE PROCEDURE %s ';
+  CreateProcedureStr2 = 'BEGIN EXIT; END %s%s';
+
 procedure TMDOExtract.ListProcs(ProcedureName : String = '');
   
-  resourcestring
-    CreateProcedureStr1 = 'CREATE PROCEDURE %s ';
-    CreateProcedureStr2 = 'BEGIN EXIT; END %s%s';
   const
     ProcedureSQL =
       'SELECT * FROM RDB$PROCEDURES ' +

@@ -16,6 +16,9 @@
   @author(Júlio Cesar)
   @created(Indefinido)
   @lastmod(10 Dec 2003) }
+
+{$I ..\mdo.inc}
+
 unit MDOHTMLDataExport;
 
 interface

@@ -27,6 +27,8 @@
 {                                                                        }
 {************************************************************************}
 
+{$I ..\mdo.inc}
+
 unit MDOTable;
 
 interface
@@ -102,7 +104,9 @@ type
     procedure SwitchToIndex;
   protected
     procedure DataEvent(Event: TDataEvent; Info: Longint); override;
+{$IFNDEF MDO_FPC}
     procedure DefChanged(Sender: TObject); override;
+{$ENDIF}
     procedure DoOnNewRecord; override;
     function GetCanModify: Boolean; override;
     function GetDataSource: TDataSource; override;
@@ -113,12 +117,14 @@ type
     procedure InternalOpen; override;
     procedure InternalRefresh; override;
     procedure InternalRefreshRow; override;
+{$IFNDEF MDO_FPC}
     function PSGetDefaultOrder: TIndexDef; override;
     function PSGetIndexDefs(IndexTypes: TIndexOptions): TIndexDefs; override;
     function PSGetKeyFields: string; override;
     function PSGetTableName: string; override;
     procedure PSSetCommandText(const CommandText: string); override;
     procedure PSSetParams(AParams: TParams); override;
+{$ENDIF}
     procedure SetFiltered(Value: Boolean); override;
     procedure SetFilterOptions(Value: TFilterOptions); override;
     procedure SetFilterText(const Value: string); override;
@@ -132,7 +138,9 @@ type
     procedure DeleteIndex(const Name: string);
     procedure DeleteTable;
     procedure EmptyTable;
+{$IFNDEF MDO_FPC}
     procedure GetDetailLinkFields(MasterFields, DetailFields: TList); override;
+{$ENDIF}
     procedure GetIndexNames(List: TStrings);
     procedure GotoCurrent(Table: TMDOTable);
     property CurrentDBKey: TFBDBKey read GetCurrentDBKey;
@@ -428,10 +436,12 @@ begin
   inherited DataEvent(Event, Info);
 end;
 
+{$IFNDEF MDO_FPC}
 procedure TMDOTable.DefChanged(Sender: TObject);
 begin
   StoreDefs := True;
 end;
+{$ENDIF}
 
 procedure TMDOTable.DeleteIndex(const Name: string);
 var
@@ -818,6 +828,7 @@ begin
   Result := FMasterLink.DataSource;
 end;
 
+{$IFNDEF MDO_FPC}
 procedure TMDOTable.GetDetailLinkFields(MasterFields, DetailFields: TList);
 var
   i: Integer;
@@ -846,6 +857,7 @@ begin
       GetFieldList(DetailFields, Idx.Fields);
   end;
 end;
+{$ENDIF}
 
 function TMDOTable.GetExists: Boolean;
 var
@@ -1073,7 +1085,9 @@ begin
       begin
           with FieldDefs.AddFieldDef do
           begin
+            {$IFNDEF MDO_FPC}
             FieldNo := Query.Current.ByName('RDB$FIELD_POSITION').AsInteger; {do not localize}
+            {$ENDIF}
             Name := TrimRight(Query.Current.ByName('RDB$FIELD_NAME').AsString); {do not localize}
             case Query.Current.ByName('RDB$FIELD_TYPE').AsInteger of {do not localize}
               blr_varying, blr_text:
@@ -1290,6 +1304,7 @@ begin
   ReQuery;
 end;
 
+{$IFNDEF MDO_FPC}
 function TMDOTable.PSGetDefaultOrder: TIndexDef;
   
     function GetIdx(IdxType: TIndexOption): TIndexDef;
@@ -1388,6 +1403,7 @@ begin
     Open;
   PSReset;
 end;
+{$ENDIF}
 
 procedure TMDOTable.Reopen;
 begin
@@ -1397,7 +1413,7 @@ begin
     begin
       SetState(dsInactive);
       CloseCursor;
-      OpenCursor;
+      OpenCursor{$IFDEF MDO_FPC}(False){$ENDIF};
       SetState(dsBrowse);
     end;
   finally

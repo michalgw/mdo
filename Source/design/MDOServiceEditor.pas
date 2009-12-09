@@ -30,11 +30,16 @@ unit MDOServiceEditor;
 
 interface
 
-{$I MDO.inc}
+{$I ..\mdo.inc}
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, MDOServices, MDOConst
+  {$IFDEF MDO_FPC}
+  LResources,
+  {$ELSE}
+  Windows, Messages,
+  {$ENDIF}
+  SysUtils, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, MDOServices,
+  MDOConst
   {$IFDEF MDO_DELPHI6_UP}
     , Variants
   {$ENDIF};
@@ -82,7 +87,9 @@ implementation
 
 uses TypInfo;
 
+{$IFNDEF MDO_FPC}
 {$R *.dfm}
+{$ENDIF}
 
 function EditMDOService(AService: TMDOCustomService): Boolean;
 begin
@@ -235,6 +242,11 @@ begin
         end;
     end;
 end;
+
+{$IFDEF MDO_FPC}
+initialization
+  {$I MDOServiceEditor.lrs}
+{$ENDIF}
 
 end.
 

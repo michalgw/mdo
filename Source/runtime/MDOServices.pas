@@ -36,13 +36,17 @@
   later software
 }
 
+{$I ..\mdo.inc}
+
 unit MDOServices;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  MDODialogs, MDOHeader, MDO, MDOExternals;
+  {$IFNDEF MDO_FPC}
+  Windows, Messages, Graphics, Controls, Forms, Dialogs, MDODialogs,
+  {$ENDIF}
+  SysUtils, Classes, MDOHeader, MDO, MDOExternals;
 
 const
   DefaultBufferSize = 32000;
@@ -487,7 +491,10 @@ type
 implementation
 
 uses
-  MDOIntf, MDOSQLMonitor;
+  {$IFNDEF MDO_FPC}
+  MDOSQLMonitor,
+  {$ENDIF}
+  MDOIntf;
 
 { TMDOCustomService }
 
@@ -563,8 +570,10 @@ begin
   
   if Assigned(FOnAttach) then
     FOnAttach(Self);
-  
+
+  {$IFNDEF MDO_FPC}
   MonitorHook.ServiceAttach(Self);
+  {$ENDIF}
 end;
 
 function TMDOCustomService.Call(ErrCode: ISC_STATUS; RaiseError: Boolean): 
@@ -605,7 +614,9 @@ begin
   end
   else
     FHandle := nil;
+  {$IFNDEF MDO_FPC}
   MonitorHook.ServiceDetach(Self);
+  {$ENDIF}
 end;
 
 procedure TMDOCustomService.GenerateSPB(sl: TStrings; var SPB: String; var 
@@ -734,7 +745,9 @@ begin
     FQuerySPBLength := 0;
     FQueryParams := '';
   end;
+  {$IFNDEF MDO_FPC}
   MonitorHook.ServiceQuery(Self);
+  {$ENDIF}
 end;
 
 procedure TMDOCustomService.Loaded;
@@ -745,7 +758,11 @@ begin
       Attach;
   except
     if csDesigning in ComponentState then
+      {$IFDEF MDO_FPC}
+      Classes.ApplicationHandleException(nil)
+      {$ELSE}
       Application.HandleException(Self)
+      {$ENDIF}
     else
       raise;
   end;
@@ -768,33 +785,37 @@ begin
       LoginParams.Free;
     end;
   end
-  else begin
-    IndexOfUser := IndexOfSPBConst(SPBConstantNames[isc_spb_user_name]);
-    if IndexOfUser <> -1 then
-      Username := Copy(Params[IndexOfUser],
-                                         Pos('=', Params[IndexOfUser]) + 1, {mbcs ok}
-                                         Length(Params[IndexOfUser]));
-    IndexOfPassword := IndexOfSPBConst(SPBConstantNames[isc_spb_password]);
-    if IndexOfPassword <> -1 then
-      Password := Copy(Params[IndexOfPassword],
-                                         Pos('=', Params[IndexOfPassword]) + 1, {mbcs ok}
-                                         Length(Params[IndexOfPassword]));
-    result := ServerLoginDialog(serverName, Username, Password);
-    if result then
+  else
+    if Assigned(LoginDialogProc) then
     begin
+      IndexOfUser := IndexOfSPBConst(SPBConstantNames[isc_spb_user_name]);
+      if IndexOfUser <> -1 then
+        Username := Copy(Params[IndexOfUser],
+                                           Pos('=', Params[IndexOfUser]) + 1, {mbcs ok}
+                                           Length(Params[IndexOfUser]));
       IndexOfPassword := IndexOfSPBConst(SPBConstantNames[isc_spb_password]);
-      if IndexOfUser = -1 then
-        Params.Add(SPBConstantNames[isc_spb_user_name] + '=' + Username)
-      else
-        Params[IndexOfUser] := SPBConstantNames[isc_spb_user_name] +
-                                 '=' + Username;
-      if IndexOfPassword = -1 then
-        Params.Add(SPBConstantNames[isc_spb_password] + '=' + Password)
-      else
-        Params[IndexOfPassword] := SPBConstantNames[isc_spb_password] +
-                                     '=' + Password;
-    end;
-  end;
+      if IndexOfPassword <> -1 then
+        Password := Copy(Params[IndexOfPassword],
+                                           Pos('=', Params[IndexOfPassword]) + 1, {mbcs ok}
+                                           Length(Params[IndexOfPassword]));
+      result := LoginDialogProc(serverName, Username, Password);
+      if result then
+      begin
+        IndexOfPassword := IndexOfSPBConst(SPBConstantNames[isc_spb_password]);
+        if IndexOfUser = -1 then
+          Params.Add(SPBConstantNames[isc_spb_user_name] + '=' + Username)
+        else
+          Params[IndexOfUser] := SPBConstantNames[isc_spb_user_name] +
+                                   '=' + Username;
+        if IndexOfPassword = -1 then
+          Params.Add(SPBConstantNames[isc_spb_password] + '=' + Password)
+        else
+          Params[IndexOfPassword] := SPBConstantNames[isc_spb_password] +
+                                       '=' + Password;
+      end;
+    end
+    else
+      Result := False;
 end;
 
 procedure TMDOCustomService.ParamsChange(Sender: TObject);
@@ -1198,7 +1219,9 @@ begin
     FStartSPBLength := 0;
     FStartParams := '';
   end;
+  {$IFNDEF MDO_FPC}
   MonitorHook.ServiceStart(Self);
+  {$ENDIF}
 end;
 
 procedure TMDOControlService.ServiceStart;

@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Package Version="3">
+    <PathDelim Value="\"/>
+    <Name Value="mdolaz_dsg"/>
+    <Author Value="Copyright(c) 2002-2005, The Mercury Team, (Free Pascal / Lazarus port by Michal Gawrycki)"/>
+    <CompilerOptions>
+      <Version Value="8"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <IncludeFiles Value="runtime\;design\"/>
+        <OtherUnitFiles Value="design\;lib\$(TargetCPU)-$(TargetOS)\;runtime\"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <Parsing>
+        <SyntaxOptions>
+          <SyntaxMode Value="Delphi"/>
+        </SyntaxOptions>
+      </Parsing>
+      <Other>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Description Value="Mercury Database Objects
+(designtime package)"/>
+    <Version Build="1"/>
+    <Files Count="9">
+      <Item1>
+        <Filename Value="design\MDODatabaseEdit.pas"/>
+        <UnitName Value="MDODatabaseEdit"/>
+      </Item1>
+      <Item2>
+        <Filename Value="design\MDOEventsEditor.pas"/>
+        <UnitName Value="MDOEventsEditor"/>
+      </Item2>
+      <Item3>
+        <Filename Value="design\MDOGeneratorLinkEditor.pas"/>
+        <UnitName Value="MDOGeneratorLinkEditor"/>
+      </Item3>
+      <Item4>
+        <Filename Value="design\MDOServiceEditor.pas"/>
+        <UnitName Value="MDOServiceEditor"/>
+      </Item4>
+      <Item5>
+        <Filename Value="design\MDOTransactionEdit.pas"/>
+        <UnitName Value="MDOTransactionEdit"/>
+      </Item5>
+      <Item6>
+        <Filename Value="design\MDOUpdateSQLEditor.pas"/>
+        <UnitName Value="MDOUpdateSQLEditor"/>
+      </Item6>
+      <Item7>
+        <Filename Value="design\MDOSQLEdit.pas"/>
+        <UnitName Value="MDOSQLEdit"/>
+      </Item7>
+      <Item8>
+        <Filename Value="design\MDODBRegLaz.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="MDODBRegLaz"/>
+      </Item8>
+      <Item9>
+        <Filename Value="design\MDODBLogDlg.pas"/>
+        <UnitName Value="MDODBLogDlg"/>
+      </Item9>
+    </Files>
+    <Type Value="RunAndDesignTime"/>
+    <RequiredPkgs Count="5">
+      <Item1>
+        <PackageName Value="mdolaz"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="SynEdit"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="IDEIntf"/>
+      </Item3>
+      <Item4>
+        <PackageName Value="LCL"/>
+      </Item4>
+      <Item5>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item5>
+    </RequiredPkgs>
+    <UsageOptions>
+      <CustomOptions Value="-dUseCThreads"/>
+      <UnitPath Value="$(PkgOutDir)\"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>

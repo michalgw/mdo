@@ -29,6 +29,8 @@
 
   }
 
+{$I ..\mdo.inc}
+
 unit MDOMisc;
 
 interface

@@ -29,11 +29,19 @@
 
 unit MDOUpdateSQLEditor;
 
+{$I ..\mdo.inc}
+
 interface
 
-uses Forms, DB, ExtCtrls, StdCtrls, Controls, ComCtrls, Classes, SysUtils,
-  Windows, Menus, MDO, MDODatabase, MDOUpdateSQL, MDOCustomDataSet, MDOTable,
-  MDOQuery, MDOConst, MDOUtils;
+uses
+  {$IFDEF MDO_FPC}
+  LResources,
+  {$ELSE}
+  Windows,
+  {$ENDIF}
+  Forms, DB, ExtCtrls, StdCtrls, Controls, ComCtrls, Classes, SysUtils, Menus,
+  MDO, MDODatabase, MDOUpdateSQL, MDOCustomDataSet, MDOTable, MDOQuery,
+  MDOConst, MDOUtils;
 
 type
 
@@ -156,7 +164,9 @@ function EditMDODataSet(ADataSet: TMDODataSet; GetTableNamesProc:
 
 implementation
 
+{$IFNDEF MDO_FPC}
 {$R *.DFM}
+{$ENDIF}
 
 uses Dialogs, {LibHelp,} TypInfo;
 
@@ -472,11 +482,13 @@ var
   P, TokenStart: PChar;
   QuoteChar: Char;
   IsParam: Boolean;
-  
+
+  {$IFNDEF MDO_FPC}
   function IsKatakana(const Chr: Byte): Boolean;
   begin
     Result := (SysLocale.PriLangID = LANG_JAPANESE) and (Chr in [$A1..$DF]);
   end;
+  {$ENDIF}
   
 begin
   if FToken = stEnd then
@@ -502,8 +514,8 @@ begin
         begin
           while TRUE do
           begin
-            if (P^ in ['A'..'Z', 'a'..'z', '0'..'9', '_', '.', '"', '$']) or
-              IsKatakana(Byte(P^)) then
+            if (P^ in ['A'..'Z', 'a'..'z', '0'..'9', '_', '.', '"', '$'])
+              {$IFNDEF MDO_FPC} or IsKatakana(Byte(P^)) {$ENDIF} then
               Inc(P)
             else if P^ in LeadBytes then
               Inc(P, 2)
@@ -1186,5 +1198,10 @@ begin
 end;
 
 { Event Handlers }
+
+{$IFDEF MDO_FPC}
+initialization
+  {$I MDOUpdateSQLEditor.lrs}
+{$ENDIF}
 
 end.

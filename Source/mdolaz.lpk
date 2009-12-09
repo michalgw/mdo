@@ -1,0 +1,154 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Package Version="3">
+    <PathDelim Value="\"/>
+    <Name Value="mdolaz"/>
+    <Author Value="Copyright(c) 2002-2005, The Mercury Team, (Free Pascal / Lazarus port by Michal Gawrycki)"/>
+    <CompilerOptions>
+      <Version Value="8"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <OtherUnitFiles Value="runtime\"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <Parsing>
+        <SyntaxOptions>
+          <SyntaxMode Value="Delphi"/>
+        </SyntaxOptions>
+      </Parsing>
+      <Other>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Description Value="Mercury Database Objects
+(runtime library)"/>
+    <Version Build="1"/>
+    <Files Count="28">
+      <Item1>
+        <Filename Value="runtime\MDOUtils.pas"/>
+        <UnitName Value="MDOUtils"/>
+      </Item1>
+      <Item2>
+        <Filename Value="runtime\MDO.pas"/>
+        <UnitName Value="MDO"/>
+      </Item2>
+      <Item3>
+        <Filename Value="runtime\MDOBatchMove.pas"/>
+        <UnitName Value="MDOBatchMove"/>
+      </Item3>
+      <Item4>
+        <Filename Value="runtime\MDOBlob.pas"/>
+        <UnitName Value="MDOBlob"/>
+      </Item4>
+      <Item5>
+        <Filename Value="runtime\MDOConst.pas"/>
+        <UnitName Value="MDOConst"/>
+      </Item5>
+      <Item6>
+        <Filename Value="runtime\MDOCSVDataExport.pas"/>
+        <UnitName Value="MDOCSVDataExport"/>
+      </Item6>
+      <Item7>
+        <Filename Value="runtime\MDOCustomDataSet.pas"/>
+        <UnitName Value="MDOCustomDataSet"/>
+      </Item7>
+      <Item8>
+        <Filename Value="runtime\MDOCustomExport.pas"/>
+        <UnitName Value="MDOCustomExport"/>
+      </Item8>
+      <Item9>
+        <Filename Value="runtime\MDODatabase.pas"/>
+        <UnitName Value="MDODatabase"/>
+      </Item9>
+      <Item10>
+        <Filename Value="runtime\MDODatabaseInfo.pas"/>
+        <UnitName Value="MDODatabaseInfo"/>
+      </Item10>
+      <Item11>
+        <Filename Value="runtime\MDOErrorCodes.pas"/>
+        <UnitName Value="MDOErrorCodes"/>
+      </Item11>
+      <Item12>
+        <Filename Value="runtime\MDOEvents.pas"/>
+        <UnitName Value="MDOEvents"/>
+      </Item12>
+      <Item13>
+        <Filename Value="runtime\MDOExternals.pas"/>
+        <UnitName Value="MDOExternals"/>
+      </Item13>
+      <Item14>
+        <Filename Value="runtime\MDOExtract.pas"/>
+        <UnitName Value="MDOExtract"/>
+      </Item14>
+      <Item15>
+        <Filename Value="runtime\MDOHeader.pas"/>
+        <UnitName Value="MDOHeader"/>
+      </Item15>
+      <Item16>
+        <Filename Value="runtime\MDOHTMLDataExport.pas"/>
+        <UnitName Value="MDOHTMLDataExport"/>
+      </Item16>
+      <Item17>
+        <Filename Value="runtime\MDOInstall.pas"/>
+        <UnitName Value="MDOInstall"/>
+      </Item17>
+      <Item18>
+        <Filename Value="runtime\MDOInstallHeader.pas"/>
+        <UnitName Value="MDOInstallHeader"/>
+      </Item18>
+      <Item19>
+        <Filename Value="runtime\MDOIntf.pas"/>
+        <UnitName Value="MDOIntf"/>
+      </Item19>
+      <Item20>
+        <Filename Value="runtime\MDOMisc.pas"/>
+        <UnitName Value="MDOMisc"/>
+      </Item20>
+      <Item21>
+        <Filename Value="runtime\MDOQuery.pas"/>
+        <UnitName Value="MDOQuery"/>
+      </Item21>
+      <Item22>
+        <Filename Value="runtime\MDOScript.pas"/>
+        <UnitName Value="MDOScript"/>
+      </Item22>
+      <Item23>
+        <Filename Value="runtime\MDOServices.pas"/>
+        <UnitName Value="MDOServices"/>
+      </Item23>
+      <Item24>
+        <Filename Value="runtime\MDOSQL.pas"/>
+        <UnitName Value="MDOSQL"/>
+      </Item24>
+      <Item25>
+        <Filename Value="runtime\MDOStoredProc.pas"/>
+        <UnitName Value="MDOStoredProc"/>
+      </Item25>
+      <Item26>
+        <Filename Value="runtime\MDOTable.pas"/>
+        <UnitName Value="MDOTable"/>
+      </Item26>
+      <Item27>
+        <Filename Value="runtime\MDOUpdateSQL.pas"/>
+        <UnitName Value="MDOUpdateSQL"/>
+      </Item27>
+      <Item28>
+        <Filename Value="mdo.inc"/>
+        <Type Value="Include"/>
+      </Item28>
+    </Files>
+    <RequiredPkgs Count="1">
+      <Item1>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item1>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)\"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>

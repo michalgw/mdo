@@ -36,6 +36,8 @@
   later software
 }
 
+{$I ..\mdo.inc}
+
 unit MDOInstallHeader;
 
 
@@ -49,9 +51,9 @@ type
   OPT = longint;
   TEXT = PChar;
   FP_ERROR = function(IscCode: MSG_NO; UserContext: Pointer;
-                             const ActionDescription : TEXT): Integer; stdcall;
+                             const ActionDescription : TEXT): Integer; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
   FP_STATUS = function(Status: Integer; UserContext: Pointer;
-                              const ActionDescription: TEXT): Integer; stdcall;
+                              const ActionDescription: TEXT): Integer; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 const
   IB_INSTALL_DLL = 'ibinstall.dll'; {do not localize}
@@ -206,7 +208,7 @@ const
 
 type
 Tisc_install_clear_options = function(hOption: POPTIONS_HANDLE):MSG_NO;
-                                       stdcall;
+                                       {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 Tisc_install_execute = function (hOption: OPTIONS_HANDLE;
                                  src_dir: TEXT;
@@ -216,13 +218,13 @@ Tisc_install_execute = function (hOption: OPTIONS_HANDLE;
                                  error_func: FP_ERROR;
                                  error_data: pointer;
                                  uninstal_file_name: TEXT):MSG_NO;
-                                 stdcall;
+                                 {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 Tisc_install_get_info = function (info_type :integer;
                                   option :OPT;
                                   info_buffer : Pointer;
                                   buf_len : Cardinal): MSG_NO;
-                                  stdcall;
+                                  {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 
 
@@ -230,33 +232,33 @@ Tisc_install_get_message = function (hOption: OPTIONS_HANDLE;
                                      message_no: MSG_NO;
                                      message_txt: Pointer;
                                      message_len: Cardinal):MSG_NO;
-                                     stdcall;
+                                     {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 Tisc_install_load_external_text = function (msg_file_name: TEXT):MSG_NO;
-                                            stdcall;
+                                            {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 Tisc_install_precheck = function (hOption: OPTIONS_HANDLE;
                                   src_dir: TEXT;
                                   dest_dir: TEXT):MSG_NO;
-                                  stdcall;
+                                  {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 Tisc_install_set_option = function (hOption: POPTIONS_HANDLE;
                                     option: OPT):MSG_NO;
-                                    stdcall;
+                                    {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 Tisc_uninstall_execute = function (uninstall_file_name: TEXT;
                                    status_func: FP_STATUS;
                                    status_data: pointer;
                                    error_func: FP_ERROR;
                                    error_data: pointer):MSG_NO;
-                                   stdcall;
+                                   {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 Tisc_uninstall_precheck = function (uninstall_file_name: TEXT):MSG_NO;
-                                    stdcall;
+                                    {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 Tisc_install_unset_option = function (hOption: POPTIONS_HANDLE;
                                       option: OPT):MSG_NO;
-                                      stdcall;
+                                      {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 implementation
 
 
