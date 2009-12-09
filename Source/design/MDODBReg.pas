@@ -50,7 +50,8 @@ interface
 
 uses Windows, SysUtils, Classes, Graphics, Dialogs, Controls, Forms, TypInfo,
   DB, DBReg, SQLEdit, ColnEdit, FldLinks, MDO, MDOTable, MDODatabase,
-  MDOUpdateSQLEditor, MDOEventsEditor, MDOConst, MDOMisc, MDOScript
+  MDOUpdateSQLEditor, MDOEventsEditor, MDOConst, MDOMisc, MDOScript,
+  MDOGeneratorLinkEditor
 {$IFDEF MDO_DELPHI5}
   , DsgnIntf
 {$ENDIF}
@@ -236,7 +237,15 @@ type
     function GetVerb(Index: Integer): string; override;
     function GetVerbCount: Integer; override;
   end;
-  
+
+  { TMDOGeneratorLinkProperty }
+
+  TMDOGeneratorLinkProperty = class(TClassProperty)
+  public
+    procedure Edit; override;
+    function GetAttributes: TPropertyAttributes; override;
+  end;
+
 procedure Register;
 
 implementation
@@ -312,6 +321,9 @@ begin
     {do not localize}
   RegisterPropertyEditor(TypeInfo(TStrings), TMDOEvents, 'Events',
     TMDOEventListProperty); {do not localize}
+
+  RegisterPropertyEditor(TypeInfo(TMDOGeneratorLink), TMDODataSet,
+    'GeneratorLink', TMDOGeneratorLinkProperty);
 
   RegisterComponentEditor(TMDODatabase, TMDODatabaseEditor);
   RegisterComponentEditor(TMDOCustomService, TMDOServiceEditor);
@@ -977,6 +989,21 @@ end;
 function TMDOServiceEditor.GetVerbCount: Integer;
 begin
   Result := 2;
+end;
+
+{ TMDOGeneratorLinkProperty }
+{
+****************************** TMDOGeneratorLinkProperty ***********************
+}
+procedure TMDOGeneratorLinkProperty.Edit;
+begin
+  if EditMDOGeneratorLink(TMDODataSet(GetComponent(0))) then
+    Modified;
+end;
+
+function TMDOGeneratorLinkProperty.GetAttributes: TPropertyAttributes;
+begin
+  Result := inherited GetAttributes + [paDialog, paSubProperties, paReadOnly];
 end;
 
 end.
