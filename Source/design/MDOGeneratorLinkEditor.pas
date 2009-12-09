@@ -14,11 +14,18 @@
 
 unit MDOGeneratorLinkEditor;
 
+{$I ..\mdo.inc}
+
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, MDOCustomDataset;
+  {$IFDEF MDO_FPC}
+  LResources,
+  {$ELSE}
+  Windows, Messages,
+  {$ENDIF}
+  SysUtils, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls,
+  MDOCustomDataset;
 
 type
   TMDOGeneratorLinkEditForm = class (TForm)
@@ -43,7 +50,9 @@ function EditMDOGeneratorLink(AGeneratorLink: TMDOGeneratorLink): Boolean;
 
 implementation
 
+{$IFNDEF MDO_FPC}
 {$R *.DFM}
+{$ENDIF}
 
 function EditMDOGeneratorLink(AGeneratorLink: TMDOGeneratorLink): Boolean;
 begin
@@ -83,5 +92,10 @@ begin
     Result := True;
   end;
 end;
+
+{$IFDEF MDO_FPC}
+initialization
+  {$I MDOGeneratorLinkEditor.lrs}
+{$ENDIF}
 
 end.

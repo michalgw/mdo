@@ -29,11 +29,18 @@
 
 unit MDOEventsEditor;
 
+{$I ..\mdo.inc}
+
 interface
 
 uses
-  SysUtils, Windows, Messages, Classes, Graphics, Controls,
-  Forms, Dialogs, ExtCtrls, StdCtrls, Grids, MDOEvents;
+  {$IFDEF MDO_FPC}
+  LResources, LCLType,
+  {$ELSE}
+  Windows, Messages,
+  {$ENDIF}
+  SysUtils, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, StdCtrls,
+  Grids, MDOEvents;
 
 type
   TMDOEventsEditorForm = class (TForm)
@@ -50,7 +57,9 @@ function EditAlerterEvents(Events: TStrings): Boolean;
 
 implementation
 
+{$IFNDEF MDO_FPC}
 {$R *.DFM}
+{$ENDIF}
 
 function EditAlerterEvents(Events: TStrings): Boolean;
 var
@@ -86,5 +95,10 @@ begin
   for i := 1 to MaxEvents do
     cEvents.Cells[0, i - 1] := IntToStr(i);
 end;
+
+{$IFDEF MDO_FPC}
+initialization
+  {$I MDOEventsEditor.lrs}
+{$ENDIF}
 
 end.

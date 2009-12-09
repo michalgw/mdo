@@ -1,0 +1,118 @@
+object MDOTransactionEditForm: TMDOTransactionEditForm
+  Left = 510
+  Height = 158
+  Top = 415
+  Width = 372
+  ActiveControl = OKBtn
+  BorderStyle = bsDialog
+  BorderWidth = 5
+  Caption = 'Transaction Editor'
+  ClientHeight = 158
+  ClientWidth = 372
+  HelpFile = 'ibx.hlp'
+  OnCreate = FormCreate
+  ParentFont = True
+  Position = poScreenCenter
+  LCLVersion = '0.9.29'
+  object GroupBox1: TGroupBox
+    Left = 5
+    Height = 114
+    Top = 5
+    Width = 362
+    Align = alClient
+    Caption = 'Transaction Properties'
+    ClientHeight = 96
+    ClientWidth = 358
+    TabOrder = 0
+    object rbSnapShot: TRadioButton
+      Left = 1
+      Height = 17
+      Top = 3
+      Width = 65
+      Caption = '&Snapshot'
+      OnClick = rbSnapShotClick
+      TabOrder = 0
+    end
+    object rbReadCommitted: TRadioButton
+      Left = 1
+      Height = 17
+      Top = 25
+      Width = 99
+      Caption = 'Read &Committed'
+      OnClick = rbReadCommittedClick
+      TabOrder = 1
+    end
+    object rbReadOnlyTableStability: TRadioButton
+      Left = 1
+      Height = 17
+      Top = 46
+      Width = 141
+      Caption = '&Read-Only Table Stability'
+      OnClick = rbReadOnlyTableStabilityClick
+      TabOrder = 2
+    end
+    object rbReadWriteTableStability: TRadioButton
+      Left = 1
+      Height = 17
+      Top = 68
+      Width = 148
+      Caption = 'Read-&Write Table Stability '
+      OnClick = rbReadWriteTableStabilityClick
+      TabOrder = 3
+    end
+    object TransactionParams: TMemo
+      Left = 157
+      Height = 79
+      Top = 3
+      Width = 198
+      Lines.Strings = (
+        ''
+      )
+      OnClick = TransactionParamsClick
+      OnExit = TransactionParamsExit
+      TabOrder = 4
+      WordWrap = False
+    end
+  end
+  object Panel1: TPanel
+    Left = 5
+    Height = 34
+    Top = 119
+    Width = 362
+    Align = alBottom
+    BevelOuter = bvNone
+    BorderWidth = 5
+    ClientHeight = 34
+    ClientWidth = 362
+    TabOrder = 1
+    object HelpBtn: TButton
+      Left = 233
+      Height = 25
+      Top = 8
+      Width = 75
+      Caption = '&Help'
+      OnClick = HelpBtnClick
+      TabOrder = 0
+    end
+    object Cancelbtn: TButton
+      Left = 149
+      Height = 25
+      Top = 8
+      Width = 74
+      Cancel = True
+      Caption = '&Cancel'
+      ModalResult = 2
+      TabOrder = 2
+    end
+    object OKBtn: TButton
+      Left = 64
+      Height = 25
+      Top = 8
+      Width = 75
+      Caption = '&OK'
+      Default = True
+      OnClick = OKBtnClick
+      TabOrder = 1
+    end
+  end
+end

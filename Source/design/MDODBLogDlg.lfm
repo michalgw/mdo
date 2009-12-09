@@ -1,0 +1,70 @@
+object LoginDialog: TLoginDialog
+  Left = 330
+  Height = 159
+  Top = 169
+  Width = 218
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'LoginDialog'
+  ClientHeight = 159
+  ClientWidth = 218
+  LCLVersion = '0.9.29'
+  object ButtonOk: TButton
+    Left = 24
+    Height = 25
+    Top = 120
+    Width = 75
+    Caption = 'OK'
+    ModalResult = 1
+    TabOrder = 0
+  end
+  object ButtonCancel: TButton
+    Left = 120
+    Height = 25
+    Top = 120
+    Width = 75
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 1
+  end
+  object LabelDatabase: TLabel
+    Left = 16
+    Height = 14
+    Top = 8
+    Width = 72
+    Caption = 'LabelDatabase'
+    ParentColor = False
+  end
+  object EditUser: TEdit
+    Left = 88
+    Height = 21
+    Top = 40
+    Width = 112
+    TabOrder = 2
+  end
+  object EditPassword: TEdit
+    Left = 88
+    Height = 21
+    Top = 72
+    Width = 112
+    EchoMode = emPassword
+    PasswordChar = '*'
+    TabOrder = 3
+  end
+  object Label2: TLabel
+    Left = 16
+    Height = 14
+    Top = 47
+    Width = 52
+    Caption = 'User name'
+    ParentColor = False
+  end
+  object Label3: TLabel
+    Left = 16
+    Height = 14
+    Top = 79
+    Width = 47
+    Caption = 'Password'
+    ParentColor = False
+  end
+end

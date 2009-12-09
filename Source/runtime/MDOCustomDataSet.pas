@@ -28,15 +28,18 @@
 {************************************************************************}
 unit MDOCustomDataSet;
 
-{$I ..\MDO.INC}
+{$I ..\mdo.inc}
 
 interface
 
 uses
-  Windows, SysUtils, Classes, Forms, Controls, StdVCL, MDOExternals, MDO,
-  MDOHeader, MDODatabase, MDOSQL, Db, MDOUtils, MDOBlob
+  {$IFNDEF MDO_FPC}
+  Windows, StdVCL, Forms, Controls,
+  {$ENDIF}
+  SysUtils, Classes, MDOExternals, MDO, MDOHeader, MDODatabase, MDOSQL, Db,
+  MDOUtils, MDOBlob
   {$IFDEF MDO_DELPHI6_UP}
-    , Variants, FmtBcd
+    , variants, FmtBcd
   {$ENDIF};
 
 const
@@ -351,6 +354,7 @@ type
     procedure InternalSetToRecord(Buffer: PChar); override;
     procedure InternalUnPrepare; virtual;
     function IsCursorOpen: Boolean; override;
+{$IFNDEF MDO_FPC}
     procedure PSEndTransaction(Commit: Boolean); override;
     function PSExecuteStatement(const ASQL: string; AParams: TParams; 
             ResultSet: Pointer = nil): Integer; override;
@@ -365,6 +369,7 @@ type
     procedure PSStartTransaction; override;
     function PSUpdateRecord(UpdateKind: TUpdateKind; Delta: TDataSet): Boolean;
             override;
+{$ENDIF}
     procedure ReQuery;
     procedure SetBookmarkData(Buffer: PChar; Data: Pointer); override;
     procedure SetBookmarkFlag(Buffer: PChar; Value: TBookmarkFlag); override;
@@ -424,8 +429,10 @@ type
             override;
     procedure FetchAll;
     function GetCurrentRecord(Buffer: PChar): Boolean; override;
+{$IFNDEF MDO_FPC}
     function GetFieldData(FieldNo: Integer; Buffer: Pointer): Boolean; overload;
             override;
+{$ENDIF}
     function GetFieldData(Field : TField; Buffer : Pointer): Boolean; overload; 
             override;
     function GetFieldData(Field : TField; Buffer : Pointer; NativeFormat : 
@@ -473,7 +480,9 @@ type
     property Database: TMDODataBase read GetDatabase write SetDatabase;
     property ForcedRefresh: Boolean read FForcedRefresh write FForcedRefresh 
             default False;
+    {$IFNDEF MDO_FPC}
     property ObjectView default False;
+    {$ENDIF}
     property OnCalcFields;
     property OnDeleteError;
     property OnEditError;
@@ -571,6 +580,50 @@ type
   
 const
 
+{$IFDEF MDO_FPC}
+  DefaultFieldClasses : Array [TFieldType] of TFieldClass =
+    ( { ftUnknown} Tfield,
+      { ftString} TMDOStringField,
+      { ftSmallint} TSmallIntField,
+      { ftInteger} TLongintField,
+      { ftWord} TWordField,
+      { ftBoolean} TBooleanField,
+      { ftFloat} TFloatField,
+      { ftCurrency} TCurrencyField,
+      { ftBCD} TMDOBCDField,
+      { ftDate} TDateField,
+      { ftTime} TTimeField,
+      { ftDateTime} TDateTimeField,
+      { ftBytes} TBytesField,
+      { ftVarBytes} TVarBytesField,
+      { ftAutoInc} TAutoIncField,
+      { ftBlob} TBlobField,
+      { ftMemo} TMemoField,
+      { ftGraphic} TGraphicField,
+      { ftFmtMemo} TBlobField,
+      { ftParadoxOle} TBlobField,
+      { ftDBaseOle} TBlobField,
+      { ftTypedBinary} TBlobField,
+      { ftCursor} Nil,
+      { ftFixedChar} TStringField,
+      { ftWideString} TWideStringField,
+      { ftLargeint} TLargeIntField,
+      { ftADT} Nil,
+      { ftArray} Nil,
+      { ftReference} Nil,
+      { ftDataSet} Nil,
+      { ftOraBlob} TBlobField,
+      { ftOraClob} TMemoField,
+      { ftVariant} TVariantField,
+      { ftInterface} Nil,
+      { ftIDispatch} Nil,
+      { ftGuid} TGuidField,
+      { ftTimeStamp} Nil,
+      { ftFMTBcd} TMDOBCDField,
+      { ftFixedWideString} TWideStringField,
+      { ftWideMemo} TWideMemoField
+    );
+{$ELSE}
 DefaultFieldClasses: array[TFieldType] of TFieldClass = (
     nil,                { ftUnknown }
     TMDOStringField,    { ftString }
@@ -620,10 +673,12 @@ DefaultFieldClasses: array[TFieldType] of TFieldClass = (
   {$ENDIF}
 
     );
+{$ENDIF}
 
-
+{$IFNDEF MDO_FPC}
 var
   CreateProviderProc: function(DataSet: TMDOCustomDataSet): IProvider = nil;
+{$ENDIF}
 
 implementation
 
@@ -938,9 +993,9 @@ begin
   if (FCache = FBufferCache) then
   begin
     case Origin of
-      FILE_BEGIN:    FBPos := Offset;
-      FILE_CURRENT:  FBPos := FBPos + Offset;
-      FILE_END:      FBPos := DWORD(FBEnd) + Offset;
+      {$IFDEF MDO_FPC}soFromBeginning{$ELSE}FILE_BEGIN{$ENDIF}:  FBPos := Offset;
+      {$IFDEF MDO_FPC}soFromCurrent{$ELSE}FILE_CURRENT{$ENDIF}:  FBPos := FBPos + Offset;
+      {$IFDEF MDO_FPC}soFromEnd{$ELSE}FILE_END{$ENDIF}:          FBPos := DWORD(FBEnd) + Offset;
     end;
     OldCacheSize := FCacheSize;
     while (FBPos >= DWORD(FCacheSize)) do
@@ -951,9 +1006,9 @@ begin
   end
   else begin
     case Origin of
-      FILE_BEGIN:    FOBPos := Offset;
-      FILE_CURRENT:  FOBPos := FOBPos + Offset;
-      FILE_END:      FOBPos := DWORD(FOBEnd) + Offset;
+      {$IFDEF MDO_FPC}soFromBeginning{$ELSE}FILE_BEGIN{$ENDIF}:  FOBPos := Offset;
+      {$IFDEF MDO_FPC}soFromCurrent{$ELSE}FILE_CURRENT{$ENDIF}:  FOBPos := FOBPos + Offset;
+      {$IFDEF MDO_FPC}soFromEnd{$ELSE}FILE_END{$ENDIF}:          FOBPos := DWORD(FOBEnd) + Offset;
     end;
     OldCacheSize := FOldCacheSize;
     while (FBPos >= DWORD(FOldCacheSize)) do
@@ -1562,9 +1617,11 @@ var
   SetCursor: Boolean;
   CurBookmark: string;
 begin
+  {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
     Screen.Cursor := crHourGlass;
+  {$ENDIF}
   try
     if FQSelect.EOF or not FQSelect.Open then
       exit;
@@ -1577,8 +1634,10 @@ begin
       EnableControls;
     end;
   finally
+    {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
+    {$ENDIF}
   end;
 end;
 
@@ -1724,7 +1783,8 @@ begin
             if (rdFields[j].fdDataLength = 0) then
               LocalData := nil
             else
-              LocalData := @Qry.Current[i].Data^.sqldata[2];
+              LocalData := @Qry.Current.Vars[i].Data^.sqldata[2];
+              //LocalData := @Qry.Current[i].Data^.sqldata[2];
           end;
         end;
         else { SQL_TEXT, SQL_BLOB, SQL_ARRAY, SQL_QUAD }
@@ -1847,11 +1907,13 @@ begin
   Result := DefaultFieldClasses[FieldType];
 end;
 
+{$IFNDEF MDO_FPC}
 function TMDOCustomDataSet.GetFieldData(FieldNo: Integer; Buffer: Pointer): 
         Boolean;
 begin
   result := GetFieldData(FieldByNumber(FieldNo), buffer);
 end;
+{$ENDIF}
 
 function TMDOCustomDataSet.GetFieldData(Field : TField; Buffer : Pointer): 
         Boolean;
@@ -1862,7 +1924,11 @@ begin
   begin
     Result := InternalGetFieldData(Field, @lTempCurr);
     if Result then
+    {$IFDEF MDO_FPC}
+      Currency(Buffer^) := lTempCurr;
+    {$ELSE}
       CurrToBCD(lTempCurr, TBCD(Buffer^), 32, Field.Size);
+    {$ENDIF}
   end
   else
     Result := InternalGetFieldData(Field, Buffer);
@@ -2088,9 +2154,11 @@ var
   Buff: PChar;
   SetCursor: Boolean;
 begin
+  {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
     Screen.Cursor := crHourGlass;
+  {$ENDIF}
   try
     Buff := GetActiveBuf;
     if CanDelete then
@@ -2115,8 +2183,10 @@ begin
     end else
       MDOError(mdoeCannotDelete, [nil]);
   finally
+    {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
+    {$ENDIF}
   end;
 end;
 
@@ -2143,9 +2213,11 @@ var
   SetCursor: Boolean;
 begin
   DidActivate := False;
+  {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
     Screen.Cursor := crHourGlass;
+  {$ENDIF}
   try
     ActivateConnection;
     DidActivate := ActivateTransaction;
@@ -2162,8 +2234,10 @@ begin
   finally
     if DidActivate then
       DeactivateTransaction;
+    {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
+    {$ENDIF}
   end;
 end;
 
@@ -2306,7 +2380,11 @@ end;
 
 procedure TMDOCustomDataSet.InternalHandleException;
 begin
+  {$IFDEF MDO_FPC}
+  inherited;
+  {$ELSE}
   Application.HandleException(Self)
+  {$ENDIF}
 end;
 
 procedure TMDOCustomDataSet.InternalInitFieldDefs;
@@ -2533,7 +2611,9 @@ begin
           with FieldDefs.AddFieldDef do
           begin
             Name := string( FieldAliasName );
+            {$IFNDEF MDO_FPC}
             FieldNo := FieldPosition;
+            {$ENDIF}
             DataType := FieldType;
             Size := FieldSize;
             Precision := FieldPrecision;
@@ -2678,9 +2758,11 @@ var
   end;
   
 begin
+  {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
     Screen.Cursor := crHourGlass;
+  {$ENDIF}
   try
     ActivateConnection;
     ActivateTransaction;
@@ -2741,8 +2823,10 @@ begin
     else
       FQSelect.ExecQuery;
   finally
+    {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
+    {$ENDIF}
   end;
 end;
 
@@ -2753,9 +2837,11 @@ var
   SetCursor: Boolean;
   bInserting: Boolean;
 begin
+  {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
     Screen.Cursor := crHourGlass;
+  {$ENDIF}
   try
     Buff := GetActiveBuf;
     CheckEditState;
@@ -2792,8 +2878,10 @@ begin
     if bInserting then
       Inc(FRecordCount);
   finally
+    {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
+    {$ENDIF}
   end;
 end;
 
@@ -2847,9 +2935,11 @@ begin
   if FInternalPrepared then
     Exit;
   DidActivate := False;
+  {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
     Screen.Cursor := crHourGlass;
+  {$ENDIF}
   try
     ActivateConnection;
     DidActivate := ActivateTransaction;
@@ -2906,8 +2996,10 @@ begin
   finally
     if DidActivate then
       DeactivateTransaction;
+    {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
+    {$ENDIF}
   end;
 end;
 
@@ -2924,9 +3016,11 @@ var
   ofs: DWORD;
   Qry: TMDOSQL;
 begin
+  {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
     Screen.Cursor := crHourGlass;
+  {$ENDIF}
   try
     Buff := GetActiveBuf;
     if CanRefresh then
@@ -2970,8 +3064,10 @@ begin
     else
       MDOError(mdoeCannotRefresh, [nil]);
   finally
+    {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
+    {$ENDIF}
   end;
 end;
 
@@ -3255,6 +3351,7 @@ begin
   inherited Post;
 end;
 
+{$IFNDEF MDO_FPC}
 procedure TMDOCustomDataSet.PSEndTransaction(Commit: Boolean);
 begin
   if Commit then
@@ -3421,6 +3518,7 @@ begin
     end;
   end;
 end;
+{$ENDIF}
 
 procedure TMDOCustomDataSet.ReadCache(FCache: PChar; Offset: DWORD; Origin:
         Integer; Buffer: PChar);
@@ -3435,7 +3533,7 @@ begin
   else
     pCache := FOldBufferCache + Integer(pCache);
   Move(pCache^, Buffer^, DWORD(FRecordBufferSize));
-  AdjustPosition(FCache, FRecordBufferSize, FILE_CURRENT);
+  AdjustPosition(FCache, FRecordBufferSize, {$IFDEF MDO_FPC}soFromCurrent{$ELSE}FILE_CURRENT{$ENDIF});
 end;
 
 procedure TMDOCustomDataSet.ReadRecordCache(RecordNumber: Integer; Buffer: 
@@ -3448,7 +3546,7 @@ begin
     ReadRecordCache(RecordNumber, Buffer, False);
     if FCachedUpdates and
       (PRecordData(Buffer)^.rdSavedOffset <> $FFFFFFFF) then
-      ReadCache(FOldBufferCache, PRecordData(Buffer)^.rdSavedOffset, FILE_BEGIN,
+      ReadCache(FOldBufferCache, PRecordData(Buffer)^.rdSavedOffset, {$IFDEF MDO_FPC}soFromBeginning{$ELSE}FILE_BEGIN{$ENDIF},
                 Buffer)
     else
       if ReadOldBuffer and
@@ -3456,7 +3554,7 @@ begin
          CopyRecordBuffer( FOldBuffer, Buffer )
   end
   else
-    ReadCache(FBufferCache, RecordNumber * FRecordBufferSize, FILE_BEGIN, Buffer);
+    ReadCache(FBufferCache, RecordNumber * FRecordBufferSize, {$IFDEF MDO_FPC}soFromBeginning{$ELSE}FILE_BEGIN{$ENDIF}, Buffer);
 end;
 
 procedure TMDOCustomDataSet.RecordModified(Value: Boolean);
@@ -3535,15 +3633,15 @@ begin
       if (PRecordData(Buffer)^.rdSavedOffset = $FFFFFFFF) then
       begin
         PRecordData(Buffer)^.rdSavedOffset := AdjustPosition(FOldBufferCache, 0,
-                                                             FILE_END);
+                                                             {$IFDEF MDO_FPC}soFromEnd{$ELSE}FILE_END{$ENDIF});
         CopyOldBuffer;
-          WriteCache(FOldBufferCache, 0, FILE_CURRENT, OldBuffer);
+          WriteCache(FOldBufferCache, 0, {$IFDEF MDO_FPC}soFromCurrent{$ELSE}FILE_CURRENT{$ENDIF}, OldBuffer);
           WriteCache(FBufferCache, PRecordData(Buffer)^.rdRecordNumber * FRecordBufferSize,
-                     FILE_BEGIN, Buffer);
+                     {$IFDEF MDO_FPC}soFromBeginning{$ELSE}FILE_BEGIN{$ENDIF}, Buffer);
       end
       else begin
         CopyOldBuffer;
-        WriteCache(FOldBufferCache, PRecordData(Buffer)^.rdSavedOffset, FILE_BEGIN,
+        WriteCache(FOldBufferCache, PRecordData(Buffer)^.rdSavedOffset, {$IFDEF MDO_FPC}soFromBeginning{$ELSE}FILE_BEGIN{$ENDIF},
                    OldBuffer);
       end;
     finally
@@ -3612,15 +3710,19 @@ begin
 end;
 
 procedure TMDOCustomDataSet.SetFieldData(Field : TField; Buffer : Pointer);
+{$IFNDEF MDO_FPC}
 var
   lTempCurr: System.Currency;
+{$ENDIF}
 begin
+  {$IFNDEF MDO_FPC}
   if (Field.DataType = ftBCD) and (Buffer <> nil) then
   begin
     BCDToCurr(TBCD(Buffer^), lTempCurr);
     InternalSetFieldData(Field, @lTempCurr);
   end
   else
+  {$ENDIF}
     InternalSetFieldData(Field, Buffer);
 end;
 
@@ -3909,7 +4011,7 @@ begin
   else
     pCache := FOldBufferCache + Integer(pCache);
   Move(Buffer^, pCache^, FRecordBufferSize);
-  dwEnd := AdjustPosition(FCache, FRecordBufferSize, FILE_CURRENT);
+  dwEnd := AdjustPosition(FCache, FRecordBufferSize, {$IFDEF MDO_FPC}soFromCurrent{$ELSE}FILE_CURRENT{$ENDIF});
   if not bOld then
   begin
     if (dwEnd > FBEnd) then
@@ -3928,7 +4030,7 @@ begin
   begin
     if FUniDirectional then
       RecordNumber := RecordNumber mod UniCache;
-    WriteCache(FBufferCache, RecordNumber * FRecordBufferSize, FILE_BEGIN, Buffer);
+    WriteCache(FBufferCache, RecordNumber * FRecordBufferSize, {$IFDEF MDO_FPC}soFromBeginning{$ELSE}FILE_BEGIN{$ENDIF}, Buffer);
   end;
 end;
 
@@ -4125,5 +4227,10 @@ function TMDOGeneratorLink.LinksOk: Boolean;
 begin
   Result := (FGenerator <> '') and (FField <> '');
 end;
+
+{$IFDEF MDO_FPC}
+initialization
+  RegisterClasses([TMDOStringField, TMDOBCDField]);
+{$ENDIF}
 
 end.

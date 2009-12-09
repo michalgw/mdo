@@ -29,13 +29,17 @@
 
 unit MDODatabase;
 
-{$I ..\MDO.INC}
+{$I ..\mdo.inc}
 
 interface
 
 uses
-  Windows, Dialogs, Controls, StdCtrls, SysUtils, Classes, Forms, ExtCtrls,
-  MDOHeader, MDOExternals, DB, MDO, DBLogDlg;
+  {$IFDEF MDO_FPC}
+  fpTimer,
+  {$ELSE}
+  Windows, DBLogDlg, Dialogs, Controls, StdCtrls, Forms, ExtCtrls,
+  {$ENDIF}
+  SysUtils, Classes, MDOHeader, MDOExternals, DB, MDO;
 
 const
   DPBPrefix = 'isc_dpb_';
@@ -186,7 +190,7 @@ type
     FOnLogin: TMDODatabaseLoginEvent;
     FSQLDialect: Integer;
     FSQLObjects: TList;
-    FTimer: TTimer;
+    FTimer: {$IFDEF MDO_FPC}TFPTimer{$ELSE}TTimer{$ENDIF};
     FTraceFlags: TTraceFlags;
     FTransactions: TList;
     FUserNames: TStringList;
@@ -312,7 +316,7 @@ type
     FOnStartTransaction: TNotifyEvent;
     FSQLObjects: TList;
     FStreamedActive: Boolean;
-    FTimer: TTimer;
+    FTimer: {$IFDEF MDO_FPC}TFPTimer{$ELSE}TTimer{$ENDIF};
     FTPB: PChar;
     FTPBLength: Short;
     FTRParams: TStrings;
@@ -458,7 +462,11 @@ procedure GenerateTPB(sl: TStrings; var TPB: string; var TPBLength: Short);
 
 implementation
 
-uses MDOIntf, MDOSQLMonitor, MDOCustomDataSet, MDODatabaseInfo, MDOSQL,
+uses
+  {$IFNDEF MDO_FPC}
+  MDOSQLMonitor,
+  {$ENDIF}
+  MDOIntf, MDOCustomDataSet, MDODatabaseInfo, MDOSQL,
   MDOUtils, typInfo;
 
 { TMDODatabase }
@@ -487,7 +495,7 @@ begin
   FUserNames := nil;
   FInternalTransaction := TMDOTransaction.Create(self);
   FInternalTransaction.DefaultDatabase := Self;
-  FTimer := TTimer.Create(Self);
+  FTimer := {$IFDEF MDO_FPC}TFPTimer{$ELSE}TTimer{$ENDIF}.Create(Self);
   FTimer.Enabled := False;
   FTimer.Interval := 0;
   FTimer.OnTimer := TimeoutConnection;
@@ -525,8 +533,10 @@ end;
 function TMDODataBase.AddSQLObject(ds: TMDOBase): Integer;
 begin
   result := 0;
+  {$IFNDEF MDO_FPC}
   if (ds.Owner is TMDOCustomDataSet) then
       RegisterClient(TDataSet(ds.Owner));
+  {$ENDIF}
   while (result < FSQLObjects.Count) and (FSQLObjects[result] <> nil) do
     Inc(result);
   if (result = FSQLObjects.Count) then
@@ -689,8 +699,10 @@ begin
   ValidateClientSQLDialect;
   if Assigned(FAfterConnect) then
     FAfterConnect(Self);
+  {$IFNDEF MDO_FPC}
   if not (csDesigning in ComponentState) then
     MonitorHook.DBConnect(Self);
+  {$ENDIF}
   if FDefaultTransaction <> nil then
     if FDefaultTransaction.AutoCommit then
       FDefaultTransaction.StartTransaction;
@@ -998,10 +1010,12 @@ begin
     FHandle := nil;
     FHandleIsShared := False;
   end;
-  
+
+  {$IFNDEF MDO_FPC}
   if not (csDesigning in ComponentState) then
     MonitorHook.DBDisconnect(Self);
-  
+  {$ENDIF}
+
   for i := 0 to FSQLObjects.Count - 1 do
     if FSQLObjects[i] <> nil then
       SQLObjects[i].DoAfterDatabaseDisconnect;
@@ -1055,7 +1069,11 @@ begin
     {$IFDEF MDO_DELPHI6_UP}
       if Assigned(ApplicationHandleException) then
     {$ENDIF}
+        {$IFDEF MDO_FPC}
+        Classes.ApplicationHandleException(Self)
+        {$ELSE}
         Application.HandleException(Self)
+        {$ENDIF}
     else
       raise;
   end;
@@ -1099,38 +1117,41 @@ begin
     end;
   end
   else
-  begin
-    IndexOfUser := IndexOfDBConst(DPBConstantNames[isc_dpb_user_name]);
-    if IndexOfUser <> -1 then
-      Username := Copy(Params[IndexOfUser],
-                                         Pos('=', Params[IndexOfUser]) + 1, {mbcs ok}
-                                         Length(Params[IndexOfUser]));
-    IndexOfPassword := IndexOfDBConst(DPBConstantNames[isc_dpb_password]);
-    if IndexOfPassword <> -1 then
+    if Assigned(LoginDialogProc) then
     begin
-      Password := Copy(Params[IndexOfPassword],
-                                         Pos('=', Params[IndexOfPassword]) + 1, {mbcs ok}
-                                         Length(Params[IndexOfPassword]));
-      OldPassword := password;
-    end;
-    result := LoginDialogEx(DatabaseName, Username, Password, False);
-    if result then
-    begin
-      if IndexOfUser = -1 then
-        Params.Add(DPBConstantNames[isc_dpb_user_name] + '=' + Username)
-      else
-        Params[IndexOfUser] := DPBConstantNames[isc_dpb_user_name] +
-                                 '=' + Username;
-      if (Password = OldPassword) then
-        FHiddenPassword := ''
-      else
+      IndexOfUser := IndexOfDBConst(DPBConstantNames[isc_dpb_user_name]);
+      if IndexOfUser <> -1 then
+        Username := Copy(Params[IndexOfUser],
+                                           Pos('=', Params[IndexOfUser]) + 1, {mbcs ok}
+                                           Length(Params[IndexOfUser]));
+      IndexOfPassword := IndexOfDBConst(DPBConstantNames[isc_dpb_password]);
+      if IndexOfPassword <> -1 then
       begin
-        FHiddenPassword := Password;
-        if OldPassword <> '' then
-          HidePassword;
+        Password := Copy(Params[IndexOfPassword],
+                                           Pos('=', Params[IndexOfPassword]) + 1, {mbcs ok}
+                                           Length(Params[IndexOfPassword]));
+        OldPassword := password;
       end;
-    end;
-  end;
+      result := LoginDialogProc(DatabaseName, Username, Password);
+      if result then
+      begin
+        if IndexOfUser = -1 then
+          Params.Add(DPBConstantNames[isc_dpb_user_name] + '=' + Username)
+        else
+          Params[IndexOfUser] := DPBConstantNames[isc_dpb_user_name] +
+                                   '=' + Username;
+        if (Password = OldPassword) then
+          FHiddenPassword := ''
+        else
+        begin
+          FHiddenPassword := Password;
+          if OldPassword <> '' then
+            HidePassword;
+        end;
+      end;
+    end
+    else
+      Result := False;
 end;
 
 procedure TMDODataBase.Notification(AComponent: TComponent; Operation: 
@@ -1157,8 +1178,10 @@ begin
     ds := SQLObjects[Idx];
     FSQLObjects[Idx] := nil;
     ds.Database := nil;
+    {$IFNDEF MDO_FPC}
     if (ds.owner is TDataSet) then
       UnregisterClient(TDataSet(ds.Owner));
+    {$ENDIF}
   end;
 end;
 
@@ -1169,8 +1192,10 @@ begin
   for i := 0 to FSQLObjects.Count - 1 do if FSQLObjects[i] <> nil then
   begin
     RemoveSQLObject(i);
+    {$IFNDEF MDO_FPC}
     if (TMDOBase(FSQLObjects[i]).owner is TDataSet) then
       UnregisterClient(TDataSet(TMDOBase(FSQLObjects[i]).owner));
+    {$ENDIF}
   end;
 end;
 
@@ -1388,7 +1413,7 @@ begin
   FTRParamsChanged := True;
   TStringList(FTRParams).OnChange := TRParamsChange;
   TStringList(FTRParams).OnChanging := TRParamsChanging;
-  FTimer := TTimer.Create(Self);
+  FTimer := {$IFDEF MDO_FPC}TFPTimer{$ELSE}TTimer{$ENDIF}.Create(Self);
   FTimer.Enabled := False;
   FTimer.Interval := 0;
   FTimer.OnTimer := TimeoutTransaction;
@@ -1592,6 +1617,7 @@ begin
         FAfterRollbackRetaining(Self);
     end;
   end;
+  {$IFNDEF MDO_FPC}
   if not (csDesigning in ComponentState) then
   begin
     case Action of
@@ -1605,6 +1631,7 @@ begin
         MonitorHook.TRRollbackRetaining(Self);
     end;
   end;
+  {$ENDIF}
   
   if (Assigned(FOnEndTransaction)) and (not Force) and
     (Action in [TARollBack, TACommit]) then
@@ -1911,9 +1938,11 @@ begin
   
     if Assigned(FOnStartTransaction) then
       FOnStartTransaction(Self);
-  
+
+    {$IFNDEF MDO_FPC}
     if not (csDesigning in ComponentState) then
       MonitorHook.TRStart(Self);
+    {$ENDIF}
   finally
     FreeMem(pteb);
   end;

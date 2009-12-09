@@ -33,7 +33,11 @@ unit MDOIntf;
 
 interface
 
-uses Windows, MDOHeader, MDOInstallHeader, MDOExternals;
+uses
+  {$IFNDEF MDO_FPC}
+  Windows,
+  {$ENDIF}
+  MDOHeader, MDOInstallHeader, MDOExternals;
 
 var
   BLOB_get: TBLOB_get;
@@ -113,17 +117,17 @@ procedure CheckFBInstallLoaded;
 { Stubs for 6.0 only functions }
 function isc_rollback_retaining_stub(status_vector   : PISC_STATUS;
               tran_handle     : PISC_TR_HANDLE):
-                                     ISC_STATUS; stdcall;
+                                     ISC_STATUS; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 function isc_service_attach_stub(status_vector      : PISC_STATUS;
                                  isc_arg2           : UShort;
                                  isc_arg3           : PChar;
                                  service_handle     : PISC_SVC_HANDLE;
                                  isc_arg5           : UShort;
                                  isc_arg6           : PChar):
-                                 ISC_STATUS; stdcall;
+                                 ISC_STATUS; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 function isc_service_detach_stub(status_vector      : PISC_STATUS;
                                  service_handle     : PISC_SVC_HANDLE):
-                                 ISC_STATUS; stdcall;
+                                 ISC_STATUS; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 function isc_service_query_stub(status_vector        : PISC_STATUS;
                                 service_handle       : PISC_SVC_HANDLE;
                                 recv_handle          : PISC_SVC_HANDLE;
@@ -133,40 +137,40 @@ function isc_service_query_stub(status_vector        : PISC_STATUS;
                                 isc_arg7             : PChar;
                                 isc_arg8             : UShort;
                                 isc_arg9             : PChar):
-                                ISC_STATUS; stdcall;
+                                ISC_STATUS; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 function isc_service_start_stub(status_vector        : PISC_STATUS;
                                 service_handle       : PISC_SVC_HANDLE;
                                 recv_handle          : PISC_SVC_HANDLE;
                                 isc_arg4             : UShort;
                                 isc_arg5             : PChar):
-                                ISC_STATUS; stdcall;
+                                ISC_STATUS; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 procedure isc_encode_sql_date_stub(tm_date           : PCTimeStructure;
                  ib_date           : PISC_DATE);
-                                   stdcall;
+                                   {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 procedure isc_encode_sql_time_stub(tm_date           : PCTimeStructure;
                    ib_time           : PISC_TIME);
-                                   stdcall;
+                                   {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 procedure isc_encode_timestamp_stub(tm_date          : PCTimeStructure;
                   ib_timestamp     : PISC_TIMESTAMP);
-                                    stdcall;
+                                    {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 procedure isc_decode_sql_date_stub(ib_date           : PISC_DATE;
                                    tm_date           : PCTimeStructure);
-                                   stdcall;
+                                   {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 procedure isc_decode_sql_time_stub(ib_time           : PISC_TIME;
                                    tm_date           : PCTimeStructure);
-                                   stdcall;
+                                   {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 procedure isc_decode_timestamp_stub(ib_timestamp     : PISC_TIMESTAMP;
                                     tm_date          : PCTimeStructure);
-                                    stdcall;
+                                    {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 { stubs for install functions }
-function isc_install_clear_options_stub(hOption: POPTIONS_HANDLE):MSG_NO; stdcall;
+function isc_install_clear_options_stub(hOption: POPTIONS_HANDLE):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 function isc_install_execute_stub(hOption: OPTIONS_HANDLE;
                              src_dir: TEXT;
                              dest_dir: TEXT;
@@ -174,33 +178,37 @@ function isc_install_execute_stub(hOption: OPTIONS_HANDLE;
                              status_data: pointer;
                              error_func: FP_ERROR;
                              error_data: pointer;
-                             uninstal_file_name: TEXT):MSG_NO; stdcall;
+                             uninstal_file_name: TEXT):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 function isc_install_get_info_stub(info_type :integer;
                               option :OPT;
                               info_buffer : Pointer;
-                              buf_len : Cardinal): MSG_NO; stdcall;
+                              buf_len : Cardinal): MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 function isc_install_get_message_stub(hOption: OPTIONS_HANDLE;
                                  message_no: MSG_NO;
                                  message_txt: Pointer;
-                                 message_len: Cardinal):MSG_NO; stdcall;
-function isc_install_load_external_text_stub(msg_file_name: TEXT):MSG_NO; stdcall;
+                                 message_len: Cardinal):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+function isc_install_load_external_text_stub(msg_file_name: TEXT):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 function isc_install_precheck_stub(hOption: OPTIONS_HANDLE;
                               src_dir: TEXT;
-                              dest_dir: TEXT):MSG_NO; stdcall;
+                              dest_dir: TEXT):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 function isc_install_set_option_stub(hOption: POPTIONS_HANDLE;
-                                option: OPT):MSG_NO; stdcall;
+                                option: OPT):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 function isc_uninstall_execute_stub(uninstall_file_name: TEXT;
                                status_func: FP_STATUS;
                                status_data: pointer;
                                error_func: FP_ERROR;
-                               error_data: pointer):MSG_NO; stdcall;
-function isc_uninstall_precheck_stub(uninstall_file_name: TEXT):MSG_NO; stdcall;
+                               error_data: pointer):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+function isc_uninstall_precheck_stub(uninstall_file_name: TEXT):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 function isc_install_unset_option_stub(hOption: POPTIONS_HANDLE;
-                                  option: OPT):MSG_NO; stdcall;
+                                  option: OPT):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 implementation
 
-uses Sysutils, MDO;
+uses
+  {$IFDEF MDO_FPC}
+  dynlibs,
+  {$ENDIF}
+  Sysutils, MDO;
 
 var
   FBLibrary: THandle;
@@ -209,24 +217,27 @@ var
 
 procedure LoadFBLibrary;
 
-  function GetProcAddr(ProcName: PChar): Pointer;
+  function GetProcAddr(ProcName: {$IFDEF MDO_FPC}String{$ELSE}PChar{$ENDIF}): Pointer;
   begin
     Result := GetProcAddress(FBLibrary, ProcName);
     if not Assigned(Result) then
+    begin
     {$IFDEF MDO_DELPHI5}
       RaiseLastWin32Error;
     {$ENDIF}
     {$IFDEF MDO_DELPHI6_UP}
       RaiseLastOSError;
     {$ENDIF}
+    end;
   end;
 
   procedure TryLoadLibrary(aLibrary: string);
   begin
-    if FBLibrary <= HINSTANCE_ERROR then
+    if FBLibrary {$IFDEF MDO_FPC} = NilHandle {$ELSE}
+                                 <= HINSTANCE_ERROR {$ENDIF} then
     begin
-      FBLibrary := LoadLibrary(PChar(aLibrary));
-      if FBLibrary > HINSTANCE_ERROR then
+      FBLibrary := LoadLibrary({$IFNDEF MDO_FPC}PChar{$ENDIF}(aLibrary));
+      if FBLibrary > {$IFDEF MDO_FPC} NilHandle {$ELSE} HINSTANCE_ERROR {$ENDIF} then
          FBASE_CURRENT_DLL := aLibrary;
     end;
   end;
@@ -236,15 +247,18 @@ begin
   // Embedded, FBClient, GDS32
   if FBASE_CURRENT_DLL = FBASE_DLL_AUTODETECT then
   begin
-    TryLoadLibrary(FBASE_DLL_FBClient);
     TryLoadLibrary(FBASE_DLL_GDS32);
+    TryLoadLibrary(FBASE_DLL_FBClient);
     TryLoadLibrary(FBASE_DLL_FBEMBED);
   end
   else
     TryLoadLibrary(FBASE_CURRENT_DLL);
 
-  if (FBLibrary > HINSTANCE_ERROR) then
+  if (FBLibrary > {$IFDEF MDO_FPC}NilHandle{$ELSE}HINSTANCE_ERROR{$ENDIF}) then
   begin
+    {$IFDEF MDO_DEBUG}
+    WriteLn('Library loaded: ' + FBASE_CURRENT_DLL);
+    {$ENDIF}
     BLOB_get := GetProcAddr('BLOB_get'); {do not localize}
     BLOB_put := GetProcAddr('BLOB_put'); {do not localize}
     isc_sqlcode := GetProcAddr('isc_sqlcode'); {do not localize}
@@ -321,7 +335,7 @@ end;
 
 procedure FreeFBLibrary;
 begin
-  if FBLibrary > HINSTANCE_ERROR then
+  if FBLibrary > {$IFDEF MDO_FPC}NilHandle{$ELSE}HINSTANCE_ERROR{$ENDIF} then
   begin
     FreeLibrary(FBLibrary);
     FBLibrary := 0;
@@ -343,8 +357,8 @@ procedure LoadFBInstallLibrary;
   end;
 
 begin
-  FBInstallLibrary := LoadLibrary(PChar(IB_INSTALL_DLL));
-  if (FBInstallLibrary > HINSTANCE_ERROR) then
+  FBInstallLibrary := LoadLibrary({$IFNDEF MDO_FPC}PChar{$ENDIF}(IB_INSTALL_DLL));
+  if (FBInstallLibrary > {$IFDEF MDO_FPC}NilHandle{$ELSE}HINSTANCE_ERROR{$ENDIF}) then
   begin
     isc_install_clear_options := GetProcAddr('isc_install_clear_options'); {do not localize}
     isc_install_execute := GetProcAddr('isc_install_execute'); {do not localize}
@@ -373,7 +387,7 @@ end;
 
 procedure FreeFBInstallLibrary;
 begin
-  if FBInstallLibrary > HINSTANCE_ERROR then
+  if FBInstallLibrary > {$IFDEF MDO_FPC}NilHandle{$ELSE}HINSTANCE_ERROR{$ENDIF} then
   begin
     FreeLibrary(FBInstallLibrary);
     FBInstallLibrary := 0;
@@ -382,9 +396,9 @@ end;
 
 function TryFBLoad: Boolean;
 begin
-  if (FBLibrary <= HINSTANCE_ERROR) then
+  if (FBLibrary <= {$IFDEF MDO_FPC}NilHandle{$ELSE}HINSTANCE_ERROR{$ENDIF}) then
     LoadFBLibrary;
-  if (FBLibrary <= HINSTANCE_ERROR) then
+  if (FBLibrary <= {$IFDEF MDO_FPC}NilHandle{$ELSE}HINSTANCE_ERROR{$ENDIF}) then
     result := False
   else
     result := True;
@@ -404,15 +418,15 @@ end;
 
 procedure CheckFBInstallLoaded;
 begin
-  if (FBInstallLibrary <= HINSTANCE_ERROR) then
+  if (FBInstallLibrary <= {$IFDEF MDO_FPC}NilHandle{$ELSE}HINSTANCE_ERROR{$ENDIF}) then
     LoadFBInstallLibrary;
-  if (FBInstallLibrary <= HINSTANCE_ERROR) then
+  if (FBInstallLibrary <= {$IFDEF MDO_FPC}NilHandle{$ELSE}HINSTANCE_ERROR{$ENDIF}) then
     MDOError(mdoeFirebirdInstallMissing, [nil]);
 end;
 
 function isc_rollback_retaining_stub(status_vector   : PISC_STATUS;
               tran_handle     : PISC_TR_HANDLE):
-                                     ISC_STATUS; stdcall;
+                                     ISC_STATUS; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := 0;
   MDOError(mdoeIB60feature, ['isc_rollback_retaining']); {do not localize}
@@ -424,7 +438,7 @@ function isc_service_attach_stub(status_vector      : PISC_STATUS;
                                  service_handle     : PISC_SVC_HANDLE;
                                  isc_arg5           : UShort;
                                  isc_arg6           : PChar):
-                                 ISC_STATUS; stdcall;
+                                 ISC_STATUS; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := 0;
   MDOError(mdoeIB60feature, ['isc_service_attach']); {do not localize}
@@ -432,7 +446,7 @@ end;
 
 function isc_service_detach_stub(status_vector      : PISC_STATUS;
                                  service_handle     : PISC_SVC_HANDLE):
-                                 ISC_STATUS; stdcall;
+                                 ISC_STATUS; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := 0;
   MDOError(mdoeIB60feature, ['isc_service_detach']); {do not localize}
@@ -447,7 +461,7 @@ function isc_service_query_stub(status_vector        : PISC_STATUS;
                                 isc_arg7             : PChar;
                                 isc_arg8             : UShort;
                                 isc_arg9             : PChar):
-                                ISC_STATUS; stdcall;
+                                ISC_STATUS; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := 0;
   MDOError(mdoeIB60feature, ['isc_service_query']); {do not localize}
@@ -458,7 +472,7 @@ function isc_service_start_stub(status_vector        : PISC_STATUS;
                                 recv_handle          : PISC_SVC_HANDLE;
                                 isc_arg4             : UShort;
                                 isc_arg5             : PChar):
-                                ISC_STATUS; stdcall;
+                                ISC_STATUS; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := 0;
   MDOError(mdoeIB60feature, ['isc_service_start']); {do not localize}
@@ -466,47 +480,47 @@ end;
 
 procedure isc_encode_sql_date_stub(tm_date           : PCTimeStructure;
                  ib_date           : PISC_DATE);
-                                   stdcall;
+                                   {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   MDOError(mdoeIB60feature, ['isc_encode_sql_date']); {do not localize}
 end;
 
 procedure isc_encode_sql_time_stub(tm_date           : PCTimeStructure;
                    ib_time           : PISC_TIME);
-                                   stdcall;
+                                   {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   MDOError(mdoeIB60feature, ['isc_encode_sql_time']); {do not localize}
 end;
 
 procedure isc_encode_timestamp_stub(tm_date          : PCTimeStructure;
                   ib_timestamp     : PISC_TIMESTAMP);
-                                    stdcall;
+                                    {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   MDOError(mdoeIB60feature, ['isc_encode_sql_timestamp']); {do not localize}
 end;
 
 procedure isc_decode_sql_date_stub(ib_date           : PISC_DATE;
                                    tm_date           : PCTimeStructure);
-                                   stdcall;
+                                   {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   MDOError(mdoeIB60feature, ['isc_decode_sql_date']); {do not localize}
 end;
 
 procedure isc_decode_sql_time_stub(ib_time           : PISC_TIME;
                                    tm_date           : PCTimeStructure);
-                                   stdcall;
+                                   {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   MDOError(mdoeIB60feature, ['isc_decode_sql_time']); {do not localize}
 end;
 
 procedure isc_decode_timestamp_stub(ib_timestamp     : PISC_TIMESTAMP;
                                     tm_date          : PCTimeStructure);
-                                    stdcall;
+                                    {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   MDOError(mdoeIB60feature, ['isc_decode_timestamp']); {do not localize}
 end;
 
-function isc_install_clear_options_stub(hOption: POPTIONS_HANDLE):MSG_NO; stdcall;
+function isc_install_clear_options_stub(hOption: POPTIONS_HANDLE):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := 0;
   MDOError(mdoeIB60feature, ['isc_install_xxx ']); {do not localize}
@@ -519,7 +533,7 @@ function isc_install_execute_stub(hOption: OPTIONS_HANDLE;
                              status_data: pointer;
                              error_func: FP_ERROR;
                              error_data: pointer;
-                             uninstal_file_name: TEXT):MSG_NO; stdcall;
+                             uninstal_file_name: TEXT):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := 0;
   MDOError(mdoeIB60feature, ['isc_install_xxx ']); {do not localize}
@@ -528,7 +542,7 @@ end;
 function isc_install_get_info_stub(info_type :integer;
                               option :OPT;
                               info_buffer : Pointer;
-                              buf_len : Cardinal): MSG_NO; stdcall;
+                              buf_len : Cardinal): MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := 0;
   MDOError(mdoeIB60feature, ['isc_install_xxx ']); {do not localize}
@@ -537,13 +551,13 @@ end;
 function isc_install_get_message_stub(hOption: OPTIONS_HANDLE;
                                  message_no: MSG_NO;
                                  message_txt: Pointer;
-                                 message_len: Cardinal):MSG_NO; stdcall;
+                                 message_len: Cardinal):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := 0;
   MDOError(mdoeIB60feature, ['isc_install_xxx ']); {do not localize}
 end;
 
-function isc_install_load_external_text_stub(msg_file_name: TEXT):MSG_NO; stdcall;
+function isc_install_load_external_text_stub(msg_file_name: TEXT):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := 0;
   MDOError(mdoeIB60feature, ['isc_install_xxx ']); {do not localize}
@@ -551,14 +565,14 @@ end;
 
 function isc_install_precheck_stub(hOption: OPTIONS_HANDLE;
                               src_dir: TEXT;
-                              dest_dir: TEXT):MSG_NO; stdcall;
+                              dest_dir: TEXT):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := 0;
   MDOError(mdoeIB60feature, ['isc_install_xxx ']); {do not localize}
 end;
 
 function isc_install_set_option_stub(hOption: POPTIONS_HANDLE;
-                                option: OPT):MSG_NO; stdcall;
+                                option: OPT):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := 0;
   MDOError(mdoeIB60feature, ['isc_install_xxx ']); {do not localize}
@@ -568,20 +582,20 @@ function isc_uninstall_execute_stub(uninstall_file_name: TEXT;
                                status_func: FP_STATUS;
                                status_data: pointer;
                                error_func: FP_ERROR;
-                               error_data: pointer):MSG_NO; stdcall;
+                               error_data: pointer):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := 0;
   MDOError(mdoeIB60feature, ['isc_install_xxx ']); {do not localize}
 end;
 
-function isc_uninstall_precheck_stub(uninstall_file_name: TEXT):MSG_NO; stdcall;
+function isc_uninstall_precheck_stub(uninstall_file_name: TEXT):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := 0;
   MDOError(mdoeIB60feature, ['isc_install_xxx ']); {do not localize}
 end;
 
 function isc_install_unset_option_stub(hOption: POPTIONS_HANDLE;
-                                  option: OPT):MSG_NO; stdcall;
+                                  option: OPT):MSG_NO; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := 0;
   MDOError(mdoeIB60feature, ['isc_install_xxx ']); {do not localize}

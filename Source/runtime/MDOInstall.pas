@@ -36,6 +36,8 @@
   later software
 }
 
+{$I ..\mdo.inc}
+
 unit MDOInstall;
 
 interface
@@ -237,13 +239,13 @@ begin
 end;
 
 function ErrorCallback(IscCode: MSG_NO; UserContext: Pointer; const ActionDescription:
-                       TEXT): Integer; stdcall;
+                       TEXT): Integer; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := TMDOSetup(UserContext).ErrorInternal(IscCode, ActionDescription);
 end;
 
 function StatusCallback(Status : Integer; UserContext: Pointer; const ActionDescription:
-                       TEXT): Integer; stdcall;
+                       TEXT): Integer; {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 begin
   Result := TMDOSetup(UserContext).StatusInternal(Status, ActionDescription);
 end;

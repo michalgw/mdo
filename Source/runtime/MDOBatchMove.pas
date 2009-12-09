@@ -26,12 +26,19 @@
 {                    Mercury Database Objects [info@mdolib.com]          }
 {                                                                        }
 {************************************************************************}
+
+{$I ..\mdo.inc}
+
 unit MDOBatchMove;
 
 interface
 
-uses Windows, SysUtils, Graphics, Classes, Controls, Db, StdVCL,
-     MDO, MDOCustomDataSet, MDODatabase, MDOTable;
+uses
+  {$IFNDEF MDO_FPC}
+  Windows, StdVCL, Graphics, Controls,
+  {$ENDIF}
+  SysUtils, Classes, Db, MDO, MDOCustomDataSet, MDODatabase,
+  MDOTable;
 
 type
   TBatchMode = (batAppend, batUpdate, batAppendUpdate, batDelete, batCopy);

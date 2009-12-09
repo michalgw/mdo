@@ -29,11 +29,12 @@
 
 unit MDOUpdateSQL;
 
-{$I ..\MDO.INC}
+{$I ..\mdo.inc}
 
 interface
 
-uses SysUtils, Classes, DB, MDO, MDOCustomDataSet, MDOQuery
+uses
+  SysUtils, Classes, DB, MDO, MDOCustomDataSet, MDOQuery
   {$IFDEF MDO_DELPHI6_UP}
     , Variants
   {$ENDIF};

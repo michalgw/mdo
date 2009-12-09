@@ -29,11 +29,18 @@
 
 unit MDOTransactionEdit;
 
+{$I ..\mdo.inc}
+
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, MDODatabase, MDO, ExtCtrls, MDOConst;
+  {$IFDEF MDO_FPC}
+  LResources,
+  {$ELSE}
+  Windows, Messages,
+  {$ENDIF}
+  SysUtils, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, MDODatabase,
+  MDO, ExtCtrls, MDOConst;
 
 type
   TMDOTransactionEditForm = class (TForm)
@@ -70,10 +77,15 @@ function EdiTMDOtransaction(Atransaction: TMDOtransaction): Boolean;
 
 implementation
 
+{$IFNDEF MDO_FPC}
+
 {$R *.DFM}
 
 uses
   LibHelp;
+
+{$ENDIF}
+
 
 type
   TTransactionParam = (concurrency, read_committed, rec_version, nowait,
@@ -117,7 +129,9 @@ end;
 
 procedure TMDOTransactionEditForm.FormCreate(Sender: TObject);
 begin
+  {$IFNDEF MDO_FPC}
   HelpContext := hcDIBTransactionEdit;
+  {$ENDIF}
 end;
 
 procedure TMDOTransactionEditForm.HelpBtnClick(Sender: TObject);
@@ -221,5 +235,10 @@ procedure TMDOTransactionEditForm.TransactionParamsExit(Sender: TObject);
 begin
   ParseParams;
 end;
+
+{$IFDEF MDO_FPC}
+initialization
+  {$I MDOTransactionEdit.lrs}
+{$ENDIF}
 
 end.

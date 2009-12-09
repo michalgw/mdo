@@ -16,6 +16,9 @@
   --
   Component for data export
 }
+
+{$I ..\mdo.inc}
+
 unit MDOCustomExport;
 
 interface

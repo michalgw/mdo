@@ -34,11 +34,18 @@
 
 unit MDODatabaseEdit;
 
+{$I ..\mdo.inc}
+
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, MDODatabase, MDO, MDOConst, ComCtrls;
+  {$IFDEF MDO_FPC}
+  LResources,
+  {$ELSE}
+  Windows, Messages,
+  {$ENDIF}
+  SysUtils, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls,
+  MDODatabase, MDO, MDOConst, ComCtrls;
 
 type
   TMDODatabaseEditForm = class (TForm)
@@ -96,7 +103,9 @@ function EdiTMDODatabase(ADatabase: TMDODatabase): Boolean;
 
 implementation
 
+{$IFNDEF MDO_FPC}
 {$R *.DFM}
+{$ENDIF}
 
 uses TypInfo;
 
@@ -171,6 +180,12 @@ begin
       end;
     tempDB.Params.Assign(DatabaseParams.Lines);
     tempDB.LoginPrompt := LoginPrompt.Checked;
+    case ClientLibrary.ItemIndex of
+      0: tempDB.ClientLib := clAutoDetect;
+      1: tempDB.ClientLib := clFBClient;
+      2: tempDB.ClientLib := clGDS32;
+      3: tempDB.ClientLib := clFBEmbed;
+    end;
     tempDB.Connected := true;
     ShowMessage('Successful Connection');
   finally
@@ -257,7 +272,7 @@ var
   
 begin
   DecomposeDatabaseName;
-  DatabaseParams.Lines := Database.Params;
+  DatabaseParams.Lines.AddStrings(Database.Params);
   LoginPrompt.Checked := Database.LoginPrompt;
   case Database.ClientLib of
     clAutoDetect: ClientLibrary.ItemIndex := 0;
@@ -286,7 +301,8 @@ begin
         2: Database.DatabaseName := Format('%s@%s', [ServerName.Text,
           DatabaseName.Text]); {do not localize}
       end;
-    Database.Params := DatabaseParams.Lines;
+    Database.Params.Clear;
+    Database.Params.AddStrings(DatabaseParams.Lines);
     Database.LoginPrompt := LoginPrompt.Checked;
     case ClientLibrary.ItemIndex of
       0: Database.ClientLib := clAutoDetect;
@@ -396,5 +412,10 @@ procedure TMDODatabaseEditForm.UserNameChange(Sender: TObject);
 begin
   AddParam('user_name', UserName.Text);
 end;
+
+{$IFDEF MDO_FPC}
+initialization
+  {$I MDODatabaseEdit.lrs}
+{$ENDIF}
 
 end.

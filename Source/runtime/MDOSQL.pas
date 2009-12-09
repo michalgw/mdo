@@ -29,13 +29,16 @@
 
 unit MDOSQL;
 
-{$I ..\MDO.INC}
+{$I ..\mdo.inc}
 
 interface
 
 uses
-  Windows, SysUtils, Classes, Forms, Controls, MDOHeader, MDOErrorCodes,
-  MDOExternals, DB, MDO, MDODatabase, MDOUtils, MDOConst
+  {$IFNDEF MDO_FPC}
+  Windows, Forms, Controls,
+  {$ENDIF}
+  SysUtils, Classes, MDOHeader, MDOErrorCodes, MDOExternals, DB, MDO,
+  MDODatabase, MDOUtils, MDOConst
   {$IFDEF MDO_DELPHI6_UP}
     , Variants
   {$ENDIF};
@@ -336,7 +339,10 @@ type
 implementation
 
 uses
-  MDOIntf, MDOBlob, MDOSQLMonitor;
+  {$IFNDEF MDO_FPC}
+  MDOSQLMonitor,
+  {$ENDIF}
+  MDOIntf, MDOBlob;
 
 { TMDOXSQLVAR }
 {
@@ -1600,8 +1606,12 @@ destructor TMDOOutputDelimitedFile.Destroy;
 begin
   if FHandle <> 0 then
   begin
+    {$IFDEF MDO_FPC}
+    FileClose(FHandle);
+    {$ELSE}
     FlushFileBuffers(FHandle);
     CloseHandle(FHandle);
+    {$ENDIF}
   end;
   inherited Destroy;
 end;
@@ -1616,10 +1626,14 @@ begin
     FColDelimiter := TAB;
   if FRowDelimiter = '' then
     FRowDelimiter := CRLF;
+  {$IFDEF MDO_FPC}
+  FHandle := FileCreate(Filename);
+  {$ELSE}
   FHandle := CreateFile(PChar(Filename), GENERIC_WRITE, 0, nil, CREATE_ALWAYS,
                         FILE_ATTRIBUTE_NORMAL, 0);
   if FHandle = INVALID_HANDLE_VALUE then
     FHandle := 0;
+  {$ENDIF}
   if FOutputTitles then
   begin
     for i := 0 to Columns.Count - 1 do
@@ -1628,7 +1642,11 @@ begin
       else
         st := st + FColDelimiter + string(Columns[i].Data^.aliasname);
     st := st + FRowDelimiter;
+    {$IFDEF MDO_FPC}
+    FileWrite(FHandle, st[1], Length(st));
+    {$ELSE}
     WriteFile(FHandle, st[1], Length(st), BytesWritten, nil);
+    {$ENDIF}
   end;
 end;
 
@@ -1649,7 +1667,11 @@ begin
       st := st + StripString(Columns[i].AsString, FColDelimiter + FRowDelimiter);
     end;
     st := st + FRowDelimiter;
+    {$IFDEF MDO_FPC}
+    BytesWritten := FileWrite(FHandle, st[1], Length(st));
+    {$ELSE}
     WriteFile(FHandle, st[1], Length(st), BytesWritten, nil);
+    {$ENDIF}
     if BytesWritten = DWORD(Length(st)) then
       result := True;
   end
@@ -1773,18 +1795,26 @@ destructor TMDOOutputRawFile.Destroy;
 begin
   if FHandle <> 0 then
   begin
+    {$IFDEF MDO_FPC}
+    FileClose(FHandle);
+    {$ELSE}
     FlushFileBuffers(FHandle);
     CloseHandle(FHandle);
+    {$ENDIF}
   end;
   inherited Destroy;
 end;
 
 procedure TMDOOutputRawFile.ReadyFile;
 begin
+  {$IFDEF MDO_FPC}
+  FHandle := FileCreate(Filename);
+  {$ELSE}
   FHandle := CreateFile(PChar(Filename), GENERIC_WRITE, 0, nil, CREATE_ALWAYS,
                         FILE_ATTRIBUTE_NORMAL, 0);
   if FHandle = INVALID_HANDLE_VALUE then
     FHandle := 0;
+  {$ENDIF}
 end;
 
 function TMDOOutputRawFile.WriteColumns: Boolean;
@@ -1797,8 +1827,12 @@ begin
   begin
     for i := 0 to Columns.Count - 1 do
     begin
+      {$IFDEF MDO_FPC}
+      BytesWritten := FileWrite(FHandle, Columns[i].Data^.sqldata^, Columns[i].Data^.sqllen);
+      {$ELSE}
       WriteFile(FHandle, Columns[i].Data^.sqldata^, Columns[i].Data^.sqllen,
                 BytesWritten, nil);
+      {$ENDIF}
       if BytesWritten <> DWORD(Columns[i].Data^.sqllen) then
         exit;
     end;
@@ -1813,7 +1847,11 @@ end;
 destructor TMDOInputRawFile.Destroy;
 begin
   if FHandle <> 0 then
+    {$IFDEF MDO_FPC}
+    FileClose(FHandle);
+    {$ELSE}
     CloseHandle(FHandle);
+    {$ENDIF}
   inherited Destroy;
 end;
 
@@ -1827,8 +1865,12 @@ begin
   begin
     for i := 0 to Params.Count - 1 do
     begin
+      {$IFDEF MDO_FPC}
+      BytesRead := FileRead(FHandle, Params[i].Data^.sqldata^, Params[i].Data^.sqllen);
+      {$ELSE}
       ReadFile(FHandle, Params[i].Data^.sqldata^, Params[i].Data^.sqllen,
                BytesRead, nil);
+      {$ENDIF}
       if BytesRead <> DWORD(Params[i].Data^.sqllen) then
         exit;
     end;
@@ -1839,11 +1881,19 @@ end;
 procedure TMDOInputRawFile.ReadyFile;
 begin
   if FHandle <> 0 then
+  {$IFDEF MDO_FPC}
+    FileClose(FHandle);
+  {$ELSE}
     CloseHandle(FHandle);
   FHandle := CreateFile(PChar(Filename), GENERIC_READ, 0, nil, OPEN_EXISTING,
                         FILE_FLAG_SEQUENTIAL_SCAN, 0);
+  {$ENDIF}
+  {$IFDEF MDO_FPC}
+  FHandle := FileOpen(Filename, fmOpenRead);
+  {$ELSE}
   if FHandle = INVALID_HANDLE_VALUE then
     FHandle := 0;
+  {$ENDIF}
 end;
 
 { TMDOSQL }
@@ -2077,8 +2127,10 @@ begin
         raise;
       end;
   end;
+  {$IFNDEF MDO_FPC}
   if not (csDesigning in ComponentState) then
     MonitorHook.SQLExecute(Self);
+  {$ENDIF}
 end;
 
 function TMDOSQL.FieldByName(FieldName: String): TMDOXSQLVAR;
@@ -2251,8 +2303,10 @@ begin
       FBOF := False;
       result := FSQLRecord;
     end;
+    {$IFNDEF MDO_FPC}
     if not (csDesigning in ComponentState) then
       MonitorHook.SQLFetch(Self);
+    {$ENDIF}
   end;
 end;
 
@@ -2329,8 +2383,10 @@ begin
       end;
     end;
     FPrepared := True;
+    {$IFNDEF MDO_FPC}
     if not (csDesigning in ComponentState) then
       MonitorHook.SQLPrepare(Self);
+    {$ENDIF}
   except
     on E: Exception do
     begin

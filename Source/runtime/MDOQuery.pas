@@ -29,12 +29,15 @@
 
 unit MDOQuery;
 
-{$I ..\MDO.INC}
+{$I ..\mdo.inc}
 
 interface
 
-uses Windows, SysUtils, Graphics, Classes, Controls, Db, StdVCL,
-     MDOHeader, MDO, MDOCustomDataSet, MDOSQL;
+uses
+  {$IFNDEF MDO_FPC}
+  Windows, StdVCL, Graphics, Controls,
+  {$ENDIF}
+  SysUtils, Classes, Db, MDOHeader, MDO, MDOCustomDataSet, MDOSQL;
 
 type
 
@@ -68,11 +71,13 @@ type
     function GetParamsCount: Word;
     procedure InitFieldDefs; override;
     procedure InternalOpen; override;
+{$IFNDEF MDO_FPC}
     procedure PSExecute; override;
     function PSGetParams: TParams; override;
     function PSGetTableName: string; override;
     procedure PSSetCommandText(const CommandText: string); override;
     procedure PSSetParams(AParams: TParams); override;
+{$ENDIF}
     procedure SetFiltered(Value: Boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -80,7 +85,9 @@ type
     procedure BatchInput(InputObject: TMDOBatchInput);
     procedure BatchOutput(OutputObject: TMDOBatchOutput);
     procedure ExecSQL;
+{$IFNDEF MDO_FPC}
     procedure GetDetailLinkFields(MasterFields, DetailFields: TList); override;
+{$ENDIF}
     function ParamByName(const Value: string): TParam;
     procedure Prepare;
     procedure UnPrepare;
@@ -201,6 +208,7 @@ begin
   Result := False;
 end;
 
+{$IFNDEF MDO_FPC}
 procedure TMDOQuery.GetDetailLinkFields(MasterFields, DetailFields: TList);
   
     function AddFieldToList(const FieldName: string; DataSet: TDataSet;
@@ -225,6 +233,7 @@ begin
       if AddFieldToList(Params[i].Name, DataSource.DataSet, MasterFields) then
         AddFieldToList(Params[i].Name, Self, DetailFields);
 end;
+{$ENDIF}
 
 function TMDOQuery.GetParamsCount: Word;
 begin
@@ -276,6 +285,7 @@ begin
   InternalPrepare;
 end;
 
+{$IFNDEF MDO_FPC}
 procedure TMDOQuery.PSExecute;
 begin
   ExecSQL;
@@ -303,6 +313,7 @@ begin
     Params.Assign(AParams);
   Close;
 end;
+{$ENDIF}
 
 procedure TMDOQuery.QueryChanged(Sender: TObject);
 var

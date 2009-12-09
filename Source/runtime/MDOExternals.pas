@@ -27,6 +27,8 @@
 {                                                                        }
 {************************************************************************}
 
+{$I ..\mdo.inc}
+
 unit MDOExternals;
 
 { Some structures, declarations that we need for the IB stuff to work, but
@@ -34,7 +36,10 @@ unit MDOExternals;
 interface
 
 uses
-  Windows, MDOUtils;
+  {$IFNDEF MDO_FPC}
+  Windows,
+  {$ENDIF}
+  MDOUtils;
 
 type
   Int                  = LongInt; { 32 bit signed }

@@ -17,6 +17,8 @@
   Component for data export as CSV
 }
 
+{$I ..\mdo.inc}
+
 unit MDOCSVDataExport;
 
 interface
