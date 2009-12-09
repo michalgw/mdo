@@ -42,7 +42,8 @@ contains
   MDOEventsEditor in 'design\MDOEventsEditor.pas' {MDOEventsEditorForm},
   MDOTransactionEdit in 'design\MDOTransactionEdit.pas' {MDOTransactionEditForm},
   MDODatabaseEdit in 'design\MDODatabaseEdit.pas' {MDODatabaseEditForm},
-  MDOServiceEditor in 'design\MDOServiceEditor.pas' {MDOServiceEditorForm};
+  MDOServiceEditor in 'design\MDOServiceEditor.pas' {MDOServiceEditorForm},
+  MDOGeneratorLinkEditor in 'design\MDOGeneratorLinkEditor.pas' {MDOGeneratorLinkEditForm};
 
 end.
 

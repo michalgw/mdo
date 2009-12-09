@@ -45,7 +45,8 @@ contains
   MDODatabaseEdit in 'design\MDODatabaseEdit.pas' {MDODatabaseEditForm},
   MDOServiceEditor in 'design\MDOServiceEditor.pas' {MDOServiceEditorForm},
   MDOScript in 'runtime\MDOScript.pas',
-  MDOMisc in 'runtime\MDOMisc.pas';
+  MDOMisc in 'runtime\MDOMisc.pas',
+  MDOGeneratorLinkEditor in 'design\MDOGeneratorLinkEditor.pas' {MDOGeneratorLinkEditForm};
 
 end.
 
