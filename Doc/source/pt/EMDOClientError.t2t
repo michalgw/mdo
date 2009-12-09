@@ -1,0 +1,5 @@
+
+== EMDOClientError ==
+**Unit MDO**
+
+Usado para levantar erros específicos no cliente.

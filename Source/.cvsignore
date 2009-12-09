@@ -1,0 +1,9 @@
+*.~*
+*.dcu
+*.bpl
+*.dcp
+*.cfg
+*.ddp
+*.drc
+*.dof
+*.res

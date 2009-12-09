@@ -1,0 +1,8 @@
+*.~*
+*.dcu
+*.bpl
+*.dcp
+*.cfg
+*.ddp
+*.drc
+MDOConst_PT_BR.pas

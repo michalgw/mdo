@@ -1,0 +1,27 @@
+
+== TMDODataLink ==
+**Unit MDOCustomDataSet**
+
+TMDODataLink é uma classe qua ajuda objetos data-aware coordenarem ações do TMDODataSet e a responder à eventos de dados.
+
+O construtor de objetos data-aware devem chamar o construtor de TMDODataLink, e inicializar qualquer propriedade relevante. O objeto data-aware pode então ligar-se à um TDataSource utilizando a propriedade DataSource do TMDODataLink. 
+
+Objetos data-aware que ligam-se a um único campo em um dataset devem usar um TFieldDataLink.
+
+
+=== Métodos ===
+
+: **TMDODataLink.Create(ADataSet: TMDOCustomDataSet)**
+Cria uma instancia de TMDODataLink. 
+
+Create é chamado a partir do construtor de qualquer objeto data-aware que utilize um TMDODataLink para implementar sua propriedade DataSource.
+
+Após chamar seu construtor herdado, Create inicializa a propriedade BufferCount com 1. Objetos data-aware  que usam um objeto TMDODataLink para gerenciar sua ligação com um DataSource devem alterar a propriedade BufferCount para o número ou registros que eles representam, após chamar o construtor herdado.
+
+
+: **TMDODataLink.Destroy**
+Destrói uma instancia de TMDODataLink.
+
+Não chame o método Destroy diretamente pela aplicação. Ao invés disto, chame Free, o qual verificará se o objeto TMDODataLink já não foi liberado antes de chamar Destroy.
+
+Antes de chamar o destrutor herdado, Destroy remove qualquer referencia ao TMDODataLink da fonte de dados do objeto. O objeto TMDODataLink deverá ser destruído no destructor de seu proprietário, onde o proprietário chamou o Create de seu construtor.

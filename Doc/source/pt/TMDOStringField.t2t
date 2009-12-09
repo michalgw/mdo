@@ -1,0 +1,48 @@
+
+== TMDOStringField ==
+**Unit MDOCustomDataSet**
+
+TMDOStringField permitido para strings excesso de 8196 bytes de dados.
+
+O valor de um campo string é fisicamente guardado com uma sequencia de caracteres. O uso normal para campos strings é para gravar texto, tais como nomes e endereços.
+
+TMDOStringField introduz propriedades para traduzir entre valores string e outros tipos de dados, e gerenciar conversão de driver de linguagem. Como um descendente de TStringField, TMDOStringField herda muitas propriedades, métodos, e eventos que são úteis para gerenciamento de valores e propriedades de um campo em um database.
+
+
+=== Propriedades ===
+
+: **TMDOStringField.BlanksToNULL: Boolean**
+Especifica se valores branco será tratados como strings vazias.
+
+Por padrão, valores brancos são tratados como NULL. Ajuste para False para indicar que eles devem ser tratados como strings vazias.
+
+
+=== Métodos ===
+
+: **TMDOStringField.CheckTypeSize(Value: Integer)**
+Indica o tamanho do tpo do campo string. Todos tamanhos são válido para o campo TMDOString.
+
+: **TMDOStringField.Create(AOwner: TComponent)**
+Cria uma instancia de um objeto TMDOStringField.
+
+Raramento é necessário chamar Create diretamente, porque um campo string é inicializado automaticamente por todos os campos string de um dataset.
+
+Após chamar o construtor herdado, Create ajusta:
+  - DataType para ftString
+  - Size para 20
+  - Transliterate para True
+  - BlanksToNul para True
+  
+
+
+: **TMDOStringField.GetAsString: String**
+Retorna o valor de um campo como uma string.
+
+: **TMDOStringField.GetAsVariant: Variant**
+Retorna o valor de um campo como um variant.
+
+: **TMDOStringField.GetValue(var Value: string)**
+Retorna o valor de um campo.
+
+: **TMDOStringField.SetAsString(const Value: string)**
+Ajusta o valor de um campo como um tipo string.

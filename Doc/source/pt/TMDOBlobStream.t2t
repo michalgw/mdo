@@ -1,0 +1,129 @@
+
+== TMDOBlobStream ==
+**Unit MDOBlob**
+
+TMDOBlobStream é um objeto de fluxo que permite aplicações a lerem ou gravar em campos que representam Blob.
+Usado para acessar ou modificar o valor de um objeto de campo blob. Objetos de campos blob são objetos TBlobField e descendem de TBlobField assim como TGraphicField e TMemoField. Campos blob usam canais blob para implementar a maioria dos metodos e propriedades de acesso a dados.
+
+TMDOBlobStrem permite que não seja preciso ter conhecimentos sobre como os dados são gravados em campos do tipo blob, tanto para ler ou escrever dados bastando empregar uma interface de fluxo uniforme.
+
+Para usar um fluxo Blob, crie uma instancia de TMDOBlobStream, utilize seus métodos para ler ou gravar dados, e então libere o fluxo Blob da memória. Não utilize uma mesma instancia do objeto TBlobStream para acessar mais de um registro. Em vez disso, crie um novo objeto todas as vezes que você precisar ler ou escrever dados Blob em um novo registro.
+
+=== Propriedades ===
+: **TMDOBlobStream.BlobID: TISC_QUAD**
+Ajusta ou retorna o Blob ID definido em 64-bit, o qual é gravado em um campo na tabela e aponta para o primeiro segmento do blob ou para uma página de ponteiros de fragmentos de Blob.
+
+: **TMDOBlobStream.BlobMaxSegmentSize: Long**
+Retorna o tamanho de segmento máximo.
+
+: **TMDOBlobStream.BlobNumSegments: Long** 
+Retorna o número total de segmentos existente em um Blob.
+
+: **TMDOBlobStream.BlobSize: Long**
+Retorna o tamanho total em bytes de um blob.
+
+: **TMDOBlobStream.BlobType: Short**
+Retorna o tipo de blob, onde 0 para segmentado (segmented) e 1 para fluxo (stream).
+
+: **TMDOBlobStream.Database: TMDODatabase**
+Ajusta ou retorna a base de dados associada.
+
+: **TMDOBlobStream.DBHandle: PISC_DB_HANDLE**
+Utilizado para retornar o handle da base de dados.
+
+: **TMDOBlobStream.Handle: TISC_BLOB_HANDLE**
+Utilizado para retornar o handle do blob.
+
+: **TMDOBlobStream.Mode: TBlobStreamMode**
+Ajusta ou retorna o tipo do modo de fluxo do Blob.
+
+     ``type TBlobStreamMode = set of (bmRead, bmWrite, bmReadWrite);``
+
+A propriedade BlobStreamMode pode conter os seguintes valores:
+ - bmRead: usado para ler a partir de um campo blob;
+ - bmWrite: usado para escrever para um campo blob;
+ - bmReadWrite: usado para ler ou escrever em um campo blob;
+
+: **TMDOBlobStream.Modified**
+Retorna True quando o valor do campo Blob foi modificado. Se o valor do campo Blob é ajustado usando as proriedades de TBlobField, ou usando um objeto TMDOBlobStream, Modified é automaticamente ajustado para True.
+
+: **TMDOBlobStream.Transaction: TMDOTransaction**
+Ajusta ou retorna uma transação associada.
+
+: **TMDOBlobStream.TRHandle: PISC_TR_HANDLE**
+Retorna o handle da transação.
+
+
+=== Métodos ===
+
+: **TMDOBlobStream.Call(ISC_STATUS; RaiseError: Boolean): ISC_STATUS**
+Retorna uma mensagem de erro baseada no código de erro. Trata-se de um método interno utilizado para fazer chamdas à API do Firebird e devolver à aplicação a opção de tratar uma exceção ou retornar um erro baseado no valor do RaiserError.
+
+: **TMDOBlobStream.CheckReadable**
+Determina se um blob pode ser lido. Este  método levanta uma exceção se o blob não permitir leitura.
+
+: **TMDOBlobStream.CheckWritable**
+Determina se um blob pode ser escrito. Este método levanta uma exceção se o blob não permitir gravação.
+
+: **TMDOBlobStream.Create**
+Chamado para criar uma instancia de TMDOBlobStream para leitura ou escrita de um objeto TBlobField específico.
+
+: **TMDOBlobStream.Destroy**
+Destrói uma instancia de TMDOBlobStream. Não chame o método Destroy diretamente na aplicação. Ao invés disto chame o método Free. O método Free verifica se o objeto TMDOBlobStream já não está liberado da memória e somente então chama Destroy.
+
+Destrua um objeto TMDOBlobStream chamando o método Free quando ele não for mais necessário para leitura ou escrita de um campo Blob. O método Destroy dispara um evento OnDataChange se o fluxo do Blob era usado para sobrescrever ou modificar o dado em um campo. Destroy então liberará qualquer buffer que estiver alocado para o manipulador do dado.
+
+: **TMDOBlobStream.Finalize**
+Cria um blob no servidor Firebird e escreve o dado de BlobStream nele e então o fecha.
+
+: **TMDOBlobStream.LoadFromFile(FileName: String)**
+Carrega um blob a partir de um arquivo para o campo blob. Especifique o nome do arquivo a ser carregado dentro do campo como um nome de arquivo.
+
+: **TMDOBlobStream.LoadFromStream(Stream: TStream)**
+Carrega um blob a partir de um fluxo (stream) dentro de um campo blob. Especifique o fluxo (stream) do qual os valores dos campos são copiados como o valor de um parametro Stream. Isto fará com que o conteúdo do fluxo seja copiado para dentro do campo.
+
+: **TMDOBlobStream.Read(var Buffer; Count: Longint): Longint**
+Lê bytes até o número da variável Count a partir da posição corrente no dado do campo dentro do Buffer.
+
+Utilizado para ler dados de um campo blob quando o número de bytes no campo não é conhecido. O Buffer deve ter ao menos o número de bytes da variável Count alocado em memória para abrigar os dados que foram lidos do campo.
+
+O método Read transfere os dados Blobs até o número de bytes de Count dentro do Buffer, iniciando na posição atual, e então avançando a partir da posição corrente pelo número de bytes transferidos. Read retorna o número de bytes transferidos ( o qual pode ser menor que o número requisitado em Count.)
+
+Read verifica a propriedade Transliterate do campo, e converte os dados de ANSI no character set do conjunto de dados se a propriedade Transliterate for True.
+
+Todos os outros métodos data-reading de um fluxo blob (ReadBuffer, ReadComponent) chamam o método Read para fazer suas leituras.
+
+Obs: Não chame o método Read quando o objeto TMDOBlobStream foi criado no modo bmWrite.
+
+: **TMDOBlobStream.SaveToFile(FileName: String)**
+Salva o conteúdo de um campo blob em um arquivo. Especifique o nome do arquivo através do parametro FileName.
+
+: **TMDOBlobStream.SaveToStream(Stream: TStream)**
+Salva o conteúdo de um campo blob em um fluxo (stream). Especifique o nome do fluxo ao qual os valores do campo serão salvos passando um objeto TStream por parametro.
+
+: **TMDOBlobStream.Seek(Offset: Longint; Origin: Word): Longint**
+Restaura a posição atual do objeto TMDOBlobStream. Utilize o método Seek para mover a posição atual dentro de um blob pelo indicador offset. Seek permite que uma aplicação leia ou escreva em uma localização qualquer dentro de um dado blob.
+
+O parametro Origin indica como interpretar o parametro Offset. Origin deve ser um dos seguintes valores:
+soFromBeginning : Offset é a partir do inicio do blob. Seek moverá para a posição do Offset; Offset deve ser maior que zero.
+soFromCurrent: Offset é a partir da posição atual em um blob. Seek moverá da posição atual + Offset.
+soFromEnd: Offset é a partir do fim de um blob; Offset deve ser menor que zero para indicar o número de bytes antes do fim do blob; Seek retornará o novo valor da propriedade Position, a nova posição no blob.
+
+: **TMDOBlobStream.SetSize(NewSize: Long)**
+Ajusta o novo tamanho total de um blob. 
+
+: **TMDOBlobStream.Truncate**
+Rejeita todos dados dentro de um campo blob a partir da posição atual em diante. Usado para limitar o tamanho do blob. Chamando o método Truncate quando a posição corrente é zero irá limpar o conteúdo do campo blob.
+
+Obs: Não chame o método Truncate quando o objeto TMDOBlobStream for criado no modo bmRead.
+
+: **TMDOBlobStream.Write(const Buffer; Count: Longint): Longint**
+Escreve Count bytes do Buffer até a posição atual no campo e atualiza a posição atual por Count.
+Usado para escrever Count bytes em um blob, iniciando da posição atual. O método Write para TMDOBlobStream sempre escreve todos os bytes de Count, já que um blob não possui necessariamente um caracter de terminação. Assim, Write é equivalente ao método WriteBuffer.
+
+Write verifica a propriedade Transliterate do campo, e converte os dados de ANSI no character set do conjunto de dados se a propriedade Transliterate for True.
+
+Todos os outros métodos 
+Todos os outros métodos data-writing de um fluxo blob (WriteBuffer, WriteComponent) chamam o método Write para fazer suas escritas.
+
+Obs: Não chame Write quando o objeto TMDOBlobStream for criado em modo bmRead.

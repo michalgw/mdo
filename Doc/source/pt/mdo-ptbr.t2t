@@ -1,0 +1,224 @@
+Mercury Database Objects
+Biblioteca MDO
+MDO RC1 - %%date(%Y-%m-%d)
+  
+%! Target  : html
+%! Options : --toc 
+%!style(html): estilo.css
+%!postproc(html): '(?i)<body bgcolor="white" text="black">' '<body><div class="container">'
+%!postproc(html): '(?i)</body>' '</div></body>'
+% O </p> e <p> são para evitar problemas com o validator W3C
+%!postproc(html): '@@centro@@(.*)@@' '</p><center>\1</center><p>'
+%Linha em branco (blank line)
+%!postproc(html) : '@BL@' '&nbsp;'
+%!PostProc(html) : "@CA@" "["
+%!PostProc(html) : "@CF@" "]"
+%!PostProc(html) : "@SMA@" "<small>"
+%!PostProc(html) : "@SMF@" "</small>"
+
+
+@SMA@
+Documento inspirado do arquivo de ajuda do Interbase Express 4.3
+@SMF@
+
+% -------------------------------------------------------------------------------
+% MARCAS
+% -------------------------------------------------------------------------------
+% 
+% **negrito**   //itálico//   __sublinhado__   ``código``   [imagem.jpg] %%date
+% 
+% - lista           ```             = título =         || título | título |
+%   - sublista      área verbatim   == subtítulo ==    |  campo  |  campo |
+%     - subsub...   ```             === subsub...===   |  campo  |  campo |
+%     
+% -------------------------------------------------------------------------------
+% 
+% 
+% -------------------------------------------------------------------------------
+% EXEMPLO
+% -------------------------------------------------------------------------------
+% = Meu Título =
+% Aqui é uma linha de __exemplo__, com **negrito** e //itálico//.
+% 
+% Hoje é %%date(%c).
+% Aqui vai uma imagem: [../img/t2tpowered.png].
+% 
+%   | João  |  33  |   Homem |  
+%   | Maria |  19  |  Mulher |
+%   
+% -------------------------------------------------------------------------------
+%
+%  DICA: Para abrir colchete utilize @AC@, para fechar colchete utilize @FC@
+
+
+
+====================
+
+
+%! include: ProceduresFunctions.t2t
+
+
+====================
+
+
+%! include: TMDOBase.t2t
+
+
+====================
+
+
+%! include: TMDOBatch.t2t
+
+
+====================
+
+
+%! include: TMDOBCDField.t2t
+
+
+====================
+
+
+%! include: TMDOBlobStream.t2t
+
+
+====================
+
+
+%! include: TMDOCustomDataSet.t2t
+
+
+====================
+
+
+%! include: TMDODatabase.t2t
+
+
+====================
+
+
+%! include: TMDODataLink.t2t
+
+
+====================
+
+
+%! include: TMDOBatchOutput.t2t
+
+
+====================
+
+
+%! include: TMDOCustomDataSet.t2t
+
+
+====================
+
+
+%! include: TMDOSQLMonitor.t2t
+
+
+====================
+
+
+%! include: TMDOOutputRawFile.t2t
+
+
+====================
+
+
+%! include: TMDOOutputDelimitedFile.t2t
+
+
+====================
+
+
+%! include: TMDOInputRawFile.t2t
+
+
+====================
+
+
+%! include: TMDOInputDelimitedFile.t2t
+
+
+====================
+
+
+%! include: TMDODSBlobStream.t2t
+
+
+====================
+
+
+%! include: TMDODataSetUpdateObject.t2t
+
+
+====================
+
+
+%! include: TMDOCustomSQLMonitor.t2t
+
+
+====================
+
+
+%! include: EMDOFirebirdError.t2t
+
+
+====================
+
+
+%! include: EMDOError.t2t
+
+
+====================
+
+
+%! include: EMDOClientError.t2t
+
+
+====================
+
+
+%! include: TMDOSQLDA.t2t
+
+
+====================
+
+
+%! include: TMDOTable.t2t
+
+
+====================
+
+
+%! include: TMDODataSet.t2t
+
+
+====================
+
+
+%! include: TMDOQuery.t2t
+
+
+====================
+
+
+%! include: TMDOTransaction.t2t
+
+
+====================
+
+
+%! include: TMDOSQL.t2t
+
+
+====================
+
+
+%! include: TMDODatabaseInfo.t2t
+
+
+====================
+

@@ -1,0 +1,65 @@
+
+== TMDOBase ==  
+**Unit MDODatabase**
+
+TMDOBase é o objeto ancestral o qual TMDODatabase e TMDOTransaction descendem.
+
+
+=== Propriedades ===
+
+: **TMDOBase.Database**
+Conjunto de bases associadas.
+Use a propriedade database para ajustar ou retornar uma base de dados associada.
+
+
+: **TMDOBase.DBHandle: PISC_DB_HANDLE**
+Indica o database handle. Use DBHandle para retornar  o database handle.
+
+
+
+: **TMDOBase.Owner: TObject**
+Indica qual o proprietário do componente. Owner refere-se ao objeto SQL (DataSet, TMDOSQL, etc) que criou o componente TMDOBase.
+
+
+: **TMDOBase.Transaction: TMDOTransaction**
+Ajusta ou retorna a transação associada.
+
+
+: **TMDOBase.TRHandle: PISC_TR_HANDLE**
+Retorna o transaction handle.
+
+
+=== Eventos ===
+
+: **TMDOBase.AfterDatabaseDisconnect: TNotifyEvent**
+Ocorre depois que uma base de dados é desconectada. Usado para ter ações específicas depois que uma base de dados é desconectada.
+
+: **TMDOBase.BeforeDatabaseDisconnect: TNotifyEvent**
+Ocorre antes que uma base de dados é desconetada. Usado para ter ações específicas antes que uma base de dados seja desconectada.
+
+: **TMDOBase.OnDatabaseFree: TnotifyEvent**
+Ocorre depois que uma base de dados é liberada da memória.
+
+: **TMDOBase.AfterTransactionEnd: TNotifyEvent**
+Ocorre depois que uma transação é finalizada.
+
+: **TMDOBase.BeforeTransactionEnd: TNotifyEvent**
+Ocorre antes que uma transação seja finalizada.
+
+: **TMDOBase.OnTransactionFree: TNotifyEvent**
+Ocorre depois que uma transação é liberada da memória.
+
+
+=== Métodos ===
+
+: **TMDOBase.CheckDatabase** 
+Procedure que verifica se uma base de dados está conectada, ou seja, se está ajustada e ativa.
+
+: **TMDOBase.CheckTransaction**
+Procedure que verifica se uma trnasação está ativa e ajustada.
+
+: **TMDOBase.Create**
+Procedure que cria uma instancia de um objeto MDOBase.
+
+: **TMDOBase.Destroy**
+Procedure que destrói um objeto MDOBase e libera qualquer recurso associado a ele.

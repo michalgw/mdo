@@ -1,0 +1,16 @@
+
+== TMDOBCDField ==
+**Unit MDOCustomDataSet**
+
+Encapsula o tipo moeda do Windows.
+
+=== Propriedades ===
+
+: **TMDOBCDField.Size: Integer**
+Indica o tamanho do tipo de dado, o padrão é 8.
+
+
+=== Métodos ===
+
+: **TMDOBCDField.Create** 
+Cria uma instancia do objeto TMDOBCDField, tipo de dado ftBCD de tamanho padrão 8.

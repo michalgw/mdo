@@ -1,0 +1,242 @@
+
+== TMDOTable ==
+**Unit MDOtable**
+
+TMDOTable é um componente dataset que encapsula uma tabela de base de dados. 
+
+Utilizado para acessar dados em uma única tabela ou view. TMDOTable prover acesso direto à todos registros e campos em uma tabela de base Firebird. Um componente table pode trabalhar também com um sub conjunto de dados dentro de uma tabela usando filtros.
+
+=== Propriedades ===
+
+: **TMDOTable.Active: Boolean**
+Indica se uma query está ou não ativa.
+
+: **TMDOTable.BufferChunks: Integer**
+Indica o tamanho do incremento do buffer.
+
+: **TMDOTable.CachedUpdates: Integer**
+Especifica se o cached updates está habilitado para um dataset.
+
+CachedUpdates habilita ou desabilita o uso de cached updates para um dataset. Se CachedUpdates estiver True, cached updates estará habilitado, caso False, estará desabilitado.
+
+Quando cached updates está habilitado, atualizações ao dataset, como postar alterações, inserir registros, ou apagar, são armazenados em um cache interno na máquina cliente ao invés de iniciar escrevendo diretamente ao dataset na base de dados. Quando as alterações estão concluídas, um aplicativo escreve todas alterações guardadas para a base de dados em um contexto de uma única transação.
+
+Obs: Ao invés de usar cached updates, os aplicativos podem obter os mesmo benefícios com maior controle usando um client dataset.
+
+: **TMDOTable.Constraints: TCheckConstraints**
+Especifica o nível de registro estrangerios que devem ser encontrados quando editar um dado. 
+
+Utilizado para ler ou adicionar um nível de registro estrangeiro (do inglês record-level) ao dataset. Normalmente Record-Leve Constraints apresentam relacionamentos entre campos em um registro. Constraints que limitam o valor de um único campo devem ser adicionados à um campo de componente individualmente.
+
+: **TMDOTable.CurrentDBKey: TMDODBKey**
+Retorna o DBKey da linha corrente na tabela. Um DBKey é um identificador de linha único durante a transação corrente. Esta propriedade é utilizada internamente.
+
+: **TMDOTable.DefaultIndex: Boolean**
+Especifica se o dado na tabela deve ser ordenado sobre um indice padrão quando aberto. Quando ajustado para False, uma clausula ORDER BY não será usada. Quando True, o dado é ordenado baseado na primary key ou em um índice único (do ingles unique index). O padrão é True.
+
+: **TMDOTable.Exists: Boolean**
+Indica se a tabela subjacente existe.
+
+Se a tabela não existir, você pode criar a tabela a partir de definições de campos e definições de índices usando o método CreateTable. Esta propriedade é somente leitura (do ingles read-only).
+
+: **TMDOTable.Filter: string**
+Especifica linhas em um dataset que combinam com as condições do filtro.
+
+Utilize esta propriedade para restringir linhas em um dataset. A sintaxe para Filter é o mesmo de uma condição de busca que aparece depois da clausula WHERE em uma declaração de SELECT. Por exemplo, para ver somente registros onde o valor no campo PAIS contenha 'Brasil' ou 'Portugal' faça:
+
+``PAIS = 'Brasil' or PAIS = 'Portugal'``
+
+Você pode ainda utilizar coringas (do ingles wildcards) como percento (%) e underscore (_) nas condições quando você usar o operador LIKE. Por exemplo, para filtrar todos os países que iniciam com 'B' faça:
+
+``PAIS LIKE 'B%'``
+
+Para filtrar registros em que o campo seja nulo, ou não nulo, utilize o operador IS, como:
+
+``PAIS IS NULL and ESTADO IS NOT NULL``
+
+Você tamem poderá utilizar expressões mais complexas. O exemplo abaixo recupera linhas contendo valores de PAIS onde a língua oficial é o Portugues:
+
+``PAIS IN (SELECT PAIS FROM LANGUAGE WHERE LANGUAGE_NAME = 'Portugues')``
+
+
+: **TMDOTable.Filtered: Boolean**
+Especifica se o filtro está ativo ou não para uma tabela. Se Filtered for True, então o filtro está ativo. Para aplicar condições de filtro determinado na propriedade Filter ou no evento OnFilterRecord, ajuste Filtered para True.
+
+: **TMDOTable.IndexDefs: TIndexDefs**
+Contém informação sobre os indices para uma tabela. IndexDefs é um array de itens de índices, cada qual descreve um índice disponível para a tabela. Normalmente um aplicativo acessa ou especifica índices através das propriedades IndexFieldNames ou IndexFields. Se IndexDefs for atualizado ou editado manualmente, a propriedade StoredDefs será True.
+
+Obs: Os itens de índice no IndexDefs podem nem sempre refletir os índices atuais disponíveis para a tabela. Antes de examinar IndexDefs, chame seu método Update para atualizar a lista de item.
+
+: **TMDOTable.IndexFieldCount: Integer**
+Indica o número de campos que compõem a chave atual. Para os índices baseados em uma coluna única, IndexFieldCount retornará 1. Para indices multi-colunas, IndexFieldCount indicará o número de campos o qual o índice é baseado.
+
+: **TMDOTable.IndexFieldNames: String**
+Lista as colunas a serem usadas como índice em uma tabela. Utilize como uma alternativa para especificar o índice a ser utilizado. Em IndexFieldNames indique o nome de cada coluna a ser usada como um índice para a tabela. A ordem dos nomes das colunas é significante. Separe os nomes com ponto e vígula. 
+
+Obs: As propriedades IndexFieldNames e IndexName são mutuamente exclusivas. Ajustando uma limpará a outra.
+
+: **TMDOTable.IndexFields @CA@Index: Integer@CF@: TField**
+Campo de um índice. Provê um array de objetos field, onde cada um corresponde à um campo no índice corrente. Index é um valor ordinário que indica a posição de um campo em um índice. O primeiro campo em um índice é IndexFields@CA@0@CF@, o segundo é IndexFields@CA@1@CF@, e assim por diante. 
+
+Obs: Não altere IndexField diretamente. Ao invés disto utilize IndexFieldNames para requisitar ao dataset em tempo de execução.
+
+: **TMDOTable.IndexName: String**
+Identifica um índice para a tabela. Se IndexName estiver vazio, a ordenação é baseada em seu índice primário.
+
+Se IndexName contém um nome de índice válido, então o índice é utilizado para determinar a ordem dos registros.
+
+Obs: IndexFieldNames e IndexName são mutualmente exclusivos. Alterando um limpará o outro.
+
+: **TMDOTable.MasterFields: String**
+Especifica um ou mais campos em um tabela master para ligar com os campos correspondentes em uma tabela a fim de estabelecer um relacionamento master-detail entre as tabelas.
+
+Utilize MasterFields depois que especificar a propriedade MasterSource, o qual determina os nomes de um ou mais campos para usar em um relacionamento master-detail entre esta tabela e outra especificada no MasterSource.
+
+MasterFields é uma string contendo um ou mais nomes de campos  em uma tabela master. Separe os nomes dos campos com ponto e vígula.
+
+Cada vez que o registro atual na tabela master for alterado, o novo valor naqueles campos são usados para selecionar os registros correspondentes nesta tabela.
+
+: **TMDOTable.MasterSource: TDataSource**
+
+Especifica o nome da fonte de dados para um dataset usar como uma tabela master em um relacionamento master-detail entre esta tabela e outra.
+
+Após ajustar a propriedade MasterSource, especifique quais campos a usar na tabela master ajustando a propriedade MasterFields. Em tempo de execução cada vez que o registro atual na tabela master for alterado, o novo valor nos campos serão usados para selecionar os registros correspondentes nesta tabela para exibição.
+
+: **TMDOTable.ReadOnly: Boolean**
+Especifica se uma tabela é somente leitura para a aplicação. Utilize para prevenir que usuários de atualização, inserções, ou exclusões de dados na tabela. Por padrão, ReadOnly é False, o que significa que usuários podem alterar os dados da tabela.
+
+Obs: Sempre que ReadOnly estiver False, usuários talvez possam não estar habilitados para modificar ou adicionar dados à uma tabela. Outro fator, assim como privilégios insuficientes para a aplicação ou seu usuário corrente possam ser prevenidos de alterações com sucesso.
+
+Para garantir que usuários não possam modificar ou adicionar dados à tabela:
+  1. Ajuste a propriedade Active para False;
+  2. Ajuste ReadOnly para True;
+  
+: **TMDOTable.StoreDefs: Boolean**
+
+Indica se o campo da tabela e definição de índices persistem com o datamodule ou form.
+Se StoreDefs for True, o índice da tabela e a definição de campo são guardados com o datamodule ou form.
+
+Ajustando StoredDefs para True fará com que o método CreateTable dentro de uma procedure o qual criará os campos, índices, e validação em tempo de execução.
+
+StoredDefs por padrão é False. Torna-se verdadeiro sempre que FieldDefs ou IndexDefs é atualizado ou editado manualmente; para prevenir de definições editadas (ou importadas) de serem armazenadas, reajuste StoredDefs para False.
+
+: **TMDOTable.TableTypes: TMDOTableTypes**
+Ajusta os tipos de relação exibidos na lista drop-down de nome de tabelas.
+
+```
+type 
+  TMDOTableType = (ttSystem, ttView);
+  TMDOTableTypes = set of TMDOTableType;
+```
+
+Utilize para alterar quais os tipos de relação são exibidos na lista de tabelas. Os tipos são:
+  - ttSystem: Tabelas de sistema e views
+  - ttView: Views do usuário
+  
+: **TMDOTable.TableName: String**
+Indica o nome da tabela ou view que este componente encapsula.
+
+Para ajustar TableName para um valor significativo, a propriedade Database já deve estar ajustada. Se Database for ajustado em tempo de projeto, então selecione um nome de tabela válido a partir da lista drop-down de nome de tabelas no Object Inspector.
+
+Obs: Para ajustar TableName, a propriedade Active deve ser False.
+
+: **TMDOTable.TableNames: TStrings**
+Retorna uma lista de nome de tabelas. É uma propriedade interna usada para mostrar uma lista de tabelas e views em uma base de dados.
+
+: **TMDOTable.UniDirectional: Boolean**
+Determina se o cursor bidirecional deve estar habilitado ou não para uma tabela.
+
+: **TMDOTable.UpdateObject: TMDODataSetUpdateObject**
+Especifica o objeto TUpdateObject, componente usado para atualizar um result set read-only quando cached updates estiver habilitado.
+
+Em uma query que trabalha com várias tabelas, o result set não pode ser retornado. Neste caso, UpdateObject pode ser usado para especificar um TMDOUpdateSQL que fará atualizações em transações separadas que é transparente para a aplicação.
+
+
+=== Eventos ===
+
+
+: **TMDOTable.AfterDatabaseDisconnect: TNotifyEvent**
+Ocorre depois que uma base de dados é desconectada.
+
+: **TMDOTable.BeforeDatabaseDisconnect: TNotifyEvent**
+Ocorre antes que uma base de dados é desconectada.
+
+: **TMDOTable.DatabaseFree: TNotifyEvent**
+Ocorre depois que uma base de dados é liberada da memória.
+
+: **TMDOTable.AfterTransactionEnd: TNotifyEvent**
+Ocorre depois que uma transação é finalizada.
+
+: **TMDOTable.BeforeTransactionEnd: TNotifyEvent**
+Ocorre antes de uma transação ser finalizada.
+
+: **TMDOTable.TransactionFree: TNotifyEvent**
+Ocorre depois que uma transação foi liberada da memória.
+
+
+=== Métodos ===
+
+
+: **TMDOTable.AddIndex(const Name, Fields: string; Options: TIndexOptions const DescFields: string = ' ')**
+Procedure que cria um índice novo para a tabela.
+
+Chame AddIndex para criar um novo índice de uma tabela associada com um dataset. O indice criado com esta procedure é adicionada à base de dados. 
+ - Name é o nome do novo índice. 
+ - Fields é uma lista separada por ponto e vígula de campos para incluir no índice;
+ - Options é uma restrição de atributos do índice. Ele pode especificar um índice:
+   - Representa o íncice primário (ixPrimary)
+   - Contém valores não duplicados (ixUnique)
+   - Ordena registros na ordem descendente (isDescending).
+
+
+Aviso: Tentar criar um índice usando opções que não são aplicáveis à tabela levantará uma exceção.
+
+: **TMDOTable.Create(AOwner: TComponent)**
+Cria uma instancia de um componente Table.
+
+Chame Create para instanciar uma tabela declarada em um aplicativo, se ele não foi declarado no form em tempo de projeto. Create chama seu construtor herdado, cria uma lista de definição de índices limpo, cria um link de dados limpo, e cria uma lista de arquivos de índice limpo.
+
+: **TMDOTable.CreateTable**
+Constrói uma nova tabela usando a nova informação de estrutura. Chame em tempo de execução para criar uma tabela usando as definições correntes de dataset. CreateTable sobrescreve uma estrutura de tabela e dados existentes; para evitar a sobrescrita em uma tabela existente, verifique pelo método Exists antes de chamar CreateTable;
+
+Se a propriedade FieldDefs contém valores, estes valores serão usados para criar a definição dos campos. De outra maneira a propriedade Fields será usada. Uma ou ambas propriedades devem conter valores a fim de recriar um dataset.
+
+Se a propriedade IndexDefs contiver valores, estes serão usados para criar a definição dos índices para o dataset.
+
+: **TMDOTable.DeleteIndex(const Name: string)**
+Apaga um índice de uma tabela. Name é o nome do índice a ser excluído. DeleteIndex não pode remover um índice usado por uma restrição (do inglês constraint).
+
+: **TMDOTable.DeleteTable**
+Apaga uma tabela existente. A tabela deve ser fechada antes que possa ser apagada. 
+
+Aviso: Apagando uma tabela apagará todos os dados da tabela e destruirá a informação de estrutura da tabela.
+
+: **TMDOTable.Destroy**
+Destrói a instancia de uma tabela. 
+
+Não chame Destroy diretamente. Ao invés disto chame o método Free que verificará se a tabela já não está sendo liberada antes de chamar Destroy. Destroy libera os arquivos de índice, libera seu link de dados, libera suas definições de índices, e então chama seu método destrutor Destroy.
+
+: **TMDOTable.EmptyTable**
+Apaga todos registros da tabela. 
+
+Obs: Exclusão de registros pode falhar se o usuário não tiver privilégios suficientes para aplicar a operação de delete.
+
+: **TMDOTable.GetDetailLinkFields(MasterFields, DetailFields: TList)**
+Lista os campos dos componetes que ligam este datase como um detalhe de um dataset master.
+
+GetDetailLinkFields preenche duas lista de TFields que definem uma relação master-detail entre esta tabela e outro dataset (master). A lista MasterFields é preenchida com campos da tabela master onde os valores devem ser iguais aos valores dos campos em uma lista DetailFields. A lista DetailFields é preenchida com campos do dataset chamado.
+
+: **TMDOTable.GetIndexNames(List: TStrings)**
+Recupera uma lista de indeces disponíveis de uma tabela.
+
+List é um objeto de lista de string, criado e mantido pela aplicação, dentro do qual recupera-se os nomes dos índices.
+
+: **TMDOTable.GotoCurrent(Table: TMDOTable)**
+Sincroniza o registro atual para esta tabela com o registro atual de um componente table especificado.
+
+Chame o método para sincronizar a posição do cursor desta tabela baseado na posição do cursor em outro dataset que usa um componente data source diferente, mas o qual é conectado à mesma tabela da base de dados. Table é o nome de um componente Table do qual a posição do cursor é usado para sincronização.
+
+Obs: Este procedimento trabalha somente para componentes table que tenham o mesmo valor nas propriedades Database e Tablename. De outra forma uma exceção será levantada.
+
+GotoCurrent é principalmente utilizado em aplicativos que tenham dois componentes table que são ligados à mesma tabela através de componentes data source diferentes. Isto possibilita ao aplicativo ter certeza que visões separadas dos dados parecem estar ligadas.
+

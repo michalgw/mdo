@@ -1,0 +1,23 @@
+
+== TMDOCustomSQLMonitor ==
+**Unit MDOSQLMonitor**
+
+TMDOCustomSQLMonitor é um objeto ancestral do qual TMDOSQLMonitor e TMDOSQLMonitorHook são derivados.
+
+=== Métodos ===
+
+: **TMDOCustomSQLMonitor.Create(AOwner: TComponent)**
+Cria uma instancia do TMDOCustomSQLMonitor. 
+
+Também cria:
+
+  - Cria a janela
+  - Registra o evento
+  - Dispara a execução do Monitor
+  
+: **TMDOCustomSQLMonitor.Destroy**
+Destrói a instancia de TMDOCustomSQLMonitor.
+
+Não chame Destroy diretamente de um aplicativo. Ao invés disto, um aplicativo deve chamar Free. Free verifica os serviços do objeto que ainda não foram liberados antes de chamar Destroy. 
+
+Destroy desregistra o evento, detrói a janela, e mata a execução do Monitor.

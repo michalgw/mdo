@@ -1,0 +1,32 @@
+
+== TMDOSQLMonitor ==
+**Unit MDOSQLMonitor**
+TMDOSQLMonitor monitora SQL dinamico passado ao servidor firebird. Utilizado para monitorar SQL dinamicos que ocorrem em aplicações Firebird. Habilite TraceFlags em cada componente TMDODatabase a fim  de fazer com que receba informações sobre o status de cada conexão.
+
+
+=== Propriedades ===
+
+: **TMDOSQLMonitor.TraceFlags: TTraceFlags**
+Esta é uma propriedade interna usada pelo componente TMDODatabase.
+
+```
+type
+  TTraceFlag = (tfQPrepare, tfQExecute, tfQFetch, tfError, tfStmt, tfConnect, tfTransact, tfBlob, tfService, tfMisc);
+  TTraceFlags = set of TTraceFlag;
+```
+
+Utilize TraceFlags para especificar quais operações do database o SQL Monitor deve traçar na aplicação em tempo de execução. TraceFlags é útil somente para o SQL Monitor, o qual é provido para habilitar tuning de performance e debug SQL quando trabalha com servidores remotos.
+
+Obs: Normalmente as opções são ajustadas no SQL Monitor do que ajustada no código da aplicação.
+
+
+=== Eventos ===
+
+: **TMDOSQLMonitor.OnSQL: TSQLEvent**
+Informa atividade de SQL dinamico em aplicativos Firebird.
+
+``type TSQLEvent = procedure (EventText: string) of object;``
+
+Escreva um evento OnSQL para informar atividades SQL dinamicas em aplicativos Firebird. OnSQL é um evento do tipo TSQLEvent, e informa a atividade SQL através do EventTxt. 
+
+Você precisa habilitar o TraceFlags em cada TMDODatabase a fim de que o SQL Monitor receba informação de status de cada conexão.

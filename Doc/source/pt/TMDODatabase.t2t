@@ -1,0 +1,249 @@
+
+
+== TMDODatabase ==
+**Unit MDODatabase**
+
+TMDODatabase encapsula uma conexão com uma base de dados Firebird. Todos objetos descendentes de TMDOCustomDataSet e TMDOSQL usam TMDODatabase para obter acesso à base de dados.
+
+=== Propriedades ===
+: **TMDODatabase.AllowStreamedConnected: Boolean**
+Indica se a propriedade Connected pode ser ajustada em tempo de projeto.
+
+Quando AllowStreamedConnected está True (por padrão), então ajustando a propriedade Connected para True em tempo de projeto fará com que este componente automaticamente estabeleça conexão com o banco de dados quando a aplicação for inicializada. Quando AllowStreamedConnected está False, a conexão deve ser explicitamente aberta em tempo de execução, ajustando a propriedade Connected para True, ou chamando o método Open.
+
+: **TMDODatabase.ClientLib: TMDOClientLib**
+Indica a biblioteca cliente a ser utilizada para as chamadas à API do Firebird.
+
+Existem quatro opções para carga da biblioteca Firebird que pode ser configurada em tempo de projeto ou ajustada em tempo de execução.
+
+``` 
+  TMDOClientLib = (clAutoDetect, clGDS32, clFBClient, clFBEmbed);
+```
+
+|| Opção | Descrição |
+| clAutoDetect | Opção default. Determina automaticamente qual biblioteca deverá ser utilizada na seguinte ordem: Embedded, FBClient, GDS32|
+| clGDS32 | Indica que deverá ser carregado a biblioteca GDS32 |
+| clFBClient | Indica que deverá ser carregado a biblioteca FBClient |
+| clFBEmbed | Indica que deverá ser carregado a biblioteca FBEmbed |
+
+
+: **TMDODatabase.Connected: Boolean**
+Indica se uma conexão está ativa. Ajustando a propriedade para True estabelecerá a conexão com a base de dados, sem abrir qualquer dataset. Ajustando para False, irá fechar a conexão com a base de dados. Uma aplicação pode verificar a propriedade Connected para determinar a situação atual da conexão com a base de dados. Se Connected é True, a conexão com a base de dados está ativa, caso contrário, se False, então a conexão está inativa.
+
+: **TMDODatabase.DatabaseName: String**
+Especifica o nome da base de dados à associar com este componente database. Para bases locais, poderá ser informado apenas o nome do arquivo.
+ - Para conectar-se à uma base em um servidor remoto usando TCP/IP a sintaxe será <server_name>:<filename>;
+ - Para conectar-se à uma base em um servidor remoto usando NetBEUI a sintaxe será \\<server_name>\<filename>;
+ - Para conectar-se à uma base em um servidor remoto usando SPX a sintaxe será <server_name>@<filename>; 
+
+
+: **TMDODatabase.DBParamByDPB:@CA@const Idx: Integer@CF@: String**
+Especifica o nome da base de dados à associar com este componente. Usado para inspecionar e ajustar os parametros DPB sem olhar na lista de parametros em Params. Por exemplo, DBParamByDPB@CA@isc_dpb_user_name@CF@ poderá ser usado para ajustar e inspecionar o nome de usuário.
+
+
+: **TMDODatabase.DBSQLDialect: Integer**
+Retorna o dialeto do banco.
+
+: **TMDODatabase.DefaultTransaction: TMDOTransaction**
+Ajusta ou retorna o objeto de transação padrão. 
+
+Uma única conexão pode gerenciar uma ou mais transações. DefaultTransaction é uma forma conveniente de especificar a transação padrão à uma conexão.
+
+: **TMDODatabase.Handle: TISC_DB_Handle**
+Especifica o hanle da base da API Firebird, o qual é usado para fazer chamadas diretas à API do Firebird. Muitas das funções da API Firebird requerem um handle da base como um de seus argumentos. Ao Handle é atribuído um valor incial quando a base é aberta.
+
+: **TMDODatabase.HandleIsShared: Boolean**
+Indica se o handle da base está compartilhado. 
+
+: **TMDODatabase.IdleTimer: Integer**
+Especifica quanto tempo a base de dados deve esperar antes de desconectar se estiver com uma conexão ociosa.
+
+: **TMDODatabase.InternalTransaction: TMDOTransaction**
+Usado internamente por transações Firebird. Não utilize InternalTransaction, pois é para uso interno.
+
+: **TMDODatabase.IsReadOnly: Boolean**
+Indica se uma base de dados é somente-leitura.
+
+: **TMDODatabase.Params: TStrings**
+Especifica os parametros da base de dados a serem passados ao servidor Firebird. 
+
+Parametros de base de dados são passados ao servidor como texto a fim de estabelecer a conexão. Por exemplo
+
+```
+    user_name=sysdba
+    password=masterkey
+    sql_role_name=finance
+    lc_ctype=WIN1252
+```
+
+Para maiores informações sobre character set, veja o documento //Firebird Language Reference na// seção //Character Sets and Collation Orders//.
+
+Para outras informações, veja o documento //Firebird API Guide//.
+
+
+: **TMDODatabase.SQLDialect: Integer**
+Retorna ou ajusta o dialeto usado pelo cliente.
+
+Se a conexão estiver ativa, a propriedade SQLDialect não poderá ter um valor maior que o dialeto da base de dados. Se a conexão estiver inativa, então na conexão um evento OnDialectDowngradeWarning poderá ser disparado se o SQLDialect for maior que o dialeto do banco. Neste caso, a propriedade SQLDialect terá seu valor abaixado até o equivalente ao dialeto do banco.
+
+: **TMDODatabase.SQLObjectCount: Integer**
+Retorna o número de objetos SQL no database. Objetos SQL são normalmente definidos como datasets Firebird, MDOSQL, e Blobs.
+
+
+: **TMDODatabase.SQLObjects@CA@Index: Integer@CF@: TMDOBase**
+Retorna um objeto sQL baseado no número Index. Objetos SQL são normalmente definidos como datasets Firebird, MDOSQL, e Blobs.
+
+: **TMDODatabase.TraceFlags: TTraceFlags**
+Especifica as operações da base de dados que serão monitoradas em tempo de execução com um SQL Monitor.
+
+```
+type
+  TTraceFlag = (tfQPrepare, tfQExecute, tfQFetch, tfError, tfStmt, 
+                tfConnect, tfTransact, tfBlob, tfService, tfMisc);
+  TTraceFlags = set of TTraceFlag;
+```
+
+Utilize a propriedade TraceFlags para especificar as operações que o SQL Monitor deverá trilhar na aplicação durante sua execução em um banco de dados. TraceFlags é útil somente para monitoramento SQL, o qual é provido para habilitar tuning de performance e debug de SQL quando trabalha com servidores remotos.
+
+Obs: Normalmente as opções de trace são ajustadas no SQL Monitor do que no TraceFlags do código da aplicação. 
+
+O valor da propriedade TraceFlags de um componente de sessão determinam os ajustes iniciais da propriedade TraceFlags para componentes database associados com a sessão.
+
+O tipo TTraceFlags define os valores individuais que podem ser incluídos na propriedade TraceFlags. A tabela a seguir resume estes valores:
+
+|| Opção      | Descrição |
+|  tfQPrepare | Monitora declarações Prepare |
+|  tfQExecute | Monitora declarações ExecSQL |
+|  tfQFetch   | Monitora declarações Fetch   |
+|  tfError    | Monitora mensagens de erro do servidor. Tais mensagens podem incluir o código do erro |
+|  tfStmt     | Monitora todas declarações SQL |
+|  tfConnect  | Monitora operações de conexão e desconexão da base de dados, incluíndo alocação de handles de conexão, e liberação de handles de conexão |
+|  tfTransact | Monitora declarações de transação, tais como StartTransaction, Commit, e Rollback |
+|  tfBlob     | Monitora operações em cima de tipo de dados Blob |
+|  tfService  | Monitora serviços |
+|  tfMisc     | Monitora qualquer declaração tratada por outras opções de flag |
+
+Já que TraceFlags é uma propriedade de conjuntos, uma aplicação pode especificar diferentes combinações de flags para monitorar diferentes preparações de declarações:
+
+``TraceFlags := @CA@tfConnect, tfQPrepare@CF@;``
+
+
+: **TMDODatabase.TransactionCount: Integer**
+Retorna o número de transações associadas com um componente TMDODatabase.
+
+: **TMDODatabase.Transactions@CA@Index: Integer@CF@: TMDOTransaction**
+Especifica uma transação para o Index passado. Passando um valor inteiro, Transactions irá devolver a transação neste índice. Isto é usado internamente para trasmissão de mensagens importantes para componentes anexados.
+
+
+=== Eventos ===
+
+: **TMDODatabase.OnDialectDowngradeWarning: TNotifyEvent**
+Ocorre após diminuir o dialeto da conexão cliente. Escreva neste evento para fazer uma ação específica quando o dialeto for diminuído. Por exemplo, se o dialeto de sua aplicação é 3 e então uma conexão é feita com dialeto 1, então o dialeto é diminuído para 1 e o evento OnDialectDowngradeWarning é disparado.
+
+: **TMDODatabase.OnIdleTimer: TNotifyEvent**
+Ocorre após um time out da conexão.
+
+
+: **TMDODatabase.OnLogin: TMDODatabaseLoginEvent**
+Ocorre quando uma aplicação conecta-se à base de dados.
+
+``TMDODatabaseLoginEvent = procedure(Database: TMDODatabase; LoginParams: TStrings) of object;``
+
+Usado para aplicar ações específicas quando uma aplicação tenta conectar-se à base de dados. Por padrão, um login é requeirido. O USER_NAME atual é lido a partir da propriedade Params, e uma caixa de login padrão é aberta. A janela de login solicita um nome de usuário e senha, e então usa os valores inseridos pelo usuário para ajustar o valores USER_NAME e PASSWORD da propriedade Params. Estes valores são então passados ao servidor.
+
+Aplicações que forneçam manipuladores do evento OnLogin alternativos devem ajustar os valores USER_NAME e PASSWORD no LoginParams. LoginParams é uma lista de string temporária e liberada automaticamente quando não mais necessária.
+
+
+=== Métodos ===
+
+: **TMDODatabase.AddTransaction(TR: TMDOTransaction): Integer**
+Adiciona uma associação entre o componente transaction e um componente database.
+
+: **TMDODatabase.ApplyUpdates(const DataSets: array of TDataSet)**
+Aplica as pendencias do cached updates no servidor para um dataset específico.
+
+ApplyUpdates somente será útil se a propriedade CachedUpdates do dataset estiver True.
+
+DataSets é uma lista de dataset que possuem pendencias de atualização. DataSets não precisa listar todos os dataset atualmente abertos. Para cada dataset listado ApplyUpdates chamará os métodos ApplyUpdates e CommitUpdates do dataset para aplicar as pendencias de atualizações deste dataset.
+
+: **TMDODatabase.Call(ErrCode: ISC_STATUS; RaiseError: Boolean): ISC_STATUS**
+Retorna uma mensagem de erro baseado no código de erro. Call é um método interno usado para fazer chamdas à API do Firebird, e oferece a opção de levantar uma exceção ou retornar um erro baseado no valor do RaiseError.
+
+: **TMDODatabase.CheckActive**
+Verifica se a conexão com a base de dados está ativa. Se estiver inativa retornará um erro.
+
+: **TMDODatabase.CheckDatabaseName**
+Verifica se o nome da base de dados está limpo, propriedade DatabaseName. Se estiver vazia retornará um erro.
+
+: **TMDODatabase.CheckInactive**
+Verifica se uma conexão com a base de dados está inativa. Se estiver ativa retornará um erro.
+
+: **TMDODatabase.CloseDataSets**
+Fecha todos os datasets associados ao componente database sem disconectar do servidor.
+
+Normalmente, quando uma aplicação chama Close, todos os datasets são fechados, e a conexão com o servidor é desfeita. Chamando CloseDataSets assegura que um aplicativo pode fechar todos os datasets ativos sem ter que reconectar-se à base de dados.
+
+
+: **TMDODatabase.Create(AOwner: TComponent)**
+Cria uma instancia de um componente TMDODatabase em tempo de execução. Um aplicativo pode criar um componente database a fim de controlar a existencia do componente e ajustar suas propriedades e eventos.
+
+O construtor Create instancia um componente database e cria umalista vazia de componentes dataset para a propriedade DataSets e uma lista de string vazia para a propriedade Params.
+
+: **TMDODatabase.CreateDatabase**
+Cria uma base de dados usando a propriedade Params como o restante do comando CREATE DATABASE.
+
+Por exemplo, se você desejar criar uma base de dados Firebird local, você pode fazer o seguinte:
+
+```
+  1. Ajuste o nome do database para drive, caminho, e nome do arquivo database.
+  2. Ajuste Params para parametrizar  a declaração CREATE DATABASE:
+     - USER "SYSDBA"
+     - PASSWORD "masterkey"
+     - PAGE_SIZE 4096
+  3. Ajuste o valor do SQLDialect.
+  4. Chame o método CreateDatabase.
+```
+
+: **TMDODatabase.Destroy**
+Destrói a instancia do componente database.
+
+Não chame o método Destroy diretamente pela aplicação. Ao invés disto, chame Free, o qual verificará se o componente database já não foi liberado antes de chamar Destroy.
+
+Destroy disconectará do servidor, se necessário. Libera então os recursos de string alocados das propriedades Params e DataSets antes de chamar seu destrutor herdado.
+
+: **TMDODatabase.DropDatabase**
+Elimina uma base de dados, o qual removerá o arquivo da base de dados do servidor.
+
+: **TMDODatabase.FindTransaction(TR: TMDOTransaction): Integer**
+Encontra o índice da transação especificada.
+
+: **TMDODatabase.ForceClose**
+Força o fechamento da conexão com a base de dados. 
+
+Obs: Forçando a desconexão da base de dados tentará fechar a conexão com o servidor. Mesmo se a chamada falhar, o handle do database receberá nil.
+
+: **TMDODatabase.GetFieldNames(const TableName: string; List: TStrings)**
+Popula uma lista com os nomes dos campos em uma tabela. Chamando GetFieldNames você receberá uma lista dos campos da tabela associada.
+
+: **TMDODatabase.GetTableNames(List: TStrings; SystemTables: Boolean = False)**
+Popula uma lista de string com os nomes das tabelas na base de dados.
+
+ - List é um parametro objeto de lista de string já existente onde os nomes das tabelas são colocados.
+ - SystemTables indica se a lista de nome de tabelas deverá incluir as tabelas de sistema.
+ 
+Obs: Qualquer conteúdo existente no objeto de lista de string serão eliminados e sobrescritos pelos valores produzidos por GetTableNames.
+
+: **TMDODatabase.IndexOfDBConst(st: String): Integer**
+Busca pelo parametro nomeado na lista de parametros do database. Utilizado para localizar um parametro dentro dos parametros do database. Retorna -1 se o parametro não for encontrado.
+
+: **TMDODatabase.RemoveTransaction(Idx: Integer)**
+Disassocia uma transação do database. 
+
+: **TMDODatabase.RemoveTransactions**
+Disassocia todas transações do database.
+
+: **TMDODatabase.SetHandle**
+Ajusta o handle para o database.
+
+: **TMDODatabase.TestConnected: Boolean**
+Testa se o database está conectado. Retorna True se a conexão está estabelecida, caso contrário False.

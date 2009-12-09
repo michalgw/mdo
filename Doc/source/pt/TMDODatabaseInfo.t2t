@@ -1,0 +1,145 @@
+
+== TMDODatabaseInfo ==
+**Unit MDODatabaseInfo**
+
+TMDODatabaseInfo retorna informações sobre o database anexado.
+
+Utilize TMDODatabaseInfo para retornar informações sobre o database, como versão da estrutura do disco online (ODS - Online Disk Structure) usado pelo banco, o número do cache buffer do banco alocado, o número de páginas do banco lida ou escrita, ou a informação do log write-ahread.
+
+
+=== Propriedades ===
+
+: **TMDODatabaseInfo.Allocation**
+Retorna o número de páginas alocadas pelo banco.
+
+
+: **TMDODatabaseInfo.BackoutCount: TStringList**
+Retorna o número de remoções de uma versão de um registro.
+
+Utilize BackoutCount para deterinar o número de vezes que uma versão de um registro foi removido.
+
+: **TMDODatabaseInfo.BaseLevel: Long**
+Retorna a versão do banco de dados.
+
+Utilize BaseLevel para retorna a versão do banco, o qual consiste de 1 byte contendo o número 1, e 1 byte contendo o número da versão.
+
+
+; **TMDODatabaseInfo.CurrentMemory: Long**
+Retorna a quantidade de memória (em bytes) atualmente em uso pelo servidor.
+
+: **TMDODatabaseInfo.Database: TMDODatabase**
+Ajusta ou retorna o database o qual terá informações retornadas.
+
+: **TMDODatabaseInfo.DBFileName: String**
+Retorna o nome do arquivo do banco.
+
+: **TMDODatabaseInfo.DBImplementationClass: Long**
+Retorna o número da classe de implementação do database, 1 ou 12.
+
+: **TMDODatabaseInfo.DBImplementationNo: Long**
+Retorna o número da implementação do database.
+
+: **TMDODatabaseInfo.DBSiteName: String**
+Retorna o nome do site do database.
+
+: **TMDODatabaseInfo.DBSQLDialect: Long**
+Retorna o dialeto SQL do database.
+
+: **TMDODatabaseInfo.DeleteCount: TStringList**
+Retorna o número de exclusões do banco desde que o banco foi anexado pela última vez.
+
+: **TMDODatabaseInfo.ExpungeCount: TStringList**
+Retorna o número de exclusões de um registro e todo seus antepassados para registros que tiveram a exclusão aplicada commit.
+
+: **TMDODatabaseInfo.Fetches: Long**
+Retorna o número de leituras ao cache buffer da memória.
+
+
+: **TMDODatabaseInfo.ForcedWrites: Long**
+Retorna o modo de escrita pelo qual o banco é executado.
+
+ForcedWrites retorna 0 para o modo assíncrono, ou 1 para modo síncrono.
+
+
+: **TMDODatabaseInfo.InsertCount: TStringList**
+Retorna o número de inserções dentro do banco desde que o banco foi anexado pela última vez.
+
+
+: **TMDODatabaseInfo.Marks: Long**
+Retorna o número de escrita ao cache buffer da memória.
+
+: **TMDODatabaseInfo.MaxMemory: Long**
+Retorna a quantidade máxima de memória usada de uma vez desde o primeiro processo anexado ao database.
+
+: **TMDODatabaseInfo.NoReserve: Long**
+Retorna se o espaço é reservado ou não em cada página do banco para prender as versões de backup de registros modificados.
+
+NoReserve retornará 0 indicando que o espaço está reservado (padrão) ou 1 para indicar que o espaço não está reservado.
+
+: **TMDODatabaseInfo.NumBuffers: Long**
+Retorna o número de memória alocada atualmente.
+
+: **TMDODatabaseInfo.ODSMajorVersion**
+Retorna a maior versão do ODS.
+
+Bancos com número de verões maiores diferentes tem layouts físicos diferentes.
+
+Um engine de banco pode acessar somentebancos com um número de versão ODS particular; tentar anexar à um banco com um número ODS diferente resultará em um erro.
+
+: **TMDODatabaseInfo.ODSMinorVersion: Long**
+Retorna a menor versão do ODS.
+
+Um incremento em um número menor de versão indica uma alteração não-estrutural, uma que permite ainda que o banco a ser acessado por databases com o mesmo número de versão maior mas possivelmente com número de versões menor diferentes.
+
+: **TMDODatabaseInfo.PageSize: Long**
+Retorna o número de bytes por página de um banco anexado. Utilize com Allocation para determinar o tamanho do banco.
+
+: **TMDODatabaseInfo.PurgeCount: TStringList**
+Retorna o número de remoções de registro do banco. Isto é, registros que foram afetados pelo commit, resultando em verões antigas não mais necessárias do banco.
+
+: **TMDODatabaseInfo.ReadIdxCount**
+Retorna o número de leituras terminadas via um índice desde que o banco foi anexado pela última vez.
+
+: **TMDODatabaseInfo.ReadOnly: Long**
+Indica se o banco é somente leitura.
+
+ReadOnly retornará 1 se o banco é read-write e 0 se for read-only.
+
+: **TMDODatabaseInfo.Reads**
+Retorna o número de páginas lidas de um banco desde que o banco atual foi anexado pela primeira vez, isto é, um conjunto de todas leitras concluídas pelo processo, mais que isto o número de leituras concluídas para o programa chamado desde que ele anexou ao banco.
+
+: **TMDODatabaseInfo.ReadSeqCount: TStringList**
+Retorna o número de leitura sequencial do banco concluído em cada tabela desde que o database foi anexado pela última vez.
+
+: **TMDODatabaseInfo.SweepInterval: Long**
+Retorna o número de transações que são aplicadas entre os 'sweeps' para remover versões do registro do banco que não são mais necessários.
+
+: **TMDODatabaseInfo.UpdateCount: StringList**
+Retorna o número de atualizações no banco desde que o banco foi anexado pela última vez.
+
+: **TMDODatabaseInfo.UserNames: TStringList**
+Retorna os nomes de todos usuários atualmente anexados ao banco.
+
+: **TMDODatabaseInfo.Version: String**
+Retorna a versão de execução do banco.
+
+: **TMDODatabaseInfo.Writes: Long**
+Retorna o número de páginas escritas ao banco atual desde que ele foi anexado pela primeira vez por qualquer processo; isto é, um conjunto de todas escritas concluídas por todos processos anexados, mais que isto o número de escritas concluídas pelo programa chamado desde que ele foi anexado ao banco.
+
+
+=== Métodos ===
+
+
+: **TMDODatabaseInfo.Call(ErrCode: ISC_STATUS; RaiseError: Boolean): ISC_STATUS**
+Retorna uma mensagem de erro baseada no código de erro.
+
+Call é um método interno usado para fazer chamadas à API Firebird, e dar-lhe opções de levantar exceção ou retornar um erro baseado no valor de RaiseError.
+
+: **TMDODatabaseInfo.Create(AOwner: TComponent)**
+Cria uma instancia de um componente DatabaseInfo.
+
+: **TMDODatabaseInfo.Destroy**
+Destrói uma instancia de um componente DatabaseInfo.
+
+Não chame Destroy diretamente. Ao invés disto chame Free para verificar se o componente já não foi liberado antes de chamar Destroy. Destroy disconecta do servidor, libera a lista de parametros, e chama seu destrutor herdado.
+

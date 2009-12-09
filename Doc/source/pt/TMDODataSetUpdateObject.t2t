@@ -1,0 +1,23 @@
+
+== TMDODataSetUpdateObject ==
+**Unit MDOCustomDataSet**
+
+TMDODataSetUpdateObject é a classe base abstrata  para objetos de update usados para atualizar querys "não atualizáveis" quando cached updates está habilitado.
+
+Utilize TMDODataSetUpdateObject como classe base quando criar objetos customizados que podem ser usado para atualizar datasets. TMDODataSetUpdateObject declara uma única propriedade e alguns métodos abstratos, mas não provê detalhes de implementação: isto deve ser provido pelos objetos descendentes.
+
+=== Propriedades === 
+
+: **TMDODataSetUpdateObject.RefreshSQL: TMDOSQL**
+Provê a abilidade de acessar diretamente o objeto SQL encapsulando a declaração RefreshSQL.
+
+
+=== Métodos ===
+
+: **TMDODataSetUpdateObject.Create(AOwner:TComponent)**
+Cria uma intancia de um componente TMDODataSetUpdateObject.
+
+: **TMDODataSetUpdateObject.Destroy**
+Libera todos os recursos associados com esta instancia.
+
+Não chame Destroy diretamente de um aplicativo. Normalmente destruição de objetos são tratados automaticamente pelo Delphi. Se um aplicativo cria sua própria instancia de um objeto de update, então, o aplicativo terá de chamar Free, o qual irá verificar se este objeto de update já não foi liberado antes de chamar Destroy.

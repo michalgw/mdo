@@ -1,0 +1,246 @@
+
+
+== TMDOTransaction ==
+**Unit MDOdatabase**
+
+TMDOTransaction fornece controle discreto sobre uma ou mais conexões ao banco de
+dados em um aplicativo.
+
+Todos descendentes de TMDOCustomDataSet e TMDOSQL precisam usar uma transação junto
+com um componente database para obter acesso aos dados em um banco de dados.
+
+Obs.: Em aplicações MIDAS, toda query deve estar em sua própria transação. Você deve
+usar um componente de transação para cada componente query.
+
+
+=== Propriedades ===
+
+: **TMDOTransaction.Active: Boolean**
+Especifica se uma transação está ou não ativa.
+
+: **TMDOTransaction.DatabaseCount: Integer**
+Indica o número de databases que estão envolvidos em uma transação.
+
+: **TMDOTransaction.Databases@CA@Index: Integer@CF@: TMDODatabase**
+Retorna o database a partir do valor de index.
+
+: **TMDOTransaction.DefaultAction: TTransactionAction**
+Especifica qual ação uma transação deve tomar em um time out.
+
+```
+    type TTransactionAction = (taRollback, taCommit, 
+         taRollbackRetaining, taCommitRetaining);
+```
+  
+Utilize DefaultAction para indicar a ação que a transação tomara quando o limite de
+IdleTimer é alcançado. A ação da transação pode ser uma das seguintes:
+
+|| Opção              | Descrição |
+| taRollback          | Aplica rollback na transação |
+| taCommit            | Aplica commit na transação |
+| taRollbackRetaining | Aplica rollback na transação, porém retém o contexto atual da transação |
+| taCommitRetaining   | Aplica commit na transação, porém retém o contexto atual da transação |
+
+: **TMDOTransaction.DefaultDatabase: TMDODatabase**
+Ajusta ou retorna o database padrão da transação.
+
+
+: **TMDOTransaction.Handle: TISC_TR_HANDLE**
+Retorna o handle da transação.
+
+Utilize Handle para recuperar o manipulador (handle) da transação. Handle tem um
+valor inicial atribuído  quando uma transação é iniciada.
+
+
+: **TMDOTransaction.HandleIsShared: Booelan**
+Indica se o handle é compartilhado ou não.
+
+HandleIsShared retornará True quando o handle da transação é compartilhado por mais
+de um componente de transação.
+
+
+: **TMDOTransaction.IdleTimer: Integer**
+Especifica quanto tempo a transação deve esperar antes de automaticamente aplicar
+commit ou rollback.
+
+Utilize DefaultAction para determinar a ação que a transação deve tomar.
+
+: **TMDOTransaction.InTransaction: Boolean**
+Indica se uma transação do banco de dados está em progresso ou não.
+
+Verifique InTransaction em tempo de execução para determinar se uma transação de
+banco de dados está atualmente em progresso. 
+
+InTransaction será True se uma transação está em progresso, False caso contrário.
+
+O valor de InTransaction não pode ser alterado diretamente. Chamando
+StartTransaction ajusta InTransaction para True. Chamando Commit ou Rollback ajusta
+InTransaction para False.
+
+: **TMDOTransaction.Params: TStrings**
+Retorna o buffer de parametros da transação associado com o componente de transação.
+
+Dica: Referencie-se ao Firebird API Guide para conhecer os nomes de parametos
+fornecidos.
+
+
+: **TMDOTransaction.SQLObjectCount: Integer**
+Retorna o número de datasets ativos associado com o componente database.
+
+Utilize SQLObjectCount para retornar o número de datasets ativos, objetos TMDOSQL e
+Blobs associados com o componente database. Como objetos SQL são abertos e fechados,
+este valor muda apropriadamente.
+
+: **TMDOTransaction.SQLObjects@CA@Index: Integer@CF@: TMDOBase**
+Fornece um array indexado de todos datasets ativos do componente database.
+
+: **TMDOTransaction.TPB: PChar**
+Fornece uma visualização somente leitura do buffer de parametro da transação.
+
+Para escrever no buffer de parametros da transação, utilize a propriedade Params.
+
+: **TMDOTransaction.TPBLength: Short**
+Retorna o tamanho do buffer de parametros da transação.
+
+
+
+=== Eventos ===
+
+
+: **TMDOTransaction.OnIdleTimer: TNotifyEvent**
+Ocorre depois que uma transação alcançar o time out.
+
+Escreva para o evento OnIdleTimer para tomar ações específicas depois que uma
+transação é marcada para permanecer inativa pelo número de segundos especificados em
+IdleTimer.
+
+
+=== Métodos ===
+
+
+: **TMDOTransaction.AddDatabase(db: TMDODatabase): Integer**
+Associa um database à transação.
+
+
+: **TMDOTransaction.Call(ErrCode: ISC_STATUS; RaiseError: Boolean): ISC_STATUS**
+Retorna uma mensagem de erro baseado no código de erro.
+
+Call é um método interno usado par afazer chamadas à API do Firebird, e dar-lhe as
+opções de levantar exceções ou retornar um erro baseado no valor de RaiseError.
+
+
+: **TMDOTransaction.CheckDatabasesInList**
+Verifica por databases na lista.
+
+Chame CheckDatabasesInList para verificar se há algum database na lista. Se não
+existir databases na lista, uma exceção é levantada.
+
+
+: **TMDOTransaction.CheckInTransaction**
+Verifica se a transação está ativa e se há algum database na lista de database da
+transação.
+
+Se alguma condição for falsa, uma exceção é levantada.
+
+
+: **TMDOTransaction.CheckNotInTransaction**
+Verifica se a transação não está ativa e se não há datatabases na lista de database
+da transação.
+
+Se alguma condição for falsa, uma exceção é levantada.
+
+
+: **TMDOTransaction.Commit**
+Guarda permanentemente as alterações, inserções e exclusões de dados associado com a
+transação corrente, e finaliza as transações correntes.
+
+A transação corrente é a última transação iniciada pela chamada de StartTransaction.
+
+Obs.: Antes de chamar Commit, um aplicativo deve verificar o status da propriedade
+InTransaction. Se um aplicativo chama Commit e não há transação corrente, uma
+exceção é levantada.
+
+
+: **TMDOTransaction.CommitRetaining**
+Aplica Commit na transação ativa e retém o contexto da transação depois do commit.
+
+Chame CommitRetaining para guardar permanentemente no servidor todas atualizações,
+inserções e exclusões de dados associado com a transação corrente e então reter o
+contexto da transação. A transação corrente é a última transação iniciada  chamando
+StartTransaction.
+
+Obs.: Antes de chamar CommitRetaining, um aplicativo deve verificar o status da
+propriedade InTransaction. Se um aplicativo chama CommitRetaining e não há transação
+corrente, uma exceção é levantada.
+
+
+: **TMDOTransaction.Create(AOwner: TComponent)**
+Cria uma instancia do componente de transação.
+
+Chame Create para instanciar um componente de transação em tempo de execução. Um
+aplicativo cria um componente de transação a fim de controlar a existencia do
+componente e ajustar suas propriedades e eventos.
+
+Create instanciará um componente de transação e criará uma lista de string limpa
+para a propriedade Params.
+
+
+: **TMDOTransaction.Destroy**
+Destrói a instancia do componente de transação.
+
+Não chame Destroy diretamente em um aplicativo. Ao invés disto, chame Free, o qual
+verificará se o componente de transação já não foi liberado antes de chamar
+Destroy.
+
+Destroy disconecta do servidor do banco de dados, se necessário. Ele então libera os
+recursos alocados para as propriedades Params e SQLObjects antes de chamar seu
+destrutor herdado.
+
+
+: **TMDOTransaction.FindDatabase(db: TMDODatabase): Integer**
+Encontra o índice do database associado.
+
+
+: **TMDOTransaction.RemoveDatabase(Idx: Integer)**
+Desassocia um database da transação.
+
+
+: **TMDOTransaction.RemoveDatabases**
+Desassocia todos os database da transação.
+
+
+: **TMDOTransaction.Rollback**
+Cancela todas atualizações, inserções e exclusões para a transação corrente e
+finaliza a transação.
+
+A transação corrente  é a última transação iniciada chamando StarTransaction. 
+
+Obs.: Antes de chamar Rollback, um aplicativo deve verificar o status da propriedade
+InTransaction. Se um aplicativo chama Rollback e não há transação corrente, uma
+exceção é levantada.
+
+: **TMDOTransaction.RollbackRetaining**
+Cancela todas atualizações, inserções e exclusões para a transação corrente e retém
+o contexto da transação.
+
+A transação corrente  é a última transação iniciada chamando StarTransaction. 
+
+
+Obs.: Antes de chamar RollbackRetaining, um aplicativo deve verificar o status da
+propriedade InTransaction. Se um aplicativo chama RollbackRetaining e não há
+transação corrente, uma exceção é levantada.
+
+
+: **TMDOTransaction.StartTransaction**
+Inicia uma nova transação no servidor de banco de dados.
+
+Chame StartTransaction para iniciar uma nova transação no servidor de banco de
+dados. Antes de chamar StartTransaction, um aplicativo precisa verificar o status da
+propriedade InTransaction. Se InTranscation é True, indica que uma transação já está
+em progresso, uma chamada subsequente ao StartTransaction sem chamar um Commit ou
+Rollback antes para finalizar a transação corrente levantará uma exceção.
+
+Atualizações, inserções e exclusões que ocorrem depois que uma chamada à
+StartTransaction são mantidas pelo servidor até que o aplicativo chame Commit para
+salvar as alterações ou Rollback para cancela-las.
+

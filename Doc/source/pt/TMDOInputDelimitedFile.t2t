@@ -1,0 +1,38 @@
+
+== TMDOInputDelimitedFile ==
+**Unit MDOBatch**
+
+TMDOInputDelimitedFile processa a entrada de dados em batch de arquivos delimitados. 
+
+
+=== Propriedades ===
+
+: **TMDOInputDelimitedFile.ColDelimiter: String**
+Ajusta a coluna delimitadora para o arquivo de entrada.
+
+: **TMDOInputDelimitedFile.ReadBlanksAsNull: Boolean**
+Ajustado para True, lê espaços brancos no arquivo de entrada como caracter nulo.
+
+: **TMDOInputDelimitedFile.RowDelimiter: String**
+Ajusta a linha delimitadora para a entrada de dados.
+
+: **TMDOInputDelimitedFile.SkipTitles: Boolean**
+Ajustado para True, despresa o primeiro registro de um arquivo delimitado. Campos de título não são úteis em arquivos de entrada em grupo, e esta propriedade permite à você despresar isto.
+
+
+=== Métodos ===
+
+: **TMDOInputDelimitedFile.Destroy**
+Destrói a instancia do TMDOInputDelimitedFile.
+
+Não chame Destroy diretamente em uma aplicação. Ao invés disto chame Free. Free verificará se o objeto já não foi liberado antes de chamar Destroy.
+
+: **TMDOInputDelimitedFile.GetColumn(var Col: String): Integer**
+Retorna o conteúdo de uma coluna XSQLDA.
+
+: **TMDOInputDelimitedFile.ReadParameters: Boolean**
+Lê os parametros de entrada do XSQLDA.
+
+: **TMDOInputDelimitedFile.ReadyFile**
+Prepara a entrada para o XSQLDA.
+

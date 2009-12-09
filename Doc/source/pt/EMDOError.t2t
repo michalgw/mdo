@@ -1,0 +1,25 @@
+
+== EMDOError ==
+**Unit MDO**
+
+Classe para erros de exceção Firebird. Utilizado para levantar exceções quando um componente detecta um erro no database ou na implementação do componente.
+
+=== Propriedades ===
+: **EMDOError.MDOErrorCode: Long**
+Retorna o código do erro Firebird.
+
+: **EMDOError.SQLCode: Long**
+Traduz um código de erro Firebird do Status Vector para um código de erro SQL.
+
+Tipicamente, esta chamada é usada para preencher uma variável com um número de erro SQL para uso em uma rotina de tratamento de erros.
+
+
+=== Métodos ===
+
+
+: **EMDOError.Create(ASQLCode: Long; Msg: string)**
+Chama o construtor herdado e ajusta SQLCode e MDOErrorCode.
+
+: **Create(ASQLCode: Long; AMDOErrorCode: Long; Msg: string)**
+Chama o construtor herdado e ajusta SQLCode e MDOErrorCode.
+

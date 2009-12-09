@@ -1,0 +1,241 @@
+
+== TMDOCustomDataSet ==
+**Unit MDOCustomDataSet**
+
+Encapsula funcionalidades do MDO para objetos dataset descendentes.
+
+Aplicações nunca usam objetos TMDOCustomDataSet diretamente. De outra maneira, eles usam descendentes de TMDOCustomDataSet, como TMDODataSet, TMDOQuery, TMDOStoredProc, e TMDOTable, os quais herdam suas propriedades e métodos dataset-related.
+
+=== Propriedades ===
+: **TMDOCustomDataSet.Database: TMDODatabase**
+Identifica o compontente database para o qual este dataset representará uma ou mais tabelas. Usado para acessar propriedades, eventos, e métodos do componente database associado a este dataset.
+
+: **TMDOCustomDataSet.DBHandle: PISC_DB_HANDLE**
+Especifica o handle do database para este dataset.
+
+: **TMDOCustomDataSet.ForcedRefresh**
+Especifica se o dataset deve ser atualizado. Ajustando para True forçará a atualização do dataset.
+
+: **TMDOCustomDataSet.Transaction: TMDOTransaction**
+Identifica a transação sob a qual a query é executada.
+
+: **TMDOCustomDataSet.TRHandle: PISC_TR_HANDLE**
+Especifica o handle da transação para o dataset.
+
+: **TMDOCustomDataSet.UpdateObject: TMDODataSetUpdateObject**
+Especifica o objeto de atualização (update) usado para atualizar um result set read-only quando cached updates está habilitado.
+
+Usado para especificar um componente TMDODataSetUpdateObject para usar em uma aplicação que deve ser capaz de atualizar um result set read-only.
+
+Em alguns casos, tais como query feitas em tabelas múltiplas, um result set não pode ser retornado. Neste casos, o UpdateObject pode ser usado para especificar um componente TMDOUpdateSQL que execute atualizações como uma transação separada que seja transparente à aplicação.
+
+: **TMDOCustomDataSet.UpdateRecordTypes: TMDOUpdateRecordTypes**
+Especifica o tipo de registros visíveis em um datase quendo cached updates está habilitado.
+
+``type TMDOUpdateRecordTypes = set of (cusModified, cusInserted, cusDeleted, cusUnmodified, cusUninserted);``
+
+TMDOUpdateRecordTypes é um conjunto que pode ter os seguintes valores:
+  || Opção | Descrição |
+  | cusModified | Registros modificados são visíveis. |
+  | cusInserted | Registros inseridos são visíveis. |
+  | cusDeleted | Registros apagados são visíveis. |
+  | cusUnmodified | Registros não modificados são visíveis. |
+  | cusUninserted | Registros não inseridos são visíveis. |
+
+Por padrão, um dataset é criado com um UpdateRecordTypes ajustado para cusModified, cusInserted, ou cusUnmodified, seginificando que todos registros existentes, editados, ou inseridos são visíveis para o usuário.
+
+Uma aplicação que deva percorrer através de um dataset sem apagar registro pode alterar UpdateRecordTypes como parte de um método que não apaga registros, assim os registros apagados serão visíveis o tempo suficiente para restaurar a condição prévia sem apagar.
+
+Uma aplicação que deva circular por um dataset para registros que não possam ser apagados pode alterar UpdateRecordTypes como parte de um método NaoApagar, de modo que os registros "não apagados" estejam visíveis o suficiente para restaura-los para a condição anterior de "não apagados".
+
+Igualmente, uma aplicaçã que deva circular por um dataset para registros que não possam ser inseridos pode alterar UpdateRecordTypes como parte de um método NaoInserir, de modo que os registros "não inseridos" estejam visíveis o suficiente para restaura-los para a condição anterior de "não inseridos".
+
+Uma aplicação pode também usar UpdateRecordTypes como um filtro para temporariamente limitar os registros visíveis àqueles adicionados ou inseridos pelo usuário durante a sessão atual.
+
+: **TMDOCustomDataSet.UpdatesPending: Boolean**
+Indica se o buffer cached updates contem registros que ainda não foram aplicados. Se o retorno for True, então há registros editados, apagados, ou inseridos à serem aplicados à base de dados. Se o retorno for False não há registros no cache.
+
+
+=== Eventos ===
+
+: **TMDOCustomDataSet.OnUpdateError: TMDOUpdateErrorEvent**
+Ocorre se uma exceção é gerada quando o cached updates é aplicado à base de dados.
+
+```
+type
+  TMDOUpdateAction = (uaFail, uaAbort, uaSkip, uaRetry, uaApplied, uaApply);
+  TMDOUpdateErrorEvent = procedure(DataSet: TDataSet; E: EDatabaseError; UpdateKind: TUpdateKind; var UpdateAction:
+```
+
+Escreva um manipulador de evento OnUpdateError para responder à exceções geradas quando o cached updates é aplicado à base de dados. Pois há um certo tempo entre o tempo que um registro é aramazenado em memória e o tempo que o cached updates é aplicado, existe uma possibilidade de outra aplicação poder alterar um ou mais do mesmo registro em uma base de dados antes que a alteração armazenada possa ser aplicada. DataSet é o nome do conjunto de dados o qual atualizações são aplicadas.
+
+ - E é um ponteiro para um objeto EDBEngineError do qual uma aplicação pode extrair uma mensagem de erro e a causa tual da condição do erro. Um handler OnUpdateError pode usar esta informação para determinar como responder à condição de erro.
+ - UpdateKind indica se um erro ocorreu enquanto estava inserindo, apagando, ou modificando um registro.
+ - UpdateAction indica a ação a ser feita quando o handler do OnUpdateError sair. Quando entrar no handler, UpdateAction está sempre ajustado para uaFail. Se OnUpdateError pode manipular ou corrigir o erro, ajuste UpdateAction para uaRetry antes de sair do manipulador de erro. A tabela abaixo lista os valores possíveis para o UpdateAction e para quê eles servem:
+                    || Opção     | Descrição |
+                    |  uaAbort   | Aborta a operação de update sem retornar uma mensagem de erro |
+                    |  uaApply   | Somente para uso interno |
+                    |  uaApplied | Não usado em rotinas de manipulação de erro |
+                    |  uaFail    | Abora a operação de update e retorna uma mensagem de erro |
+                    |  uaRetry   | Repete a operação do update que levantou a condição de erro originalmente |
+                    |  uaSkip    | Abandona a atualização do registro que levantou a condição de erro, e deixa as alterações não aplicadas em cache |
+
+O manipulador de erro pode usar as propriedades TField.OldValue e TField.NewValue para avaliar as condições de erro e ajustar TField.NewValue para um novo valor a ser reaplicado. Neste caso, ajuste UpdateAction para uaRetry antes de sair.
+
+Obs: Se uma chamada à ApplyUpdates levantar uma exceção e este ApplyUpdates não é chamado dentro de um bloco try..except, uma mensagem de erro é retornada. Se um handler OnUpdateError não puder corrigir a condição de erro e deixar UpdateAction ajustado para uaFail, a mensagem de erro é retornada duas vezes. Para prevenir isto, ajuste UpdateAction para uaAbort no manipulador do erro.
+
+Importante: O código em um OnUpdateError não deve chamar nenhum método que faça alteração no registro atual.
+
+: **TMDOCustomDataSet.OnUpdateRecord: TMDOUpdateRecordEvent**
+Ocorre quando cached updates é aplicado em um registro.
+
+```
+type
+  TMDOUpdateAction = (uaFail, uaAbort, uaSkip, uaRetry, uaApply, uaApplied);
+  TMDOUpdateRecordEvent = procedure(DataSet: TDataSet; UpdateKind: TUpdateKind; 
+                              var UpdateAction: TMDOUpdateAction) of object;
+```
+
+Escreva um evento OnUpdateRecord para processar atualizações que não possam ser manipuladas por um único componente de update, tais como implementação de updates em cascata, inserções, ou exclusões. Este evento também é útil para aplicações que necessitam controle adicional sobre substituição de parametros em componentes de update.
+
+ - DataSet é o nome do dataset ao qual as atualizações serão aplicadas.
+ - UpdateKind é usado se o update atual é a inserção de um registro, a exlusão de um registro, ou a modificação de um registro.
+ - UpdateAction indica que a ação feita pelo evento OnUpdateRecord antes dela saiu. Quando entrar no envento, UpdateAction estará sempre como uaFail. Se OnUpdateRecord for executado com sucesso, ele deverá alterar UpdateAction para uaApplied antes de sair. A tabela abaixo lista os valores possíveis para o UpdateAction e para quê eles servem:
+      || Opção     | Descrição |
+      |  uaAbort   | Aborta a operação de update sem retornar uma mensagem de erro |
+      |  uaApply   | Somente para uso interno |
+      |  uaApplied | Não usado em rotinas de manipulação de erro |
+      |  uaFail    | Abora a operação de update e retorna uma mensagem de erro |
+      |  uaRetry   | Repete a operação do update que levantou a condição de erro originalmente |
+      |  uaSkip    | Abandona a atualização do registro que levantou a condição de erro, e deixa as alterações não aplicadas em cache |
+
+
+=== Métodos ===
+
+: **TMDOCustomDataSet.ApplyUpdates**
+Escreve as atualizações em cache pendentes de um dataset no banco de dados. 
+
+Este método envia os dados armazenados em memória para o database armazernar, mas as alterações não são aplicadas (commit) no banco de dados. Uma aplicação deve explicitamente chamar o método Commit do componente TMDOTransaction para aplicar as alterações no banco de dados se a escrita for bem sucedida, ou chamar o método Rollback do componente TMDOTransaction para desfazer as alterações se existir algum erro.
+
+Obs: O método preferencial para atualização de datasets é chamar o método ApplyUpdates do componente database do que chamar o método ApplyUpdates de cada dataset individualmente. A aplicação é responsável por aplicar (commit) ou desfazer (rollback) a transação.
+
+: **TMDOCustomDataSet.CachedUpdateStatus: TCachedUpdateStatus**
+Retorna o status do cached updates do registro atual no dataset. 
+
+``type TCachedUpdateStatus = (cusUnmodified, cusModified, cusInserted, cusDeleted, cusUninserted);``
+
+TCachedUpdateStatus pode ser um dos seguintes tipos:
+  || Opção | Descrição |
+  | cusDeleted | O registro será apagado. |
+  | cusInserted | O registro será inserido. |
+  | cusModified | O registro será alterado. |
+  | cusUninserted | O registro foi inserido e então apagado. |
+  | cusUnmodified | O registro foi alterado. |
+
+: **TMDOCustomDataSet.CancelUpdates**
+Limpa todas pendencias do cached updates. Quando um dataset é fechado, ou a propriedade CachedUpdates está False, CancelUpdates é chamado automaticamente.
+
+Obs: Para desfazer mudanças em um único registro, chame RevertRecord.
+
+: **TMDOCustomDataSet.CompareBookmarks(Bookmark1, Bookmark2: TBookmark): Integer**
+Compara dois bookmarks. Retorna um inteiro indicando a diferença entre os dois bookmarks. Retorna zero se os dois bookmarks são iguais, um valor negativo -1 se Bookmark1 é menor que Bookmark2, ou um valor positivo 1 se Bookmark1 é maior que Bookmark2. Também retorna zero se um dos dois bookmarks estiver nulo (nil). Bookmark1 e Bookmark2 são dois valores TBookmark a serem comparados.
+
+: **TMDOCustomDataSet.Create(AOwner: TComponent)**
+Cria uma instancia de um componente TDataSet em tempo de execução. Normalmente aplicações instanciam descendentes de dataset, tais como TMDOTable, TMDOQuery, TMDODataSet, ou TMDOStoredProc, ao invés de TMDOCustomDataSet. Estes objetos instanciados são manipulados automaticamente.
+
+Por outro lado, aplicações que criam componentes dataset especializados, como por exemplo componentes customizados, podem precisar instanciar um componente TMDOCustomDataSet chamando o método Create.
+
+ - Create:
+    - Chama o método herdado Create de TDataSet.
+    - Cria cinco objetos query.
+    - Cria o objeto base para assegurar a referencia ao database e transaction.
+    - Associa os eventos do database e transaction relacionado ao componente base.
+
+: **TMDOCustomDataSet.CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream**
+Retorna um objeto TBlobStream para leitura ou escrita de dados em um campo especificado blob.
+
+``type TBlobStreamMode = (bmRead, bmWrite, bmReadWrite);``
+
+Chame este método para obter um fluxo para leitura ou escrita de dados para um objeto binário grande (BLOB - Binary Large OBject). O parametro Field deve especificar um componente TBlobField da propriedade array Fields. O parametro Mode especifica se o fluxo será usado para leitura, escrita, ou atualização de conteúdo do campo.
+
+: **TMDOCustomDataSet.Destroy**
+Destrói a instancia de um componente dataset.
+
+Não chame Destroy diretamente em uma aplicação. Normalmente a destruição de datasets é manipulada automaticamente pelo Delphi. Se uma aplicação cria suas próprias instancias de um dataset, entretanto, a aplicação deverá chamar o método Free, o qual verifica que o componente dataset não está pronto para ser liberado antes de chamar Destroy.
+ - Destroy executa as seguintes tarefas:
+   - Libera os objetos query associados.
+   - Libera o objeto base.
+   - Libera os recursos internos associados.
+
+: **TMDOCustomDataSet.FetchAll**
+Acessa todos registros da posição atual do cursor até o fim do arquivo e guarda isto localmente. Este método é utilizado para reduzir o tráfeco da rede quando estiver usando cached updates. FetchAll chama o método CheckBrowseMode para postar quaisquer alterações pendentes, e então acessa todos registros a partir da posição do cursor até o fim do arquivo, e guarda localmente. Normalmente quando cached updates está habilitado, uma transação recupera somente os dados que são necessários para as finalidades de retorno.
+
+Obs: O uso de FetchAll nem sempre é apropriado. Por exemplo, quando uma aplicação acessa uma base de dados usada por muitos clientes simultaneos e existe um grau elevado de disputa por atualizações nos mesmos registros, capturando todos registros de uma vez pode não ser vantajoso porque alguns registros capturados podem ter sido alterados por outras aplicações. Tente sempre pesar o que é mais vantajoso: a redução de tráfeco na rede ou reduzir a disputa por registros.
+
+: **TMDOCustomDataSet.GetCurrentRecord(Buffer: PChar): Boolean**
+Recupera o registro atual em um buffer.A maioria das aplicações não deve precisar chamar este método. TDataSet automaticamente aloca um buffer para o registro ativo.
+
+Chame GetCurrentRecord para copiar o registro atual dentro de um buffer alocado pela aplicação. Buffer deve ser pelo menos tão grande quando o tamanho do registro indicado pela propriedade RecordSize.
+
+: **TMDOCustomDataSet.GetFieldData(FieldNo: Integer; Buffer: Pointer): Boolean**
+Lê o dado do campo dentro de um buffer a partir de um campo de um dataset especificado pelo FieldNo. Retorna o tamanho do Buffer.
+
+: **TMDOCustomDataSet.GetFieldData(Field: TField; Buffer: Pointer): Boolean**
+Lê o dado do campo dentro de um buffer a partir de um campo de um dataset especificado pelo Field. Retorna o tamanho do Buffer.
+
+: **TMDOCustomDataSet.Locate(const KeyFields: string; const KeyValues: Variant; Options: TLocateOptions): Boolean**
+Chame Locate para buscar em um dataset por um registro específico e a posição do cursor nele.
+  - KeyFields é uma string contendo uma lista separada por ';' de nomes de campo no qual será feita a busca.
+  - KeyValues é um variant que especifica os valores a serem localizados nos campos chave. Se KeyFields lista somente um campo, KeyValues especificará o valor para aquele campo no registro desejado. Para especificar múltiplos valores de busca, passe um array de variant como KeyValues, ou construa um array variant usando a rotina VarArrayOf. Por exemplo:
+
+```
+  with cad_cliente do
+    Locate('Nome;Telefone;Email', VarArrayOf(['Mercury', '99-9999-9999', 'info@mdolib.com']), [loPartialKey]);
+```
+
+  - Options é um conjunto de opções que especificam uma busca adicional enquanto procura nos campos. Se Options conter o tipo loCaseInsensitive, então Locate ignora entre maiúsculas e minúsculas enquanto equipara os campos. Se Options contém o tipo loPartialKey, então Locate permite strings aproximadas nas strings de KeyValues. Se Options está vazio, ou se KeyFields não inclui quaisquer campos string, Options é ignorado.
+
+Locate retorna True se encontrar um registro identico, e faz aquele registro o atual. De outra maneira Locate retorna False. 
+
+Locate usará o método mais rápido possível para localizar registros equivalentes. Se a busca dos campos no KeyFields estiver indexada e o indece for compatível com as opções de busca especificada, Locate usará o indíce. De outra maneira criará um filtro para a busca.
+
+: **TMDOCustomDataSet.LocateNext(const KeyFields: string; const KeyValues: Variant; Options: TLocateOptions): Boolean**
+Busca no dataset por registro depois de um registro especificado e o faz o registro atual. Chame Locatenext para buscar em um dataset por um registro depois da posição atual do cursor.
+
+  - KeyFields é uma string contendo uma lista separada por ';' de nomes de campo no qual será feita a busca.
+  - KeyValues é um variant que especifica os valores a serem localizados nos campos chave. Se KeyFields lista somente um campo, KeyValues especificará o valor para aquele campo no registro desejado. Para especificar múltiplos valores de busca, passe um array de variant como KeyValues, ou construa um array variant usando a rotina VarArrayOf.
+  - Options é um conjunto de opções que especificam uma busca adicional enquanto procura nos campos. Se Options conter o tipo loCaseInsensitive, então Locate ignora entre maiúsculas e minúsculas enquanto equipara os campos. Se Options contém o tipo loPartialKey, então Locate permite strings aproximadas nas strings de KeyValues. Se Options está vazio, ou se KeyFields não inclui quaisquer campos string, Options é ignorado.
+
+LocateNext retorna True se encontrar um registro identico, e faz aquele registro o atual. De outra maneira LocateNext retorna False. 
+
+LocateNext usará o método mais rápido possível para localizar registros equivalentes. Se a busca dos campos no KeyFields estiver indexada e o indece for compatível com as opções de busca especificada, Locate usará o indíce. De outra maneira criará um filtro para a busca.
+
+: **TMDOCustomDataSet.Lookup(const KeyFields: string; const KeyValues: Variant; const ResultFields: string): Variant**
+Recupera valores de campo de um registro que equipara aos valores de uma busca.
+  - KeyFields é uma string contendo uma lista separada por ';' de nomes de campo no qual será feita a busca.
+  - KeyValues é um array variant contendo os valores para comparar nos campos chaves. Para especificar múltiplos valores de busca, passe KeyValues como um array variante, ou construa um array variant através da rotina VarArrayOf.
+  - ResultFields é uma string contendo uma lista separada por ';' de nomes de campo dos quais seus os valores devem ser retornados do registro equiparado.
+
+Lookup retorna um array variant contendo os valores dos campos especificados no ResultFields.
+
+Lookup usa um método mais rápido possível para localizar registros equivalentes. Se a busca dos campos no KeyFields estiverem indexados, Lookup usará os índices. De outra maneira criará um filtro para a busca.
+
+: **TMDOCustomDataSet.RecordModified(Value: Boolean)**
+Ajusta o registro para modificado ou não modificado. 
+
+Obs: Este método é de uso interno.
+
+: **TMDOCustomDataSet.RevertRecord**
+Restaura o registro atual em um dataset para um estado de não modificado quando cached updates está habilitado.
+
+Obs: Para desfazer todas alterações para todas pendencias de atualizações em um cache, chame CancelUpdates.
+
+: **TMDOCustomDataSet.Undelete**
+Restaura um registro apagado de um dataset. Também pode ser recuperado um registro "desinserido" (uninserted).
+
+: **TMDOCustomDataSet.UpdateStatus: TUpdateStatus**
+Informa o estado de update para o registro corrente.
+
+``type TUpdateStatus = (usUnmodified, usModified, usInserted, usDeleted);``
+
+Usado para determinar o estado de update do registro corrente enquanto cached updates estiver habilitado. O estado de update pode ser alterado frequantemente como quando registros são editados, inseridos, ou apagados. UpdateStatus oferece um método conveniente para que as aplicações avaliem o status atual antes de empreender ou de terminar as operações que dependem do status de update dos registros.

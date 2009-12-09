@@ -1,0 +1,10 @@
+
+== TMDOBatchOutput ==
+**Unit MDOSQL**
+
+Objeto utilizado para abstração de todas saídas batch. Provê propriedades e métodos úteis para
+uso de saídas batch.
+
+=== Métodos === 
+: **TMDOBatchOutput.WriteColumns: Boolean**
+Função que provê a saída de dados em colunas para um arquivo específico. Usado para escrever dados em colunas na área do descritor SQL extendido (XSQLDA) para um arquivo especificado.

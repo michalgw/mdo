@@ -1,0 +1,19 @@
+
+== TMDOOutputRawFile ==
+**Unit MDOBatch**
+
+TMDOOutputRawFile envia dados para um arquivo cru formatado. Utilize TMDOOutputRawFile para enviar dados em um arquivo cru, que é equivalente ao external file do Firebird. Arquivos cru não são limitados à um formato de caracter.
+
+
+=== Métodos ===
+
+: **TMDOOutputRawFile.Destroy**
+Destrói a instancia do TMDOInputRawFile.
+
+Não chame Destroy diretamene de um apliativo. Ao invés disto, chame Free. Free verifica se o objeto já não foi liberado e somente então chama Destroy.
+
+: **TMDOOutputRawFile.ReadyFile**
+Prepara a saída para o XSQLDA.
+
+: **TMDOOutputRawFile.WriteColumns**
+Saída de dados em colunas no XSQLDA.

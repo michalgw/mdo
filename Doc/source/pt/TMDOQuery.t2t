@@ -1,0 +1,347 @@
+
+
+== TMDOQuery ==
+**Unit MDOquery**
+
+TMDOQuery executa expressões SQL Firebird.
+
+Utilize TMDOQuery para acessar uma ou mais tabelas em um banco de dados usando
+expressões SQL. Utilize componentes query em servidores Firebird remotos.
+
+Componentes query são úteis por eles poderem: acessar  mais de uma tabela de uma vez
+(joins); Automaticamente acessar um subset de linhas e colunas em suas tabelas
+subjacentes, ao invés de sempre trazer todas linhas e colunas.
+
+Obs.: TMDOQuery é particulamente importante ao desenvolvimento de aplicativos de
+base de dados escalável. Se há alguma chance de uma aplicação que executa em base de
+dados locais ser escalada para um servidor SQL remoto no futuro, utilize TMDOQuery
+no inínio para assegurar uma escalonamento facilitado depois.
+
+
+=== Propriedades ===
+
+
+: **TMDOQuery.Active: Boolean**
+Indica se uma query está ou não ativa.
+
+
+: **TMDOQuery.BufferChunks: Integer**
+Ajusta ou retorna o tamanho do pedaço do buffer de um dataset.
+
+: **TMDOQuery.CachedUpdates: Boolean**
+Especifica se o cached updates está habilitado para um dataset.
+
+CachedUpdates habilita ou desabilita o uso de cached updates para um dataset. Se
+CachedUpdates estiver True, cached updates estará habilitado, caso False, estará
+desabilitado.
+
+Quando cached updates está habilitado, atualizações ao dataset, como postar
+alterações, inserir registros, ou apagar, são armazenados em um cache interno na
+máquina cliente ao invés de iniciar escrevendo diretamente ao dataset na base de
+dados. Quando as alterações estão concluídas, um aplicativo escreve todas alterações
+guardadas para a base de dados em um contexto de uma única transação.
+
+Obs: Ao invés de usar cached updates, os aplicativos podem obter os mesmo benefícios
+com maior controle usando um client dataset.
+
+
+: **TMDOTable.Constraints: TCheckConstraints**
+Especifica o nível de registro estrangerios que devem ser encontrados quando editar
+um dado. 
+
+Utilizado para ler ou adicionar um nível de registro estrangeiro (do inglês
+record-level) ao dataset. Normalmente Record-Leve Constraints apresentam
+relacionamentos entre campos em um registro. Constraints que limitam o valor de um
+único campo devem ser adicionados à um campo de componente individualmente.
+
+
+: **TMDOQuery.DataSource: TDataSource**
+Especifica o componente data source do qual será extraído o valor do campo atual
+para usar com os parametros de mesmo nome na expressão da query SQL.
+
+Ajuste a propriedade DataSource para preencher automaticamente os parametros na
+query com o valor dos campos de outro datase. 
+
+Parametros que tenham o mesmo nome de campos em outro dataset serão preenchidos com
+os valores do campo. 
+
+Parametros com nomes que não são identicos aos campos no outro dataset não obterão
+os valores automaticamente, e devem ser ajustados programaticamente. Por exemplo, se
+a propriedade SQL do TMDOQuery contém a expressão SQL abaixo e o dataset
+referenciado através do DataSource tem um campo CodCli, o valor do registro atual no
+outro dataset será usado no parametro CodCli.
+
+SELECT *
+FROM Endereco e
+WHERE (e.CodCli = :CodCli)
+
+DataSource deve apontar para um componente TDataSource lincado à outro componente
+datasource.
+
+O dataset especificado no DataSource deve ser criado, populado, e aberto antes de
+tentar ligar os parametros. Parametros são limitados à chamar o método Prepare antes
+de exectuar a query.
+
+Dica: DataSource é especificamente de uso quando criado um relacionamento
+mestre/detalhe entre tabelas usando uma query lincada. Ele é também usado para
+garantir o ligamento para parametros que já não estão ajustados na propriedade
+Params.
+
+: **TMDOQuery.GenerateParamNames: Boolean**
+Gera uma lista de nome de parametros para a query.
+
+: **TMDOQuery.ParamCheck: Boolean**
+Especifica se a lista de prametros para uma query é gerada se a propriedade SQL é
+alterada em tempo de execução.
+
+Por padrão, ParamCheck é true, significando que a propriedade Params é
+automaticamente gerada em tempo de execução. Quando ParamCheck é True, o número
+apropriado de parametros é garantido a ser gerado para a expressão SQL atual.
+
+Esta propriedade é útil para DDL (Data Definition Language) que contém parametros
+como parte do DDL e que não são parametros para o TMDOQuery. Por exemplo, o DDL para
+criar uma stored procedure pode conter parametros que são parte da stored
+procedures. Ajuste ParamCheck para False para prevenir que estes parametros sejam
+confundidos com os parametros de execução DDL do TMDOQuery.
+
+
+: **TMDOQuery.ParamCount: Word**
+Indica o número atual de parametros de uma query. Se a propriedade ParamCheck é
+True, ParamCount sempre corresponderá ao número dos parametros atuais na expressão
+SQL da query.
+
+: **TMDOQuery.Params: TParams**
+Contém os parametros da query.
+
+Acessando Params em tempo de execução poderá ser visto e ajustado os nomes, valores
+e tipo de dados dinamicamente dos parametros (em tempo de projeto é utilizado o
+editor de parametros para ajustar as informações). Param é um array iniciado em zero
+de registros TParams. Index especifica o elemento do array a acessar. 
+
+Obs.: Um modo fácil de ajustar e recuperar os valores de parametros quando o nome de
+cada parametro é conhecido é chamar ParamByName. ParamByName não pode, entretanto,
+ser usado para mudar um tipo de dado ou nome de parametro.
+
+: **TMDOQuery.Prepared: Boolean**
+Determina se a query está ou não preparada para execução. Se Prepare é True, a query
+está preparada, caso seja False não está preparada. Quando uma query não precisa ser
+preparada antes da execução, a performance da execução é comprometida se a query é
+preparada antes, particularmente se ela é uma query parametrizada que é executada
+mais de uma vez usando o mesmo valor de parametro.
+
+Obs.: Um aplicativo pode mudar a configuração atual de Prepared para preparar ou
+despreparar uma query. Se Prepared é True, mudando-o para False chamará o método
+Unprepare para despreparar a query. Se Prepared é False, mudando-o para True chamará
+o método Prepare para preparar a query. Geralmente, entretanto, a boa prática de
+programação é chamar Prepare e Unprepare diretamente. Estes médos atualizam
+automaticamente a propriedade Prepared.
+
+: **TMDOQuery.RowsAffected: Integer**
+Retorna o número de linhas tratadas pela última execução da query. 
+
+Verifique RowsAffected para determinar quantas linhas foram atualizadas ou excluídas
+pela última operação da query. Se RowsAffected é -1, a query não atualizou ou
+excluiu qualquer linha.
+
+: **TMDOQuery.SQL: TStrings**
+Contém o texto da expressão SQL a ser executada pela query.
+
+Utilize SQL para fornecer a expressão SQL que um componente query executará quando
+seus métodos ExecSQL ou Open forem chamados. Em tempo de projeto a propriedade SQL
+pode ser editada invocando o editor de String List no Object Inspector.
+
+A propriedade SQL deve conter somente uma expressão SQL completa por vez.
+
+
+: **TMDOQuery.StatementType: TMDOSQLTypes**
+Retorna o tipo de expressão da query.
+
+Os tipos são: SQLUnknown, SQLSelect, SQLInsert, SQLUpdate, SQLDelete, SQLDDL,
+SQLGetSegment, SQLPutSegment, SQLExecProcedure, SQLStartTransaction, SQLCommit,
+SQLRollback, SQLSelectForUpdate, SQLSetGenerator;
+
+
+: **TMDOQuery.StmtHandle: TISC_STMT_HANDLE**
+Identifica o manipulador da expressão da query.
+
+Utilize StmHandle se o aplicativo faz chamadas diretas ao servidor Firebird,
+passando os métodos do TMDOQuery. Algumas chamadas à API requerem um handle da
+expressão como um parametro. Em todas outras circustancias um aplicativo não precisa
+de acesso à esta propriedade.
+
+: **TMDOQuery.Text: String**
+Aponta o texto atual da query SQL.
+
+Text é uma propriedade somente-leitura que pode ser examinada para determinar o
+conteúdo atual da expressão SQL. Para query parametrizada, Text contém a expressão
+SQL com os parametros substituídos pelo símbolo de substituição de parametro (?) em
+lugar do valor atual do parametro.
+
+Em geral não é necessário verificar a propriedade Text. Para acessar ou alterar a
+expressão SQL de uma query, utilize a propriedade SQL. Para verificar ou modificar
+parametros, utilize a propriedade Params.
+
+
+: **TMDOQuery.UniDirectional: Boolean**
+
+Determinará se o cursor bidirecional está ou não habilitado para um result set da
+query.
+
+Ajuste UniDirectional para controlar se um cursor pode ou não mover-se para frente
+ou para trás através de um result set. Por padrão UniDirectional é False,
+habilitando navegação pra frente e para trás.
+
+Obs.: Se um aplicativo não precisa de acesso bidirecional aos registros em um result
+set, ajuste UniDirectional para True. Quando UniDirectional é True, um aplicativo
+requer menos memória e a performance é melhorada.
+
+
+: **TMDOQuery.UpdateObject: TMDODataSetUpdateObject**
+Especifica o objeto de update usado para atualizar um resutl set somente-leitura
+quando cached updates está habilitado.
+
+Ajuste UpdateObject para especificar o componente update object usado para atualizar
+um result set somente-leitura quando cached updates está habilitado.
+
+
+=== Eventos ===
+
+
+: **TMDOQuery.AfterDatabaseDisconnect: TNotifyEvent**
+Ocorre depois que uma base de dados é desconectada.
+
+Escreva no evento AfterDatabaseDisconnect ações específicas para quando um database
+é desconectado.
+
+
+: **TMDOQuery.BeforeDatabaseDisconnect: TNotifyEvent**
+Ocorre antes que uma base de dados é desconectada.
+
+Escreva no evento BeforeDatabaseDisconnect ações específicas para antes que um
+database é desconectado.
+
+
+: **TMDOQuery.DatabaseFree: TNotifyEvent**
+Ocorre depois que um database é liberado da memória.
+
+Escreva no evento DatabaseFree ações específicas quando um database é liberado da
+memória.
+
+
+: **TMDOQuery.AfterTransactionEnd: TNotifyEvent**
+Ocorre depois que uma transação foi terminada.
+
+Escreve no evento AfterTransactionEnd ações específicas para depois que uma
+transação foi terminada.
+
+
+: **TMDOQuery.BeforeTransactionEnd: TNotifyEvent**
+Ocorre antes uma transação ser finalizada.
+
+Escreve no evento BeforeTransactionEnd ações específicas para antes de uma transação
+ser finalizada.
+
+
+: **TMDOQuery.TransactionFree: TNotifyEvent**
+Ocorre depois que uma transação foi liberada da memória.
+
+Escreva no evento TransactionFree ações específicas para depois que uma transação
+for liberada da memória.
+
+
+=== Métodos === 
+
+
+: **TMDOQuery.BatchInput**
+Executará uma query parametrizada em SQL para entrada no objeto de entrada
+referenciado.
+
+: **TMDOQuery.BatchOutput**
+Fornece a saída da query selecionada no sQL para o OutputObject referenciado.
+
+: **TMDOQuery.Create**
+Cria uma instancia de um componente query.
+
+Chame create para instanciar uma query em tempo de execução. Componentes query
+colocados nos formulários ou data modules em tempo de projeto são criados
+automaticamente.
+
+Create chamará seu construtor herdado, criará uma lista de expressão SQL limpa,
+criará uma lista de parametros limpa, ajustará o hanlder do evento OnChange para a
+lista de expressão SQL, ajustará a propriedade ParamCheck para True, e ajustará a
+propriedade RowsAffected para -1.
+
+: **TMDOQuery.Destroy**
+Destrói a instancia de uma query.
+
+Não chame Destroy diretamente. Ao invés disto chame Free para verificar se a query
+já não foi liberada antes de chamar Destroy. Destroy disconecta do servidor, libera
+a lista de expressão SQL e a lista de parametros, e então chama seu destrutor
+herdado.
+
+: **TMDOQuery.ExecSQL**
+Executará a expressão SQL para a query.
+
+Chame o método para executar a expressão SQL atualmente na propriedade SQL. Utilize
+ExecSQL para executar ações que não retornam um cursor de dados (como INSERT,
+UPDATE, DELETE e CREATE TABLE).
+
+Obs.: Para expressões SELECT, chame o método Open ao invés de ExecSQL. ExecSQL
+prepara a expressão na propriedade SQL para execução se ele já não foi preparado.
+Para velocidade de performance, um aplicativo deve chamar Prepare antes de chamar
+ExecSQL pela primeira vez.
+
+: **TMDOQuery.GetDetailLinkFields**
+Preencherá uma lista com os campos mestre e detalhes do link.
+
+Criará duas lista de TFields de relacionamento mestre/detalhe entre duas tabelas;
+uma contém os campos master, e outra contém os campos detalhes.
+
+: **TMDOQuery.ParamByName(const Value: string): TParam**
+Acessará informação de parametros baseado em um nome de parametro especificado.
+
+Chame ParamByName para ajustar ou usar informação de parametro para um parametro
+específico baseado em seu nome.
+
+Value é o nome do parametro para o qual deseja-se recuperar informação.
+
+ParamByName é primeiramente usado para ajustar um valor de parametro em tempo de
+execução. Por exemplo, a expressão abaixo recupera o valor atual de um parametro
+chamado 'Contato' dentro de uma caixa de edição:
+  Edit1.Text := Query1.ParamByName('Contato').AsString;
+  
+: **TMDOQuery.Prepare**
+Envia uma query ao servidor para otimização da execução.
+
+Chame Prepare para ter os recusos de uma query alocados no servidor e executar
+otimizações adicionais. 
+
+Chamando Prepare antes de executar uma query melhora a performance do aplicativo.
+
+Delphi automaticamente preparará uma query se ela é executada sem ser primeiramente
+preparada. Depois da execução, Delphi despreparará a query. Quando uma query for
+executada um certo número de vezes, um aplicativo deve sempre explicitamente
+preparar a query para evitar múltiplas preparações e despreparações desnecessárias.
+
+Preparando uma query faz com que alguns recursos do database sejam consumidos, assim
+é uma boa prática para um aplicativo despreparar uma query quando for concluído seu
+uso. O método UnPrepare despreparará uma query.
+
+Obs.: Quando você alterar o texto de uma query em tempo de execução, a query é
+automaticamente fechada e despreparada.
+
+
+: **TMDOQuery.UnPrepare**
+Libera os recursos alocados por uma query previamente preparada.
+
+Chame UnPrepare para liberar os recursos alocados de uma query previamente preparada
+no lado do servidor e no lado do cliente.
+
+Preparando uma query faz com que alguns recursos do database sejam consumidos, assim
+é uma boa prática para um aplicativo despreparar uma query quando for concluído seu
+uso. O método UnPrepare despreparará uma query.
+
+Obs.: Quando você alterar o texto de uma query em tempo de execução, a query é
+automaticamente fechada e despreparada.
+
+

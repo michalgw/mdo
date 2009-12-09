@@ -1,0 +1,50 @@
+
+== TMDOSQLDA ==
+**Unit MDOSQL**
+
+TMDOSQLDA fornece propriedades e métodos para uso com componentes MDOSQL.
+
+Todas aplicações SQL dinamicas (DSQL) devem declarar uma ou mais XSQLDA. O XSQLDA é uma linguagem hospedeira de estrutura de dados que DSQL usa para transportar dados de/para um database quando processa uma string SQL. Existem dois tipos de XSQLDA: entrada e saída de descritores. Ambos são implementados usando a estrutura XSQLDA.
+
+=== Propriedades === 
+
+: **TMDOSQLDA.AsXSQLDA: PXSQLDA**
+Representa o valor do campo XSQLDA como um valor XSQLDA.
+
+: **TMDOSQLDA.Count: Integer**
+Retorna o númer de campos XSQLDA.
+
+: **TMDOSQLDA.Modified: Boolean**
+Indica se um campo foi modificado.
+
+: **TMDOSQLDA.Names: String**
+Retorna os nomes do campo XSQLDA.
+
+: **TMDOSQLDA.RecordSize: Integer**
+Retorna o tamanho do registro XSQLDA.
+
+: **TMDOSQLDA.UniqueRelationName: String**
+Retorna o nome de uma relação única. Utilize para trazer o nome de uma relação se somente uma relação estiver envolvida na query, de outra maneira, será retornado nil. Esta propriedade é utilizada internamente.
+
+: **TMDOSQLDA.Vars: @CA@Idx: Integer@CF@: TMDOSQLVAR; default**
+Retorna o XSQLVAR definido para o parametro XSQLDA.
+
+Vars é uma propriedade default para TMDOSQLDSA, o que significa que o nome da propriedade Vars pode ser omitida quando o objeto TMDOSQLDA implementa um apropriedade em outro objeto.
+
+
+=== Métodos ===
+
+
+: **TMDOSQLDA.AddName(FieldName: String; Idx: Integer)**
+Adiciona um nome à estrutura XSQLDA.
+
+: **TMDOSQLDA.ByName: (Idx: String): TMDOSQLVAR**
+Retorna os campos XSQLVAR por nome.
+
+: **TMDOSQLDA.Create(Query: TMDOSQL)**
+Cria uma instancia de uma estrutura XSQLDA.
+
+: **TMDOSQLDA.Destroy**
+Destrói a estrutura XSQLDA.
+
+Não chame Destroy diretamente. Chame o método Free. Free verifica se todos objetos não estão nil antes de chamar Destroy.

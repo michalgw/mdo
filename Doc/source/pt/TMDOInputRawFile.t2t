@@ -1,0 +1,19 @@
+
+== TMDOInputRawFile ==
+**Unit MDOBatch**
+
+TMDOInputRawFile insere dados de um arquivo cru. Utilize TMDOInputRawFile para inserir dados de um arquivo cru, que é equivalente à saída do external file do Firebird. Arquivos cru não são limitados à um formato de caracter.
+
+
+=== Métodos ===
+
+: **TMDOInputRawFile.Destroy**
+Destrói a instancia do TMDOInputRawFile.
+
+Não chame Destroy diretamene de um apliativo. Ao invés disto, chame Free. Free verifica se o objeto já não foi liberado e somente então chama Destroy.
+
+: **TMDOInputRawFile.ReadParameters: Boolean**
+Lê parametros de entrada XSQLDA.
+
+: **TMDOInputRawFile.ReadyFile**
+Prepara a saída para XSQLDA.

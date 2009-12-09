@@ -1,0 +1,268 @@
+
+== TMDODataset ==
+**Unit MDODataset**
+
+TMDODataSet executa expressões SQL Firebird. TMDODataSet tem como principal objetivo
+utilização com expressões de SELECT. TMDODataSet armazena as informações de dados,
+fazendo-o completamente navegavel. Por TMDODataSet ser descendente de TDataset, ele
+funciona bem com todos componentes data-aware.
+
+
+=== Propriedades ===
+
+: **TMDODataSet.Active**
+Indica se a query está ativa.
+
+: **TMDODataSet.AutoCalcFields**
+Determina se os cursores bidirecionais estão habilitados ou não para uma tabela.
+
+Ajuste AutoCalcFields para controlar quando o evento OnCalcFields será disparado
+para atualizar campos calculados durante o processo do dataset. Um campo calculado é
+um que deriva seu valor dos valores de um ou mais campos no registro ativo, algumas
+vezes com processamento adicional.
+
+Quando AutoCalcFields é True (padrão), OnCalcFields é disparado quando:
+   . O dataset é aberto;
+   . O dataset é colocado no modo dsEdit;
+   . O foco muda de um controle visual para outro, ou de uma coluna para outra em
+uma grade data-aware e modificações são feitas no registro;
+   . Um registro é recuperado do database.
+   
+Se um aplicativo permite alteração de dados pelo usuário, OnCalcFields é
+frequentemente disparado. Nestes casos o aplicativo pode ajustar AutoCalcFields para
+False para reduzir a frequencia com o qual AutoCalcFiels é chamado. Quando
+AutoCalcFields é False, OnCalcFields não é chamado quando mudanças são feitas nos
+campos dentro de um registro.
+
+: **TMDODataSet.BufferChunks**
+Ajustará ou retornará o tamanho do pedaço do buffer do dataset.
+
+: **TMDODataSet.CachedUpdates**
+Especificará se cached updates estará habilitado ou não para um dataset.
+
+CachedUpdates habilitará ou desabilitará o uso de cached updates para um dataset. Se
+CachedUpdates é True, cached updates estará habilitado. Se CachedUpdates é False,
+cached updates estará desabilitado.
+
+Quando cached updates está habilitado, atualizações ao dataset (como update, insert
+ou delete de registros), são guardados em um cache interno na máquina cliente ao
+invés de serem escritas diretamente ao dataset das tabelas no database. Quando as
+alterações são completadas, um aplicativo escreverá todas alterações de atualizações
+ao database no contexto de uma única transação.
+
+Obs.: Ao invés de usar cached updates, os aplicativos podem obter os mesmos
+benefícios com grande controle usando um client dataset.
+
+
+: **TMDODataSet.DataSource**
+Especificará a fonte de dados (componente data source) do qual estrairá os valores
+do campo corrente para usar com os parametros de mesmo nome na expressão SQL da
+query.
+
+
+Ajuste DataSource para automaticamente preencher os parametros na query com os
+valores de campos de outro dataset. 
+
+Parametros que tenhma o mesmo nome de campos em outro dataset são preenchidos com os
+valores do campo.
+
+Parametros com nomes que não são os mesmos dos campos em outro dataset não têm
+valores recuperados automaticamente, e devem ser ajustados via programação. Por
+exemplo, se a propriedade SQL do TMDODataSet contém a expressão SQL abaixo e o
+dataset referenciado através de DataSource tem um campo Codigo, o valor do registro
+corrente no outro dataset é usado no parametro Codigo.
+
+SELECT Codigo
+FROM Cliente C
+WHERE (C.Codigo = :Codigo)
+
+DataSource deve apontar para um componente TDataSource lincado à outro componente
+dataset; ele não pode apontar para este componente datasource desta query.
+
+Dica: DataSource é especialmente usado quando cria-se um relacionamento
+mestre/detalhe entre tabelas usando uma query lincada. Ele é também usado para
+garantir o ligamento de parametros que não foram ajustados na propriedade Params.
+
+: **TMDODataSet.DeleteSQL: TStrings**
+Conterá a expressão SQL usada para apagar linhas do dataset.
+
+
+: **TMDODataSet.InsertSQL: TStrings**
+Conterá a expressão SQL usada para inserir linhas dentro do dataset.
+
+: **TMDODataSet.ModifySQL: TStrings**
+Fornece acesso ao objeto SQL encapsulando a expressão ModifySQL.
+
+: **TMDODataSet.ParamCheck**
+Especifica se a lista de prametros para uma query é gerada ou não se a propriedade
+SQL é alterada em tempo de execução.
+
+Ajuste ParamCheck para especificar se a propriedade Params deve ser lima e regerada
+se um aplicativo modifica a propriedade SQL em tempo de execução.
+
+Por padrão, ParamCheck é true, significando que a propriedade Params é
+automaticamente gerada em tempo de execução. Quando ParamCheck é True, o número
+apropriado de parametros é garantido a ser gerado para a expressão SQL atual.
+
+Esta propriedade é útil para DDL (Data Definition Language) que contém parametros
+como parte do DDL e que não são parametros para o TMDOQuery. Por exemplo, o DDL para
+criar uma stored procedure pode conter parametros que são parte da stored
+procedures. Ajuste ParamCheck para False para prevenir que estes parametros sejam
+confundidos com os parametros de execução DDL do TMDOQuery.
+
+
+: **TMDODataSet.Params: TMDOSQLDA**
+Fornece abilidade para especificar valores para uma query parametrizada.
+
+Utilize para fornecer valores à uma pesquisa parametrizada. Por exemplo:
+  ''' DataSet1.Params[0].AsInteger := 25
+  ''' DataSet1.Params.ByName['Field2'].AsString := 'value'
+
+
+: **TMDODataSet.Prepared: Boolean**
+Determinará se um conjunto de querys no dataset está ou não preparado para execução.
+
+Verifique Prepared para saber se um conjunto de queries já encontra-se preparado
+para execução. Se Prepared está True, o conjunto de queries está preparado, e se
+Prepared está False, o conjunto de queries está despreparado. 
+
+Quando um conjunto de queries não precisar ser preparado antes da execução, a
+performance da execução é melhorada se o cojunto de queries for preparada antes,
+particulamente se ela é um conjunto de queries parametrizada que é executada mais de
+uma vez usando os mesmos valores de parametros.
+
+: **TMDODataSet.QDelete: TMDOSQL**
+Fornece maneiras de acessar diretamente o objeto SQL encapsulando a expressão
+DeleteSQL.
+
+: **TMDODataSet.QInsert: TMDOSQL**
+Fornece maneiras de acessar diretamente o objeto SQL encapsulando a expressão
+InsertSQL.
+
+: **TMDODataSet.QModify: TMDOSQL**
+Fornece maneiras de acessar diretamente o objeto SQL encapsulando a expressão
+ModifySQL.
+
+: **TMDODataSet.QRefresh: TMDOSQL**
+Fornece maneiras de acessar diretamente o objeto SQL encapsulando a expressão
+RefreshSQL.
+
+: **TMDODataSet.QSelect: TMDOSQL**
+Fornece maneiras de acessar diretamente o objeto SQL encapsulando a expressão
+SelectSQL.
+
+: **TMDODataSet.RefreshSQL: TStrings**
+Fornece maneiras de acessar diretamente o objeto SQL encapsulando a expressão
+RefreshSQL.
+
+: **TMDODataSet.SelectSQL: TStrings**
+Fornece maneiras de acessar diretamente o objeto SQL encapsulando a expressão
+SelectSQL.
+
+: **TMDODataSet.SelectStmtHandle**
+Recebe o handle de uma expressão SELECT.
+
+: **TMDODataSet.StatementType: TMDOSQLTypes**
+Retorna o tipo de expressão da query QSelect.
+
+Utilize StatementType para determinar o tipo de expressão de uma query QSelect.
+
+Os tipos de TMDOSQLTypes são:
+   '''SQLCommit: Efetua (aplica commit) em uma transação ativa;
+   '''SQLDDL: Executa uma expressão DDL;
+   '''SQLDelete: Remove linhas em uma tabela ou no set ativo de um cursor;
+   '''SQLExecProcedure: Chama uma stored procedure;
+   '''SQLGetSegment: Lê um segmento de um blob aberto;
+   '''SQLInsert: Adiciona um ou mais novos registros à uma tabela especificada;
+   '''SQLPutSegment: Escreve um segmento blob;
+   '''SQLRollback: Retorna o database ao seu estado anterior ao início da transação
+atual;
+   '''SQLSelectForUpdate: Ajusta a Stored Procedure para atualização;
+   '''SQLSetGenerator: Ajusta um novo valor para um generator existente;
+   '''SQLSelect: Recupera dados de uma ou mais tabelas;
+   '''SQLStartTransaction: Inicia uma nova transação em um ou mais databases;
+   '''SQLUnknown: Tipo SQL desconhecido;
+   '''SQLUpdate: Altera dados em todos ou parte de uma linha existente em uma
+tabela, view, ou set ativo de um cursor.
+
+: **TMDODataSet.UniDirectional: Boolean**
+Determina se cursores bidirecionais está ou não habilitados para uma tabela.
+
+
+=== Eventos ===
+
+
+: **TMDODataSet.AfterDatabaseDisconnect: TNotifyEvent***
+Ocorre depois que um database é desconectado.
+
+Escreva no evento AfterDatabaseDisconnect ações específicas para depois que um
+database é desconectado.
+
+: **TTMDODataSet.BeforeDatabaseDisconnect: TNotifyEvent***
+Ocorre antes que um database seja desconectado.
+
+Escreva no evento BeforeDatabaseDisconnect ações específicas para antes que um
+database seja desconectado.
+
+
+: **TTMDODataSet.DatabaseFree: TNotifyEvent***
+Ocorre depois que um database é liberado da memória.
+
+Escreva no evento DatabaseFree ações específicas para depois que um database é
+liberado da memória.
+
+
+: **TTMDODataSet.AfterTransactionEnd: TNotifyEvent***
+Ocorre depois que uma transação é finalizada.
+
+Escreva no evento AfterTransactionEnd ações específicas para depois que uma
+transação é finalizada.
+
+
+: **TTMDODataSet.BeforeTransactionEnd: TNotifyEvent***
+Ocorre antes que uma transação seja finalizada.
+
+Escreva no evento AfterTransactionEnd ações específicas para antes que uma transação
+seja finalizada.
+
+
+: **TTMDODataSet.TransactionFree: TNotifyEvent***
+Ocorre depois que uma transação é liberada da memória.
+
+Escreva no evento AfterTransactionEnd ações específicas para depois que uma
+transação é liberada da memória.
+
+
+=== Métodos ===
+
+
+: **TTMDODataSet.BatchInput(InputObject: TMDOBatchInput)**
+Executa a query parametrizada no SQL para entrada no objeto referenciado.
+
+
+: **TTMDODataSet.BatchOutput(OutputObject: TMDOBatchOutput)**
+Fornece a saída da query selecionada no SQL para o objeto OutputObject referenciado.
+
+
+: **TTMDODataSet.ExecSQL**
+Executa a expressão SQL da query.
+
+Chame ExecSQL para executar a expressão SQL atualmente definida na propriedade SQL.
+Utilize ExecSQL para executar pesquisas que não retornam um cursor de dados (como
+INSERT, UPDATE, DELETE e CREATE TABLE).
+
+Obs.: Para expressões SELECT, chame o método Open ao invés de ExecSQL.
+
+ExecSQL prepara a expressão na propriedade SQL para execução se ela ainda não foi
+preparada. Para melhorar a performance, um aplicativo deve chamar Prepare antes de
+chamar ExecSQL pela primeira vez.
+
+
+: **TTMDODataSet.Prepare**
+Prepara todas queries no dataset a serem executados.
+
+
+: **TTMDODataSet.UnPrepare**
+Reinicia o estado das queries internas do dataset.
+
+

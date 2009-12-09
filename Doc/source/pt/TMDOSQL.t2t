@@ -1,0 +1,210 @@
+
+== TMDOSQL ==
+**Unit MDOSQL**
+TMDOSQL fornece um objeto para execução de expressão SQL Firebird com um mínimo de
+sobrecarga.
+
+TMDOSQL não tem interface com objetos de controle data-aware e é unidirecional.
+
+
+=== Propriedades ===
+
+
+: **TMDOSQL.Bof: Boolean**
+Indica se uma query está no início do dataset.
+
+
+: **TMDOSQL.Database: TMDODatabase**
+Ajusta ou retorna o database associado com a query.
+
+
+: **TMDOSQL.DBHandle: PISC_DB_HANDLE**
+Especifica o handle do database para a query.
+
+: **TMDOSQL.Eof: Boolean**
+Indica se a query está no final do dataset.
+
+Utilize a propriedade Eof para determinar se uma query está ou não no final do
+dataset e se  a query retornou linhas no resultado.
+
+Em adição, se a propriedade é True imediatamente depois a query é aberta, então isto
+significa que o dataset está vazio.
+
+: **TMDOSQL.FieldIndex[FieldName: String]: Integer**
+Retorna o índice do campo nomeado.
+
+: **TMDOSQL.Fields[const Idx: Integer]: TMDOSQLVAR**
+Retorna o campo XSQLVAR.
+
+: **TMDOSQL.GenerateParamNames: Boolean**
+Gera uma lista de nome de parametros da query.
+
+Ajuste para True para ter uma lista de nome de parametros gerada da query.
+
+
+: **TMDOSQL.GoToFirstRecordOnExecute: Boolean**
+Vai para o primeiro registro no result set aberto.
+
+Utilize a propriedade GoToFirstRecordOnExecute para ir para o primeiro registro no
+result set aberto. Por padrão, esta propriedade é ajustada para True.
+GoToFirstRecordOnExecute existe primeiramente para uso no TMDODataSet o qual ajusta
+este valor paraFAlse para seus TMDOSQL internos.
+
+: **TMDOSQL.Handle: TISC_STMT_HANDLE**
+Especifica o handle da query.
+
+: **TMDOSQL.Open**
+Determina se o dataset está aberto.
+
+: **TMDOSQL.ParamCheck: Boolean**
+Especifica se a lista de parametros para uma query SQL é gerada se a propriedade SQL
+é alterada em tempo de execução.
+
+Esta propriedade é útil para expressões DDL (Data Definition Language) que contém
+parametros como parte da expressão DDL e que não tem parametros para a query
+TMDOSQL. Por exemplo, a expressão DDL para criar uma stored procedure pode conter
+expressões de parametro que são parte da stored procedure. Ajuste ParamCheck para
+False para prevenir que estes parametros sejam confundidos por parametros da query
+TMDOSQL que executa a expressão DDL.
+
+Um aplicativo que não utiliza queries parametrizadas podem escolher ajustar
+ParamCheck para False, mas de outra forma deve ser marcado como True.
+
+: **TMDOSQL.Params: TMDOSQLDA**
+Retorna os parametros XSQLDA.
+
+: **TMDOSQL.Plan: String**
+Retorna o plan para a query.
+
+Utilize a propriedade Plan para visualizar o plan de execução da query uma vez que a
+query foi preparada.
+
+: **TMDOSQL.Prepared: Boolean**
+Indica se a query foi preparada.
+
+: **TMDOSQL.RecordCount: Integer**
+Retorna a quantidade de registros atuais em uma query.
+
+Utilize a propriedade RecordCount para ver quantos registros foram retornados pela
+query. Se o result set retornar 100 linhas, RecordCount irá retornar 100 linhas
+somente depois que todos os registros forem visitados. Isto é, após olhar o primeiro
+registro, RecordCount é 1, e assim por diante.
+
+: **TMDOSQL.RowsAffected: Integer**
+Retorna o número de linhas afetadas.
+
+Esta propriedade é útil para INSERT, DELETE e UPDATE.
+
+: **TMDOSQL.SQL: TStrings**
+Ajusta a query SQL a ser executada.
+
+Utilize a propriedade SQL para visualizar ou escrever a query SQL a ser executada.
+
+: **TMDOSQL.SQLType: TMDOSQLTypes read FSQLType**
+Retorna o tipo da query a ser executada.
+
+``` type TMDOSQLTypes = set of (SQLUnknown, SQLSelect, SQLInsert, SQLUpdate,
+SQLDelete, 
+``` SQLDDL, SQLGetSegment, SQLPutSegment, SQLExecProcedure, SQLStartTransaction,
+SQLCommit, 
+``` SQLRollback, SQLSelectForUpdate, SQLSetGenerator);
+
+
+Utilize SQLType para determinar o tipo da query a ser executada. Os tipos de query
+incluem:
+
+|| Tipo | Descrição |
+|SQLCommit | Aplica commit em uma transação ativa |
+|SQLDDL | Modifica o metadata do database |
+|SQLDelete | Remove linhas em uma tabela ou no conjunto de um cursor ativo |
+|SQLExecProcedure | Chama uma stored procedure |
+|SQLGetSegment | Lê um segumento de um Blob aberto |
+|SQLInsert | Adiciona uma ou mais linhas à uma tabela específica | 
+|SQLPutSegment | Escreve um segmento Blob |
+|SQLRollback | Restaura o database para o seu estado inicial anterior da transação
+corrente |
+|SQLSelectForUpdate | Usado para updates posicionados |
+|SQLSetGenerator | Ajusta um novo valor para um generator existente |
+|SQLSelect | Recupera dados de uma ou mais tabelas |
+|SQLStartTransaction | Inicia uma nova transação em um ou mais base de dados |
+|SQLUnknown | Tipo SQL desconhecido |
+|SQLUpdate | Altera dados em todo ou parte de uma linha existente em uma tabela,
+view ou set de cursor ativo |
+
+: **TMDOSQL.Transaction: TMDOTransaction**
+Ajusta ou retorna a transação a ser utilizada pela query.
+
+: **TMDOSQL.TRHandle: PISC_TR_HANDLE**
+Especifica o handle da transação para a query.
+
+: **TMDOSQL.UniqueRelationName: String**
+Indica o único nome de relação. 
+
+
+=== Eventos ===
+
+
+: **TMDOSQL.OnSQLChanging: TNotifyEvent**
+Ocorre quanto a query SQL é modificada.
+
+Escreva para o evento OnSQLChanging ações específicas quando uma query for
+modificada. Se uma exceção é levantada neste evento, a query não foi modificada.
+
+
+=== Métodos ===
+: **TMDOSQL.BatchInput(InputObject: TMDOBatchInput)**
+Executa uma query parametrizada no SQL para entradas em um objeto input referenciado.
+
+: **TMDOSQL.BatchOutput(OutputObject: TMDOBatchOutput)**
+Saída da query selecionada em um SQL para o objeto OutputObject referenciado.
+
+: **TMDOSQL.Call(ErrCode: ISC_STATUS; RaiseError: Boolean): ISC_STATUS**
+Retorna uma mensagem de erro baseado no código de erro.
+
+Call é um método interno utilizado para fazer chamadas à API do Firebird, e dar-lhe
+opções de levantar execção ou retornar um erro baseado no valor de RaiserError.
+
+: **TMDOSQL.CheckClosed**
+Levanta uma exceção se a query não estiver fechada.
+
+: **TMDOSQL.CheckOpen**
+Levanta uma exceção se a query não estiver aberta.
+
+: **TMDOSQL.CheckValidStatement**
+Levanta uma exceção se a query não tem uma expressão válida.
+
+: **TMDOSQL.Close**
+Fecha a query.
+
+: **TMDOSQL.Create(AOwner:TComponent)**
+Cria uma instancia do componente TMDOSQL.
+
+: **TMDOSQL.Current: TMDOSQLDA**
+Retorna um descritor do SQL extendido para o registro corrente.
+
+: **TMDOSQL.Destroy**
+Libera todos recursos associado com esta instancia.
+
+Não chame Destroy diretamente no aplicativo. Normalmente a destruição dos objetos é
+manipulada automaticamente pelo Delphi. Se um aplicativo cria sua própria instancia
+de um objeto, entretanto, o aplicativo deve chamar Free, o qual verifica se o objeto
+já não foi liberado antes de chamar Destroy.
+
+: **TMDOSQL.ExecQuery**
+Executa uma query SQL.
+
+: **TMDOSQL.FieldByName[FieldName: String]: TMDOSQLVAR**
+Retorna campos XSQLVAR pelo nome.
+
+: **TMDOSQL.FreeHandle**
+Libera recursos do Firebird associdados com a query.
+
+: **TMDOSQL.GetUniqueRelationName: String**
+Pega o nome de relação único.
+
+: **TMDOSQL.Next: TMDOSQLDA**
+Retorna um descritor do SQL extendido para o próximo registro.
+
+: **TMDOSQL.Prepare**
+Prepara uma query para execução.
+

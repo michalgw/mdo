@@ -1,0 +1,45 @@
+
+== TMDOBatch ==  
+**Unit MDOSQL**
+
+Este objeto é usado para oferecer propriedades e método para uso com os objetos
+TMDOBatchInput e TMDOBatchOutPut, os quais tornam possíveis a entrada e saída 
+de dados em qualquer formato virtualmente. 
+
+Descendentes desta classe podem especificar um nome de arquivo (para entrada ou 
+saída), e um objeto TMDOSQLDA representando um registro ou parametros. O método
+ReadFile é chamado antes de processar a entrada ou saída.
+
+
+=== Propriedades ===
+
+: **TMDOBatch.Columns: TMDOSQLDA**
+Usado para recuperar colunas XSQLDA.
+
+: **TMDOBatch.Filename: String**
+Ajusta ou exibe o nome do nome de arquivo externo.
+
+: **TMDOBatch.Params: TMDOSQLDA**
+Usado para retornar parametros XSQLDA.
+
+
+=== Métodos ===
+
+: **TMDOBatch.ReadyFile** 
+Procedure para preparar o arquivo para entrada ou saída.
+
+
+====================
+
+== TMDOBatchInput ==
+**Unit MDOSQL**
+
+Objeto utilizado para abstração de todas entradas batch. Provê propriedades e métodos úteis para
+uso de entradas batch.
+
+=== Métodos ===
+
+: **TMDOBatchInput.ReadParameters: Boolean**
+
+Função para ler parametros de entrada XSQLDA. Sua chamada lê a entrada de parametros da área do descritor SQL extendido (XSQLDA) de um arquivo especificado.
+

@@ -1,0 +1,51 @@
+
+== TMDODSBlobStream ==
+**Unit MDOCustomDataSet**
+
+TMDODSBlobStream é um objeto interno usado pelo DataSet em processo de criação de fluxo de Blob.
+
+
+=== Métodos ===
+
+: **TMDODSBlobStream.Create(AField: TField ABlobStream: TMDOBlobStream; Mode: TBlobStreamMode)**
+Reinicia o fluxo para o início do Blob.
+
+
+``type TBlobStreamMode = (bmRead, bmWrite, bmReadWrite);``
+
+Chame Create para iniciar o fluxo para o início do Blob. Dependendo do modo, ele também trunca o fluxo Blob.
+
+
+: **TMDODSBlobStream.Read(var Buffer; Count: Longint): Longint**
+Lê o número de requisição de bytes do Blob.
+
+Utilizado para ler dados de um Blob quando o número de bytes no dado do campo não é conhecido. 
+
+Buffer deve ter ao menos Count bytes alocados para assegurar o dado que foi lido do campo.
+
+Read transfere Count bytes do dado Blob no Buffer, inicia na posição atual, e então avança pelo número de bytes atualmente transferidos. Read retorna o número de bytes atualmente transferidos ( o qual pode ser menor que o número requisitado no Count).
+
+Read verifica a propriedade Transliterate do campo, e converte o dado em ANSI do character set especificado pelo dataset se Transliterate é true.
+
+Todos os outros métodos data-reading de um fluxo Blob (ReadBuffer, ReadComponent) chamam Read para fazer sua leitura.
+
+Obs: Não chame Read quando o TMDODSBlobStream for criado no modo bmWrite.
+
+: **TMDODSBlobStream.Seek(Offset: Longint; Origin: Word): Longint**
+Reinicia a posição atual do objeto TMDODSBlobStream.
+
+Utilize Seek para mover a posição atual dentro do Blob para o indicado no offset. Seek permite um aplicativo ler ou escrever em uma localização dentro do blob.
+
+O parametro Origin indica como interpretar o parametro Offset. Origin deve ser um dos seguintes valores:
+
+|| Valor | Descrição |
+| soFromBeginning | Offset parte do início do blob. Seek move para a posição do Offset. Offset deve ser >= 0. |
+| soFromCurrent | Offset parte da posição atual do blob. Seek move para posição atual + offset |
+| soFromEnd | Offset parte do fim do blob. Offset deve ser <= 0 para indicar um número de bytes antes do fim do blob. Seek retornará o novo valor da propriedade Position, a nova posição atual no blob. |
+
+: **TMDODSBlobStream.SetSize(NewSize: Long)**
+Ajusta o tamanho do blob para o tamnho requisitado.
+
+
+: **TMDODSBlobStream.Write(const Buffer; Count: Longint): Longint**
+Ajusta o campo para ser modificado, escre o número de bytes requisitados ao fluxo blob, e dispara o evento OnFieldChange.

@@ -1,0 +1,5 @@
+
+== EMDOFirebirdError == 
+**Unit MDO**
+
+EMDOFirebirdError é utilizado para levantar erros do servidor.

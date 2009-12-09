@@ -1,0 +1,82 @@
+
+== Procedures & Functions ==
+
+=== Unit MDO ===
+
+: **MDOAlloc(var P; OldSize, NewSize: Integer)**
+Aloca ou desaloca memória para o tamanho passado, e reinicializa a nova memória para zero.
+
+: **CheckStatusVector(ErrorCodes: array of ISC_STATUS): Boolean**
+Verifica o Status Vector.
+
+: **MDOError(ErrMess: EMDOClientError; const Args: array of const)**
+Retorna a mensagem de erro para o código de erro especificado. Utilize esta procedure para localizar uma mensagem de erro apropriada para um erro específico e levantar uma exceção EMDOClientError.
+
+: **MDODataBaseError**
+Interpreta o SQLCode e o status do MDOErrorCode e envia para uma exceção EMDOFirebirdError. Utilize esta procedure para localizar no Status Vector e interpretar o SQLCode e status do MDOErrorCode, então construa a string de status, e passe para a exceção EMDOFirebirdError.
+
+: **SetMDODataBaseErrorMessages(Value: TMDODataBaseErrorMessages)**
+Lhe permite escolher a mensagem de erro que você deseja ver.
+
+```
+type
+  TMDODataBaseErrorMessage =(ShowSQLCode, ShowFBMessage, ShowSQLMessage);
+  TMDODataBaseErrorMessages = set of TMDODataBaseErrorMessage;
+```
+
+Utilize a procedure para escolher a mensagem de erro que deseja. As opões disponíveis estão definidas no TMDODataBaseErrorMessages.
+
+
+: **GetMDODataBaseErrorMessages: TMDODataBaseErrorMessages**
+Retorna a configuração da mensagem de erro atual.
+
+```
+type
+  TMDODataBaseErrorMessage =(ShowSQLCode, ShowFBMessage, ShowSQLMessage);
+  TMDODataBaseErrorMessages = set of TMDODataBaseErrorMessage;
+```
+
+: **StatusVector: PISC_STATUS**
+Recupera o Status Vector thread-specific do thread-local armazenado.
+
+: **StatusVectorArray: PStatusVector**
+Recupera um ponteiro para o array do Status Vector.
+
+: **StatusVectorAsText: String**
+Captura o Status Vector e retorna como uma string formatada.
+
+
+
+=== Unit MDOIntf ===
+
+
+: **LoadFBInstallLibrary**
+Carrega IBInstall.DLL na memória. Utilizado para carregar a biblioteca na memória e resolver os respectivos pontos de entrada ao respectivo ponteiro da procedure dentro da unit.
+
+: **LoadFBLibrary**
+Carrega a biblioteca GDS32.DLL ou FBCLIENT.DLL na memória e resolve os pontos de entrada respectivos aos ponteiros da procedure dentro da unit.
+
+A biblioteca FBCLIENT.DLL é utilizada por padrão, mas também há suporte à bibliteca GDS32.DLL. Se você deseja alternar entre um e outro você pode configurar no arquivo de diretivas de compilação MDO.INC, onde FB10 representa GDS32 e FB15 representa FBCLIENT. Esta alteração também pode ser feita em tempo de projeto no objeto database, alterando sua propriedade ClientLib.
+
+: **FreeFBInstallLibrary**
+Libera a biblioteca IBInstall.DLL da memória previamente carregada.
+
+: **FreeFBLibrary**
+Libera a biblioteca GDS32.DLL ou FBCLIENT.DLL da memória previamente carregada. 
+
+
+: **CheckFBInstallLoaded**
+Tenta carregar IBInstall.DLL na memória se já não estiver carregada. Se não conseguir será levantada uma exceção.
+
+
+: **CheckFBLoaded**
+Tenta carregar GDS32.DLL ou FBCLIENT.DLL na memória se já não estiver carregada. Se não conseguir será levantada uma exceção.
+
+: **GetFBClientVersion: Integer**
+Retorna a maior versão do cliente Firebird.
+
+
+=== Unit MDOSQLMonitor ===
+
+: **DisableMonitoring**
+Desliga o monitoramento de SQL.

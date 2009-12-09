@@ -1,0 +1,33 @@
+
+== TMDOOutputDelimitedFile ==
+**Unit MDOBatch**
+
+
+TMDOInputDelimitedFile processa a saída de dados em batch de arquivos delimitados. 
+
+
+=== Propriedades ===
+
+: **TMDOOutputDelimitedFile.ColDelimiter: String**
+Ajusta a coluna delimitadora para o arquivo de saída.
+
+: **TMDOOutputDelimitedFile.OutputTitles: Boolean**
+Ajustado para True colocará o título no topo do arquivo.
+
+: **TMDOOutputDelimitedFile.RowDelimiter: String**
+Ajusta a linha delimitadora para a saída de dados.
+
+
+=== Métodos ===
+
+: **TMDOOutputDelimitedFile.Destroy**
+Destrói a instancia do TMDOOutputDelimitedFile.
+
+Não chame Destroy diretamente em uma aplicação. Ao invés disto chame Free. Free verificará se o objeto já não foi liberado antes de chamar Destroy.
+
+
+: **TMDOOutputDelimitedFile.ReadyFile**
+Prepara a saída para o XSQLDA.
+
+: **TMDOOutputDelimitedFile.WriteColumns: Boolean**
+Ajustado para True para saída de dados em colunas XSQLDA.
