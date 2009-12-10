@@ -17,7 +17,7 @@
   Component for data export
 }
 
-{$I ..\mdo.inc}
+{$I ..\MDO.inc}
 
 unit MDOCustomExport;
 

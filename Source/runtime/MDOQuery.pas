@@ -29,7 +29,7 @@
 
 unit MDOQuery;
 
-{$I ..\mdo.inc}
+{$I ..\MDO.inc}
 
 interface
 

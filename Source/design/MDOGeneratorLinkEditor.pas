@@ -14,7 +14,7 @@
 
 unit MDOGeneratorLinkEditor;
 
-{$I ..\mdo.inc}
+{$I ..\MDO.inc}
 
 interface
 

@@ -17,7 +17,7 @@
   @created(Indefinido)
   @lastmod(10 Dec 2003) }
 
-{$I ..\mdo.inc}
+{$I ..\MDO.inc}
 
 unit MDOHTMLDataExport;
 

@@ -29,7 +29,7 @@
 
 unit MDOHeader;
 
-{$I ..\mdo.inc}
+{$I ..\MDO.inc}
 
 interface
 

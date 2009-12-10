@@ -29,7 +29,7 @@
 
 unit MDOEventsEditor;
 
-{$I ..\mdo.inc}
+{$I ..\MDO.inc}
 
 interface
 

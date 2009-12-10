@@ -30,7 +30,7 @@ unit MDOServiceEditor;
 
 interface
 
-{$I ..\mdo.inc}
+{$I ..\MDO.inc}
 
 uses
   {$IFDEF MDO_FPC}

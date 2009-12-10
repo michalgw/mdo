@@ -29,7 +29,7 @@
 
 unit MDOUpdateSQL;
 
-{$I ..\mdo.inc}
+{$I ..\MDO.inc}
 
 interface
 

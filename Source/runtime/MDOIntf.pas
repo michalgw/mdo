@@ -29,7 +29,7 @@
 
 unit MDOIntf;
 
-{$I ..\MDO.INC}
+{$I ..\MDO.inc}
 
 interface
 
