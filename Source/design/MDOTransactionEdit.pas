@@ -29,7 +29,7 @@
 
 unit MDOTransactionEdit;
 
-{$I ..\mdo.inc}
+{$I ..\MDO.inc}
 
 interface
 

@@ -36,7 +36,7 @@
   later software
 }
 
-{$I ..\mdo.inc}
+{$I ..\MDO.inc}
 
 unit MDOServices;
 

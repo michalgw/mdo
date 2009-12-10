@@ -29,7 +29,7 @@
 
   }
 
-{$I ..\mdo.inc}
+{$I ..\MDO.inc}
 
 unit MDOMisc;
 

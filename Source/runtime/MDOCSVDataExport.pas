@@ -17,7 +17,7 @@
   Component for data export as CSV
 }
 
-{$I ..\mdo.inc}
+{$I ..\MDO.inc}
 
 unit MDOCSVDataExport;
 

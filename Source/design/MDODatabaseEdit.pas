@@ -34,7 +34,7 @@
 
 unit MDODatabaseEdit;
 
-{$I ..\mdo.inc}
+{$I ..\MDO.inc}
 
 interface
 
