@@ -105,7 +105,8 @@ type
     property AfterTransactionEnd;
     property BeforeDatabaseDisconnect;
     property BeforeTransactionEnd;
-    property BufferChunks;
+    property BooleanFields;
+	property BufferChunks;
     property CachedUpdates;
     property Constraints stored ConstraintsStored;
     property DatabaseFree;
