@@ -135,6 +135,13 @@ type
   published
     property Size default 8;
   end;
+
+  { TMDOBooleanField }
+
+  TMDOBooleanField = class(TBooleanField)
+  protected
+    procedure SetAsBoolean(AValue: Boolean); override;
+  end;
   
   TMDODataLink = class (TDetailDataLink)
   private
@@ -193,6 +200,7 @@ type
     FBEnd: DWord;
     FBlobCacheOffset: Integer;
     FBlobStreamList: TList;
+    FBooleanFields: Boolean;
     FBPos: DWord;
     FBufferCache: PChar;
     FBufferChunks: Integer;
@@ -354,6 +362,7 @@ type
     procedure InternalSetToRecord(Buffer: PChar); override;
     procedure InternalUnPrepare; virtual;
     function IsCursorOpen: Boolean; override;
+    function IsBooleanField(AField, ARelation: String): Boolean;
 {$IFNDEF MDO_FPC}
     procedure PSEndTransaction(Commit: Boolean); override;
     function PSExecuteStatement(const ASQL: string; AParams: TParams; 
@@ -388,6 +397,7 @@ type
             FBeforeDatabaseDisconnect write FBeforeDatabaseDisconnect;
     property BeforeTransactionEnd: TNotifyEvent read FBeforeTransactionEnd
             write FBeforeTransactionEnd;
+    property BooleanFields: Boolean read FBooleanFields write FBooleanFields;
     property BufferChunks: Integer read FBufferChunks write SetBufferChunks;
     property CachedUpdates: Boolean read FCachedUpdates write SetCachedUpdates;
     property DatabaseFree: TNotifyEvent read FDatabaseFree write FDatabaseFree;
@@ -541,6 +551,7 @@ type
     property BeforePost;
     property BeforeScroll;
     property BeforeTransactionEnd;
+    property BooleanFields;
     property BufferChunks;
     property CachedUpdates;
     property DatabaseFree;
@@ -579,7 +590,7 @@ type
   end;
   
 const
-
+  MDO_DEFAULT_BOOL_DOMAIN = 'T_BOOLEAN';
 {$IFDEF MDO_FPC}
   DefaultFieldClasses : Array [TFieldType] of TFieldClass =
     ( { ftUnknown} Tfield,
@@ -587,7 +598,7 @@ const
       { ftSmallint} TSmallIntField,
       { ftInteger} TLongintField,
       { ftWord} TWordField,
-      { ftBoolean} TBooleanField,
+      { ftBoolean} TMDOBooleanField,
       { ftFloat} TFloatField,
       { ftCurrency} TCurrencyField,
       { ftBCD} TMDOBCDField,
@@ -630,7 +641,7 @@ DefaultFieldClasses: array[TFieldType] of TFieldClass = (
     TSmallintField,     { ftSmallint }
     TIntegerField,      { ftInteger }
     TWordField,         { ftWord }
-    TBooleanField,      { ftBoolean }
+    TMDOBooleanField,   { ftBoolean }
     TFloatField,        { ftFloat }
     TCurrencyField,     { ftCurrency }
     TMDOBCDField,       { ftBCD }
@@ -675,8 +686,10 @@ DefaultFieldClasses: array[TFieldType] of TFieldClass = (
     );
 {$ENDIF}
 
-{$IFNDEF MDO_FPC}
 var
+  { Domain name for boolean field }
+  MDO_BOOL_DOMAIN: String = MDO_DEFAULT_BOOL_DOMAIN;
+{$IFNDEF MDO_FPC}
   CreateProviderProc: function(DataSet: TMDOCustomDataSet): IProvider = nil;
 {$ENDIF}
 
@@ -812,6 +825,20 @@ begin
   Result := 8;
 end;
 
+
+{ TMDOBooleanField }
+
+procedure TMDOBooleanField.SetAsBoolean(AValue: Boolean);
+var
+  buf: Integer;
+begin
+  if AValue then
+    buf := 1
+  else
+    buf := 0;
+  SetData(@buf);
+end;
+
 { TMDODataLink }
 
 {
@@ -904,6 +931,7 @@ begin
     if AOwner is TMDOTransaction then
       Transaction := TMDOTransaction(AOwner);
   FGeneratorLink := TMDOGeneratorLink.Create(Self);
+  FBooleanFields := False;
 end;
 
 destructor TMDOCustomDataSet.Destroy;
@@ -2397,6 +2425,7 @@ procedure TMDOCustomDataSet.InternalInitFieldDefs;
                  'and R.RDB$FIELD_SOURCE = F.RDB$FIELD_NAME '+ {do not localize}
                  'and ((not F.RDB$COMPUTED_BLR is NULL) or ' + {do not localize}
                  '     (not F.RDB$DEFAULT_VALUE is NULL)) '; {do not localize}
+
   var
     FieldType: TFieldType;
     FieldSize: Word;
@@ -2551,7 +2580,10 @@ begin
           SQL_SHORT:
           begin
             if (sqlscale = 0) then
-              FieldType := ftSmallInt
+              if (FBooleanFields and IsBooleanField(FieldName, RelationName)) then
+                FieldType := ftBoolean
+              else
+                FieldType := ftSmallInt
             else begin
               FieldType := ftBCD;
               FieldPrecision := 4;
@@ -3247,6 +3279,30 @@ end;
 function TMDOCustomDataSet.IsCursorOpen: Boolean;
 begin
   result := FOpen;
+end;
+
+function TMDOCustomDataSet.IsBooleanField(AField, ARelation: String): Boolean;
+const
+  CheckBoolSQL = 'SELECT COUNT(*) ' +
+                 'FROM RDB$RELATION_FIELDS RF ' +
+                 'WHERE (RF.RDB$FIELD_NAME = :FIELD) ' +
+                 'AND (RF.RDB$RELATION_NAME = :RELATION) ' +
+                 'AND (RF.RDB$FIELD_SOURCE = :BOOLNAME) ';
+var
+  QueryCB: TMDOSQL;
+begin
+  QueryCB := TMDOSQL.Create(Self);
+  QueryCB.Database := DataBase;
+  QueryCB.Transaction := Database.InternalTransaction;
+  QueryCB.SQL.Text := CheckBoolSQL;
+  QueryCB.Prepare;
+  QueryCB.ParamByName('FIELD').AsString := AField;
+  QueryCB.ParamByName('RELATION').AsString := ARelation;
+  QueryCB.ParamByName('BOOLNAME').AsString := MDO_BOOL_DOMAIN;
+  QueryCB.ExecQuery;
+  Result := (QueryCB.Fields[0].AsInteger = 1);
+  QueryCB.Close;
+  QueryCB.Free;
 end;
 
 function TMDOCustomDataSet.IsSequenced: Boolean;
@@ -4230,7 +4286,7 @@ end;
 
 {$IFDEF MDO_FPC}
 initialization
-  RegisterClasses([TMDOStringField, TMDOBCDField]);
+  RegisterClasses([TMDOStringField, TMDOBCDField, TMDOBooleanField]);
 {$ENDIF}
 
 end.

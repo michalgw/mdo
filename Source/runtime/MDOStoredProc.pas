@@ -92,6 +92,7 @@ type
     property AfterTransactionEnd;
     property BeforeDatabaseDisconnect;
     property BeforeTransactionEnd;
+	property BooleanFields;
     property DatabaseFree;
     property Filtered;
     property OnFilterRecord;

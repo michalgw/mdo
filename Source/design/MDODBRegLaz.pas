@@ -279,8 +279,8 @@ begin
      TMDOHTMLDataExport
     ]);
 
-  RegisterClasses([TMDOStringField, TMDOBCDField]);
-  //RegisterFields([TMDOStringField, TMDOBCDField]);
+  RegisterClasses([TMDOStringField, TMDOBCDField, TMDOBooleanField]);
+  //RegisterFields([TMDOStringField, TMDOBCDField, TMDOBooleanField]);
   RegisterPropertyEditor(TypeInfo(TMDOFileName), TMDODatabase, 'DatabaseName',
     TMDOFileNameProperty); {do not localize}
   RegisterPropertyEditor(TypeInfo(string), TMDOStoredProc, 'StoredProcName',
@@ -315,7 +315,7 @@ begin
   RegisterComponentEditor(TMDOQuery, TMDOQueryEditor);
   RegisterComponentEditor(TMDOStoredProc, TMDOStoredProcEditor);
 
-  RegisterNoIcon([TMDOStringField, TMDOBCDField]);
+  RegisterNoIcon([TMDOStringField, TMDOBCDField, TMDOBooleanField]);
 end;
 
 { TMDOFileNameProperty }

@@ -155,6 +155,7 @@ type
     property AfterTransactionEnd;
     property BeforeDatabaseDisconnect;
     property BeforeTransactionEnd;
+    property BooleanFields;
     property BufferChunks;
     property CachedUpdates;
     property Constraints stored ConstraintsStored;
@@ -1100,7 +1101,10 @@ begin
               begin
                 sqlscale := Query.Current.ByName('RDB$FIELD_SCALE').AsInteger; {do not localize}
                 if (sqlscale = 0) then
-                  DataType := ftSmallInt
+                  if (BooleanFields and IsBooleanField(Name, FTableName)) then
+                    DataType := ftBoolean
+                  else
+                    DataType := ftSmallInt
                 else
                 begin
                   DataType := ftBCD;
