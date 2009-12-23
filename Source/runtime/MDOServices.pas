@@ -300,19 +300,22 @@ type
     procedure SetServiceStartOptions; override;
   end;
   
-  TStatOption = (DataPages, DbLog, HeaderPages, IndexPages, SystemRelations);
+  TStatOption = (DataPages, DbLog, HeaderPages, IndexPages, SystemRelations,
+    RecordVersions, StatTables);
   TStatOptions = set of TStatOption;
 
   TMDOStatisticalService = class (TMDOControlAndQueryService)
   private
     FDatabaseName: string;
     FOptions: TStatOptions;
+    FTableNames: String;
     procedure SetDatabaseName(const Value: string);
   protected
     procedure SetServiceStartOptions; override;
   published
     property DatabaseName: string read FDatabaseName write SetDatabaseName;
     property Options: TStatOptions read FOptions write FOptions;
+    property TableNames: String read FTableNames write FTableNames;
   end;
   
 
@@ -1404,10 +1407,16 @@ begin
     param := param or isc_spb_sts_idx_pages;
   if (SystemRelations in Options) then
     param := param or isc_spb_sts_sys_relations;
+  if (RecordVersions in Options) then
+    param := param or isc_spb_sts_record_versions;
+  if (StatTables in Options) then
+    param := param or isc_spb_sts_table;
   Action := isc_action_svc_db_stats;
   ServiceStartParams  := Char(isc_action_svc_db_stats);
   ServiceStartAddParam (FDatabaseName, SPBConstantValues[isc_spb_dbname]);
   ServiceStartAddParam (param, SPBConstantValues[isc_spb_options]);
+  if (StatTables in Options) then
+    ServiceStartAddParam(FTableNames, SPBConstantValues[isc_spb_command_line]);
 end;
 
 { TMDOBackupService }
