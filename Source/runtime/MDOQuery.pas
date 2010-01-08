@@ -108,7 +108,9 @@ type
     property BooleanFields;
 	property BufferChunks;
     property CachedUpdates;
-    property Constraints stored ConstraintsStored;
+    {$IFNDEF MDO_FPC}
+	property Constraints stored ConstraintsStored;
+	{$ENDIF}
     property DatabaseFree;
     property DataSource read GetDataSource write SetDataSource;
     property Filtered;
