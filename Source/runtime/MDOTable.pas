@@ -158,7 +158,9 @@ type
     property BooleanFields;
     property BufferChunks;
     property CachedUpdates;
+{$IFNDEF MDO_FPC}
     property Constraints stored ConstraintsStored;
+{$ENDIF}
     property DatabaseFree;
     property DefaultIndex: Boolean read FDefaultIndex write FDefaultIndex 
             default True;
