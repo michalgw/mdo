@@ -5,7 +5,7 @@
     <Name Value="mdolaz"/>
     <Author Value="Copyright(c) 2002-2005, The Mercury Team, (Free Pascal / Lazarus port by Michal Gawrycki)"/>
     <CompilerOptions>
-      <Version Value="8"/>
+      <Version Value="9"/>
       <PathDelim Value="\"/>
       <SearchPaths>
         <OtherUnitFiles Value="runtime\"/>
@@ -14,6 +14,7 @@
       <Parsing>
         <SyntaxOptions>
           <SyntaxMode Value="Delphi"/>
+          <UseAnsiStrings Value="False"/>
         </SyntaxOptions>
       </Parsing>
       <Other>
@@ -133,7 +134,7 @@
         <UnitName Value="MDOUpdateSQL"/>
       </Item27>
       <Item28>
-        <Filename Value="mdo.inc"/>
+        <Filename Value="MDO.inc"/>
         <Type Value="Include"/>
       </Item28>
     </Files>

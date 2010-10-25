@@ -482,7 +482,7 @@ begin
   CheckFBLoaded;
 
   FFBLoaded := True;
-  LoginPrompt := True;
+  LoginPrompt := False;
   FSQLObjects := TList.Create;
   FTransactions := TList.Create;
   FDBName := '';
