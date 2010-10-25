@@ -51,7 +51,9 @@ function EditMDOGeneratorLink(ADataSet: TMDODataSet): Boolean; overload;
 
 implementation
 
-{$IFNDEF MDO_FPC}
+{$IFDEF MDO_FPC}
+{$R *.lfm}
+{$ELSE}
 {$R *.DFM}
 {$ENDIF}
 
@@ -143,10 +145,5 @@ begin
     Result := True;
   end;
 end;
-
-{$IFDEF MDO_FPC}
-initialization
-  {$I MDOGeneratorLinkEditor.lrs}
-{$ENDIF}
 
 end.

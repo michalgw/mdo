@@ -103,7 +103,9 @@ function EdiTMDODatabase(ADatabase: TMDODatabase): Boolean;
 
 implementation
 
-{$IFNDEF MDO_FPC}
+{$IFDEF MDO_FPC}
+{$R *.lfm}
+{$ELSE}
 {$R *.DFM}
 {$ENDIF}
 
@@ -412,10 +414,5 @@ procedure TMDODatabaseEditForm.UserNameChange(Sender: TObject);
 begin
   AddParam('user_name', UserName.Text);
 end;
-
-{$IFDEF MDO_FPC}
-initialization
-  {$I MDODatabaseEdit.lrs}
-{$ENDIF}
 
 end.

@@ -57,7 +57,9 @@ function EditAlerterEvents(Events: TStrings): Boolean;
 
 implementation
 
-{$IFNDEF MDO_FPC}
+{$IFDEF MDO_FPC}
+{$R *.lfm}
+{$ELSE}
 {$R *.DFM}
 {$ENDIF}
 
@@ -95,10 +97,5 @@ begin
   for i := 1 to MaxEvents do
     cEvents.Cells[0, i - 1] := IntToStr(i);
 end;
-
-{$IFDEF MDO_FPC}
-initialization
-  {$I MDOEventsEditor.lrs}
-{$ENDIF}
 
 end.

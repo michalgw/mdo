@@ -60,6 +60,8 @@ function EditSQL(var SQLText: String; GetTableNamesPr: TGetTableNamesProc;
 
 implementation
 
+{$R *.lfm}
+
 function EditSQL(var SQLText: String; GetTableNamesPr: TGetTableNamesProc;
   GetFieldNamesPr: TGetFieldNamesProc): Boolean;
 begin
@@ -135,13 +137,10 @@ function TMDOSQLEditForm.Execute: Boolean;
 begin
   LoadTables;
   SynEditSQL.ClearAll;
-  SynEditSQL.Lines.Append(SQL);
+  SynEditSQL.Lines.Text := SQL;
   Result := (ShowModal = mrOk);
   SQL := SynEditSQL.Text;
 end;
-
-initialization
-  {$I MDOSQLEdit.lrs}
 
 end.
 

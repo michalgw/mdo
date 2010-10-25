@@ -118,12 +118,12 @@ object MDOSQLEditForm: TMDOSQLEditForm
     object ToolButtonS1: TToolButton
       Left = 47
       Top = 2
-      Width = 23
+      Width = 8
       Caption = 'ToolButtonS1'
       Style = tbsSeparator
     end
     object ToolButtonLoad: TToolButton
-      Left = 70
+      Left = 55
       Hint = 'Load from file'
       Top = 2
       Caption = 'ToolButtonLoad'
@@ -131,7 +131,7 @@ object MDOSQLEditForm: TMDOSQLEditForm
       OnClick = ToolButtonLoadClick
     end
     object ToolButtonSave: TToolButton
-      Left = 93
+      Left = 78
       Hint = 'Save to file'
       Top = 2
       Caption = 'ToolButtonSave'
@@ -146,7 +146,7 @@ object MDOSQLEditForm: TMDOSQLEditForm
     Width = 5
     Beveled = True
   end
-  object SynEditSQL: TSynEdit
+  inline SynEditSQL: TSynEdit
     Left = 175
     Height = 328
     Top = 24
@@ -161,7 +161,6 @@ object MDOSQLEditForm: TMDOSQLEditForm
     TabOrder = 4
     OnDragDrop = SynEditSQLDragDrop
     OnDragOver = SynEditSQLDragOver
-    BookMarkOptions.OnChange = nil
     Gutter.Width = 57
     Gutter.MouseActions = <    
       item
@@ -735,7 +734,7 @@ object MDOSQLEditForm: TMDOSQLEditForm
       'SynEditSQL'
     )
     BracketHighlightStyle = sbhsBoth
-    object TSynGutterPartList
+    inline TSynGutterPartList
       object TSynGutterMarks
         Width = 23
       end

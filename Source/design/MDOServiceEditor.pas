@@ -87,7 +87,9 @@ implementation
 
 uses TypInfo;
 
-{$IFNDEF MDO_FPC}
+{$IFDEF MDO_FPC}
+{$R *.lfm}
+{$ELSE}
 {$R *.dfm}
 {$ENDIF}
 
@@ -242,11 +244,6 @@ begin
         end;
     end;
 end;
-
-{$IFDEF MDO_FPC}
-initialization
-  {$I MDOServiceEditor.lrs}
-{$ENDIF}
 
 end.
 
