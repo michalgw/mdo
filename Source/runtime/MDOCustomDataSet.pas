@@ -3199,7 +3199,7 @@ begin
     end;
   end;
   if not (State in [dsCalcFields, dsFilter, dsNewValue]) then
-      DataEvent(deFieldChange, Longint(Field));
+      DataEvent(deFieldChange, PtrInt(Field));
 end;
 
 procedure TMDOCustomDataSet.InternalSetParamsFromCursor;

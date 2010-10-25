@@ -42,6 +42,10 @@ uses
   MDOUtils;
 
 type
+  {$IFNDEF MDO_FPC}
+  PtrInt			   = LongInt;
+  PtrUInt 			   = DWord;
+  {$ENDIF}
   Int                  = LongInt; { 32 bit signed }
   UInt                 = DWord;   { 32 bit unsigned }
   Long                 = LongInt; { 32 bit signed }
@@ -53,8 +57,8 @@ type
   ISC_LONG             = Long;    { 32 bit signed  }
   UISC_LONG            = ULong;   { 32 bit unsigned }
   ISC_INT64            = Int64;   { 64 bit signed  }
-  ISC_STATUS           = Long;    { 32 bit signed }
-  UISC_STATUS          = ULong;   { 32 bit unsigned}
+  ISC_STATUS           = PtrInt;    { 32 bit signed }
+  UISC_STATUS          = PtrUInt;   { 32 bit unsigned}
   Void                 = Pointer;
   { Delphi Pointer types }
   PPChar               = ^PChar;

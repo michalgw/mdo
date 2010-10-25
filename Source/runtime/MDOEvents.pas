@@ -121,7 +121,7 @@ end;
 
 procedure FBEventCallback( ptr: pointer; length: short; updated: PChar); cdecl;
 var
-  ThreadID: DWORD;
+  ThreadID: PtrUInt;
 begin
   { Handle events asynchronously in second thread }
   EnterCriticalSection( TMDOEvents( ptr).CS);
@@ -332,6 +332,7 @@ begin
     bufptr := @buffer[0];
     eventbufptr :=  @EventBuffer;
     resultBufPtr := @ResultBuffer;
+    {$IFNDEF MDO_64BIT}
     asm
       mov ecx, dword ptr [i]
       mov eax, dword ptr [bufptr]
@@ -349,6 +350,7 @@ begin
       add eax, 12
       add esp, eax
     end;
+    {$ENDIF}
     EventBufferlen := Buflen;
     FRegistered := true;
     QueueEvents;

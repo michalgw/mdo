@@ -103,7 +103,7 @@ type
     procedure SetTableTypes(const Value: TMDOTableTypes);
     procedure SwitchToIndex;
   protected
-    procedure DataEvent(Event: TDataEvent; Info: Longint); override;
+    procedure DataEvent(Event: TDataEvent; Info: PtrInt); override;
 {$IFNDEF MDO_FPC}
     procedure DefChanged(Sender: TObject); override;
 {$ENDIF}
@@ -429,7 +429,7 @@ begin
   InternalCreateIndex;
 end;
 
-procedure TMDOTable.DataEvent(Event: TDataEvent; Info: Longint);
+procedure TMDOTable.DataEvent(Event: TDataEvent; Info: PtrInt);
 begin
   if Event = dePropertyChange then begin
     if assigned(IndexDefs) then
