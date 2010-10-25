@@ -31,6 +31,8 @@ function LoginDialogEx(const DBName: String; var UserName, Passwd: String; UserN
 
 implementation
 
+{$R *.lfm}
+
 uses
   MDO;
 
@@ -60,7 +62,6 @@ begin
 end;
 
 initialization
-  {$I MDODBLogDlg.lrs}
   LoginDialogProc := @LoginDialog;
 
 end.

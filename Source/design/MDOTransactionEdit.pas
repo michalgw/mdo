@@ -77,13 +77,15 @@ function EdiTMDOtransaction(Atransaction: TMDOtransaction): Boolean;
 
 implementation
 
-{$IFNDEF MDO_FPC}
-
+{$IFDEF MDO_FPC}
+{$R *.lfm}
+{$ELSE}
 {$R *.DFM}
+{$ENDIF}
 
+{$IFNDEF MDO_FPC}
 uses
   LibHelp;
-
 {$ENDIF}
 
 
@@ -235,10 +237,5 @@ procedure TMDOTransactionEditForm.TransactionParamsExit(Sender: TObject);
 begin
   ParseParams;
 end;
-
-{$IFDEF MDO_FPC}
-initialization
-  {$I MDOTransactionEdit.lrs}
-{$ENDIF}
 
 end.

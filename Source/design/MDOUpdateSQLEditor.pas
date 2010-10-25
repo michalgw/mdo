@@ -164,7 +164,9 @@ function EditMDODataSet(ADataSet: TMDODataSet; GetTableNamesProc:
 
 implementation
 
-{$IFNDEF MDO_FPC}
+{$IFDEF MDO_FPC}
+{$R *.lfm}
+{$ELSE}
 {$R *.DFM}
 {$ENDIF}
 
@@ -1198,10 +1200,5 @@ begin
 end;
 
 { Event Handlers }
-
-{$IFDEF MDO_FPC}
-initialization
-  {$I MDOUpdateSQLEditor.lrs}
-{$ENDIF}
 
 end.
