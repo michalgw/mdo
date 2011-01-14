@@ -340,7 +340,14 @@ begin
       FText := SQL.Text;
     DataEvent(dePropertyChange, 0);
   end else
+  {$IFDEF MDO_FPC}
+  begin
+    FText := FParams.ParseSQL(SQL.Text, True);
+    FParams.Clear;
+  end;
+  {$ELSE}
     FText := FParams.ParseSQL(SQL.Text, False);
+  {$ENDIF}
   SelectSQL.Assign(SQL);
 end;
 
