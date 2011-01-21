@@ -429,7 +429,7 @@ end;
 procedure TMDOQuery.SetParamsFromCursor;
 var
   I: Integer;
-  DataSet: TDataSet;
+  ADataSet: TDataSet;
   
   procedure CheckRequiredParams;
   var
@@ -444,15 +444,15 @@ var
 begin
   if DataSource <> nil then
   begin
-    DataSet := DataSource.DataSet;
-    if DataSet <> nil then
+    ADataSet := DataSource.DataSet;
+    if ADataSet <> nil then
     begin
-      DataSet.FieldDefs.Update;
+      ADataSet.FieldDefs.Update;
       for I := 0 to FParams.Count - 1 do
         with FParams[I] do
           if not Bound then
           begin
-            AssignField(DataSet.FieldByName(Name));
+            AssignField(ADataSet.FieldByName(Name));
             Bound := False;
           end;
     end
