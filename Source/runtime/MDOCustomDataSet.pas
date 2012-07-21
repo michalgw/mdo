@@ -941,7 +941,7 @@ begin
     FreeAndNil(FDataLink);
     FreeAndNil(FBase);
     ClearBlobCache;
-    FBlobStreamList.Free;
+    FreeAndNil(FBlobStreamList);
     FreeMem(FBufferCache);
     FBufferCache := nil;
     FreeMem(FOldBufferCache);
@@ -1332,12 +1332,15 @@ procedure TMDOCustomDataSet.ClearBlobCache;
 var
   i: Integer;
 begin
-  for i := 0 to FBlobStreamList.Count - 1 do
+  if Assigned(FBlobStreamList) then
   begin
-    TMDOBlobStream(FBlobStreamList[i]).Free;
-    FBlobStreamList[i] := nil;
+    for i := 0 to FBlobStreamList.Count - 1 do
+    begin
+      TMDOBlobStream(FBlobStreamList[i]).Free;
+      FBlobStreamList[i] := nil;
+    end;
+    FBlobStreamList.Pack;
   end;
-  FBlobStreamList.Pack;
 end;
 
 procedure TMDOCustomDataSet.ClearCalcFields(Buffer: PChar);
