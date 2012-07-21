@@ -64,13 +64,11 @@ type
     procedure Disconnect; override;
     function GetParamsCount: Word;
     procedure InternalOpen; override;
-{$IFNDEF MDO_FPC}
     procedure PSExecute; override;
     function PSGetParams: TParams; override;
     function PSGetTableName: string; override;
     procedure PSSetCommandText(const CommandText: string); override;
     procedure PSSetParams(AParams: TParams); override;
-{$ENDIF}
     procedure SetFiltered(Value: Boolean); override;
     procedure SetPrepare(Value: Boolean);
     procedure SetPrepared(Value: Boolean);
@@ -368,7 +366,6 @@ begin
   SetPrepared(True);
 end;
 
-{$IFNDEF MDO_FPC}
 procedure TMDOStoredProc.PSExecute;
 begin
   ExecProc;
@@ -396,7 +393,6 @@ begin
     Params.Assign(AParams);
   Close;
 end;
-{$ENDIF}
 
 procedure TMDOStoredProc.ReadParamData(Reader: TReader);
 begin
