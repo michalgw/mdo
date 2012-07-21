@@ -71,13 +71,11 @@ type
     function GetParamsCount: Word;
     procedure InitFieldDefs; override;
     procedure InternalOpen; override;
-{$IFNDEF MDO_FPC}
     procedure PSExecute; override;
     function PSGetParams: TParams; override;
     function PSGetTableName: string; override;
     procedure PSSetCommandText(const CommandText: string); override;
     procedure PSSetParams(AParams: TParams); override;
-{$ENDIF}
     procedure SetFiltered(Value: Boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -288,7 +286,6 @@ begin
   InternalPrepare;
 end;
 
-{$IFNDEF MDO_FPC}
 procedure TMDOQuery.PSExecute;
 begin
   ExecSQL;
@@ -316,7 +313,6 @@ begin
     Params.Assign(AParams);
   Close;
 end;
-{$ENDIF}
 
 procedure TMDOQuery.QueryChanged(Sender: TObject);
 var

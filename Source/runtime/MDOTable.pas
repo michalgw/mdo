@@ -117,14 +117,12 @@ type
     procedure InternalOpen; override;
     procedure InternalRefresh; override;
     procedure InternalRefreshRow; override;
-{$IFNDEF MDO_FPC}
     function PSGetDefaultOrder: TIndexDef; override;
     function PSGetIndexDefs(IndexTypes: TIndexOptions): TIndexDefs; override;
     function PSGetKeyFields: string; override;
     function PSGetTableName: string; override;
     procedure PSSetCommandText(const CommandText: string); override;
     procedure PSSetParams(AParams: TParams); override;
-{$ENDIF}
     procedure SetFiltered(Value: Boolean); override;
     procedure SetFilterOptions(Value: TFilterOptions); override;
     procedure SetFilterText(const Value: string); override;
@@ -1310,7 +1308,6 @@ begin
   ReQuery;
 end;
 
-{$IFNDEF MDO_FPC}
 function TMDOTable.PSGetDefaultOrder: TIndexDef;
   
     function GetIdx(IdxType: TIndexOption): TIndexDef;
@@ -1409,7 +1406,6 @@ begin
     Open;
   PSReset;
 end;
-{$ENDIF}
 
 procedure TMDOTable.Reopen;
 begin

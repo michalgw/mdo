@@ -363,7 +363,6 @@ type
     procedure InternalUnPrepare; virtual;
     function IsCursorOpen: Boolean; override;
     function IsBooleanField(AField, ARelation: String): Boolean;
-{$IFNDEF MDO_FPC}
     procedure PSEndTransaction(Commit: Boolean); override;
     function PSExecuteStatement(const ASQL: string; AParams: TParams; 
             ResultSet: Pointer = nil): Integer; override;
@@ -378,7 +377,6 @@ type
     procedure PSStartTransaction; override;
     function PSUpdateRecord(UpdateKind: TUpdateKind; Delta: TDataSet): Boolean;
             override;
-{$ENDIF}
     procedure ReQuery;
     procedure SetBookmarkData(Buffer: PChar; Data: Pointer); override;
     procedure SetBookmarkFlag(Buffer: PChar; Value: TBookmarkFlag); override;
@@ -3410,7 +3408,6 @@ begin
   inherited Post;
 end;
 
-{$IFNDEF MDO_FPC}
 procedure TMDOCustomDataSet.PSEndTransaction(Commit: Boolean);
 begin
   if Commit then
@@ -3577,7 +3574,6 @@ begin
     end;
   end;
 end;
-{$ENDIF}
 
 procedure TMDOCustomDataSet.ReadCache(FCache: PChar; Offset: DWORD; Origin:
         Integer; Buffer: PChar);
