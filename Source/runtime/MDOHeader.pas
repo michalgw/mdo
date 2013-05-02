@@ -1985,6 +1985,9 @@ const
 (***********************************)
 (** Information call declarations **)
 (***********************************)
+  isc_spb_trc_id                          = 1;
+  isc_spb_trc_name                        = 2;
+  isc_spb_trc_cfg                         = 3;
 
 (******************************)
 (** Common, structural codes **)
@@ -2278,6 +2281,17 @@ const
   isc_action_svc_remove_license = 10; (* Removes a license from the license file *)
   isc_action_svc_db_stats	= 11; (* Retrieves database statistics *)
   isc_action_svc_get_ib_log     = 12; (* Retrieves the InterBase log file from the server *)
+  isc_action_svc_nbak           = 20;
+  isc_action_svc_nrest          = 21;
+  isc_action_svc_trace_start    = 22;
+  isc_action_svc_trace_stop     = 23;
+  isc_action_svc_trace_suspend  = 24;
+  isc_action_svc_trace_resume   = 25;
+  isc_action_svc_trace_list     = 26;
+  isc_action_svc_set_mapping    = 27;
+  isc_action_svc_drop_mapping   = 28;
+  isc_action_svc_display_user_adm = 29;
+  isc_action_svc_last           = 30;
 
 (*****************************************)
 (** Service information items           **)
