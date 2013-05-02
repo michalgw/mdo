@@ -2327,8 +2327,8 @@ begin
           ReadRecordCache(FCurrentRecord, Buffer, False)
         else begin
           while (not FQSelect.EOF) and
-                (FQSelect.Next <> nil) and
-                (FCurrentRecord >= FRecordCount) do
+                (FCurrentRecord >= FRecordCount) and
+                (FQSelect.Next <> nil) do
           begin
             FetchCurrentRecordToBuffer(FQSelect, FRecordCount, Buffer);
             Inc(FRecordCount);
