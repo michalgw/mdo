@@ -1064,7 +1064,7 @@ end;
 
 procedure TMDOCustomDataSet.ApplyUpdates;
 var
-  CurBookmark: string;
+  CurBookmark: {$IFDEF MDO_NEW_BOOKMARK}TBookmark{$ELSE}String{$ENDIF};
   Buffer: PRecordData;
   CurUpdateTypes: TMDOUpdateRecordTypes;
   UpdateAction: TMDOUpdateAction;
@@ -1644,7 +1644,7 @@ end;
 procedure TMDOCustomDataSet.FetchAll;
 var
   SetCursor: Boolean;
-  CurBookmark: string;
+  CurBookmark: {$IFDEF MDO_NEW_BOOKMARK}TBookmark{$ELSE}String{$ENDIF};
 begin
   {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
@@ -2717,7 +2717,7 @@ function TMDOCustomDataSet.InternalLocate(const KeyFields: string; const
         KeyValues: Variant; Options: TLocateOptions): Boolean;
 var
   fl: TList;
-  CurBookmark: string;
+  CurBookmark: {$IFDEF MDO_NEW_BOOKMARK}TBookmark{$ELSE}String{$ENDIF};
   fld, val: Variant;
   i, fld_cnt: Integer;
 begin
@@ -3324,7 +3324,7 @@ end;
 function TMDOCustomDataSet.Locate(const KeyFields: string; const KeyValues: 
         Variant; Options: TLocateOptions): Boolean;
 var
-  CurBookmark: string;
+  CurBookmark: {$IFDEF MDO_NEW_BOOKMARK}TBookmark{$ELSE}String{$ENDIF};
 begin
   DisableControls;
   try
@@ -3353,7 +3353,7 @@ function TMDOCustomDataSet.Lookup(const KeyFields: string; const KeyValues:
         Variant; const ResultFields: string): Variant;
 var
   fl: TList;
-  CurBookmark: string;
+  CurBookmark: {$IFDEF MDO_NEW_BOOKMARK}TBookmark{$ELSE}String{$ENDIF};
 begin
   DisableControls;
   fl := TList.Create;
