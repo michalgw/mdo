@@ -784,7 +784,11 @@ constructor TMDOBCDField.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   SetDataType(ftBCD);
+  {$IFDEF MDO_FPC}
+  Size := inherited GetDataSize;
+  {$ELSE}
   Size := 8;
+  {$ENDIF}
 end;
 
 class procedure TMDOBCDField.CheckTypeSize(Value: Integer);
@@ -820,7 +824,11 @@ end;
 
 function TMDOBCDField.GetDataSize: Integer;
 begin
+  {$IFDEF MDO_FPC}
+  Result := inherited GetDataSize;
+  {$ELSE}
   Result := 8;
+  {$ENDIF}
 end;
 
 
