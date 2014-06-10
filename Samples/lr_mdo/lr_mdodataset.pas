@@ -130,6 +130,15 @@ end;
 
 { TlrMDODataBase }
 
+procedure SetValue(ASL: TStrings; AValName: String; AValue: String);
+begin
+  if AValue <> '' then
+    ASL.Values[AValName] := AValue
+  else
+    if ASL.IndexOfName(AValName) >= 0 then
+      ASL.Delete(ASL.IndexOfName(AValName));
+end;
+
 function TlrMDODataBase.GetCharSet: String;
 begin
   Result := FDatabase.Params.Values['lc_ctype'];
@@ -162,7 +171,7 @@ end;
 
 procedure TlrMDODataBase.SetCharSet(AValue: String);
 begin
-  FDatabase.Params.Values['lc_ctype'] := AValue;
+  SetValue(FDatabase.Params, 'lc_ctype', AValue);
 end;
 
 procedure TlrMDODataBase.SetConnected(AValue: Boolean);
@@ -177,17 +186,17 @@ end;
 
 procedure TlrMDODataBase.SetPassword(AValue: String);
 begin
-  FDatabase.Params.Values['password'] := AValue;
+  SetValue(FDatabase.Params, 'password', AValue);
 end;
 
 procedure TlrMDODataBase.SetRole(AValue: String);
 begin
-  FDatabase.Params.Values['sql_role'] := AValue;
+  SetValue(FDatabase.Params, 'sql_role', AValue);
 end;
 
 procedure TlrMDODataBase.SetUserName(AValue: String);
 begin
-  FDatabase.Params.Values['user_name'] := AValue;
+  SetValue(FDatabase.Params, 'user_name', AValue);
 end;
 
 procedure TlrMDODataBase.AfterLoad;
@@ -204,6 +213,7 @@ end;
 constructor TlrMDODataBase.Create(AOwnerPage: TfrPage);
 begin
   inherited Create(AOwnerPage);
+  BaseName := 'lrMDODatabase';
   FDatabase := TMDODataBase.Create(OwnerForm);
   FTransaction := TMDOTransaction.Create(OwnerForm);
   FDatabase.DefaultTransaction := FTransaction;
@@ -212,22 +222,35 @@ end;
 
 destructor TlrMDODataBase.Destroy;
 begin
-  FDatabase.Connected := False;
-  FDatabase.DefaultTransaction := nil;
-  FTransaction.DefaultDatabase := nil;
-  FTransaction.Free;
-  FDatabase.Free;
+  if not (Assigned(OwnerPage) and (OwnerPage is TfrPageDialog)) then
+  begin
+    FDatabase.Connected := False;
+    FDatabase.DefaultTransaction := nil;
+    FTransaction.DefaultDatabase := nil;
+    FTransaction.Free;
+    FDatabase.Free;
+  end;
   inherited Destroy;
 end;
 
 procedure TlrMDODataBase.LoadFromXML(XML: TLrXMLConfig; const Path: String);
 begin
   inherited LoadFromXML(XML, Path);
+  FDatabase.DatabaseName := XML.GetValue(Path + 'DatabaseName/Value', '');
+  SetValue(FDatabase.Params, 'user_name', XML.GetValue(Path + 'UserName/Value', ''));
+  SetValue(FDatabase.Params, 'password', XML.GetValue(Path + 'Password/Value', ''));
+  SetValue(FDatabase.Params, 'lc_ctype', XML.GetValue(Path + 'CharSet/Value', ''));
+  SetValue(FDatabase.Params, 'sql_role', XML.GetValue(Path + 'SQLRole/Value', ''));
 end;
 
 procedure TlrMDODataBase.SaveToXML(XML: TLrXMLConfig; const Path: String);
 begin
   inherited SaveToXML(XML, Path);
+  XML.SetValue(Path + 'DatabaseName/Value', FDatabase.DatabaseName);
+  XML.SetValue(Path + 'UserName/Value', FDatabase.Params.Values['user_name']);
+  XML.SetValue(Path + 'Password/Value', FDatabase.Params.Values['password']);
+  XML.SetValue(Path + 'SQLRole/Value', FDatabase.Params.Values['sql_role']);
+  XML.SetValue(Path + 'CharSet/Value', FDatabase.Params.Values['lc_ctype']);
 end;
 
 { TlrMDODataSet }
