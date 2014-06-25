@@ -3896,7 +3896,7 @@ begin
               Qry.Params[i].AsTime := TimeStampToDateTime(ts);
             end;
             SQL_TIMESTAMP:
-              Qry.Params[i].AsDateTime := TimeStampToDateTime(MSecsToTimeStamp(PDouble(data)^));
+              Qry.Params[i].AsDateTime := TimeStampToDateTime(MSecsToTimeStamp({$IFDEF MDO_64BIT}trunc{$ENDIF}(PDouble(data)^)));
           end;
         end;
       end;
