@@ -491,11 +491,7 @@ type
 implementation
 
 uses
-  //TODO: Monitor
-  {$IFNDEF MDO_FPC}
-  MDOSQLMonitor,
-  {$ENDIF}
-  MDOIntf;
+  MDOSQLMonitor, MDOIntf;
 
 { TMDOCustomService }
 
@@ -571,10 +567,8 @@ begin
   
   if Assigned(FOnAttach) then
     FOnAttach(Self);
-  //TODO: Monitor
-  {$IFNDEF MDO_FPC}
+
   MonitorHook.ServiceAttach(Self);
-  {$ENDIF}
 end;
 
 function TMDOCustomService.Call(ErrCode: ISC_STATUS; RaiseError: Boolean): 
@@ -615,10 +609,8 @@ begin
   end
   else
     FHandle := nil;
-  //TODO: Monitor
-  {$IFNDEF MDO_FPC}
+
   MonitorHook.ServiceDetach(Self);
-  {$ENDIF}
 end;
 
 procedure TMDOCustomService.GenerateSPB(sl: TStrings; var SPB: String; var 
@@ -747,10 +739,7 @@ begin
     FQuerySPBLength := 0;
     FQueryParams := '';
   end;
-  //TODO: Monitor
-  {$IFNDEF MDO_FPC}
   MonitorHook.ServiceQuery(Self);
-  {$ENDIF}
 end;
 
 procedure TMDOCustomService.Loaded;
@@ -1218,10 +1207,7 @@ begin
     FStartSPBLength := 0;
     FStartParams := '';
   end;
-  //TODO: Monitor
-  {$IFNDEF MDO_FPC}
   MonitorHook.ServiceStart(Self);
-  {$ENDIF}
 end;
 
 procedure TMDOControlService.ServiceStart;

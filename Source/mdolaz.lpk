@@ -26,7 +26,7 @@
     <Description Value="Mercury Database Objects
 (runtime library)"/>
     <Version Build="1"/>
-    <Files Count="28">
+    <Files Count="29">
       <Item1>
         <Filename Value="runtime\MDOUtils.pas"/>
         <UnitName Value="MDOUtils"/>
@@ -124,21 +124,25 @@
         <UnitName Value="MDOSQL"/>
       </Item24>
       <Item25>
-        <Filename Value="runtime\MDOStoredProc.pas"/>
-        <UnitName Value="MDOStoredProc"/>
+        <Filename Value="runtime\MDOSQLMonitor.pas"/>
+        <UnitName Value="MDOSQLMonitor"/>
       </Item25>
       <Item26>
-        <Filename Value="runtime\MDOTable.pas"/>
-        <UnitName Value="MDOTable"/>
+        <Filename Value="runtime\MDOStoredProc.pas"/>
+        <UnitName Value="MDOStoredProc"/>
       </Item26>
       <Item27>
-        <Filename Value="runtime\MDOUpdateSQL.pas"/>
-        <UnitName Value="MDOUpdateSQL"/>
+        <Filename Value="runtime\MDOTable.pas"/>
+        <UnitName Value="MDOTable"/>
       </Item27>
       <Item28>
+        <Filename Value="runtime\MDOUpdateSQL.pas"/>
+        <UnitName Value="MDOUpdateSQL"/>
+      </Item28>
+      <Item29>
         <Filename Value="MDO.inc"/>
         <Type Value="Include"/>
-      </Item28>
+      </Item29>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

@@ -177,6 +177,8 @@ resourcestring
   SDPBConstantUnknownEx = 'DPB Constant (%s) is unknown';
   STPBConstantUnknownEx = 'TPB Constant (%s) is unknown';
 
+  SThreadFailed = '%s Thread failed with Exception: %s';
+
 implementation
 
 end.

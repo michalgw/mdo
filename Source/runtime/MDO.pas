@@ -181,7 +181,8 @@ type
     mdoeInvalidOnStatusResult,
     mdoeDPBConstantUnknownEx,
     mdoeTPBConstantUnknownEx,
-    mdoeGeneratorNotDefined
+    mdoeGeneratorNotDefined,
+    mdoeThreadFailed
     );
 
   TStatusVector              = array[0..19] of ISC_STATUS;
@@ -315,7 +316,8 @@ const
     SInvalidOnStatusResult,
     SDPBConstantUnknownEx,
     STPBConstantUnknownEx,
-    SGeneratorNotDefined
+    SGeneratorNotDefined,
+    SThreadFailed
   );
 
 // LoginDialog procedure for database

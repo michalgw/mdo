@@ -216,7 +216,7 @@ procedure Register;
 implementation
 
 uses MDOQuery, MDOStoredProc, MDOUpdateSQL, MDOCustomDataSet,
-  MDOIntf, MDOSQL, {MDOSQLMonitor,} MDODatabaseInfo, MDOEvents,
+  MDOIntf, MDOSQL, MDOSQLMonitor, MDODatabaseInfo, MDOEvents,
   MDOServices, MDOInstall, MDODatabaseEdit, MDOTransactionEdit,
   MDOBatchMove, MDOExtract, MDOServiceEditor, MDOCSVDataExport,
   MDOHTMLDataExport, MDOSQLEdit, MDOGeneratorLinkEditor;
@@ -234,7 +234,7 @@ begin
       TMDODataSet,
       TMDOSQL,
       TMDODatabaseInfo,
-      //TMDOSQLMonitor,
+      TMDOSQLMonitor,
       TMDOEvents,
       TMDOScript
       ]);

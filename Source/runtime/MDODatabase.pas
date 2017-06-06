@@ -459,9 +459,7 @@ procedure GenerateTPB(sl: TStrings; var TPB: string; var TPBLength: Short);
 implementation
 
 uses
-  {$IFNDEF MDO_FPC}
   MDOSQLMonitor,
-  {$ENDIF}
   MDOIntf, MDOCustomDataSet, MDODatabaseInfo, MDOSQL,
   MDOUtils, typInfo;
 
@@ -696,11 +694,8 @@ begin
   ValidateClientSQLDialect;
   if Assigned(FAfterConnect) then
     FAfterConnect(Self);
-  //TODO: Support for monitor
-  {$IFNDEF MDO_FPC}
   if not (csDesigning in ComponentState) then
     MonitorHook.DBConnect(Self);
-  {$ENDIF}
   if FDefaultTransaction <> nil then
     if FDefaultTransaction.AutoCommit then
       FDefaultTransaction.StartTransaction;
@@ -1009,11 +1004,8 @@ begin
     FHandleIsShared := False;
   end;
 
-  //TODO: Support for monitor
-  {$IFNDEF MDO_FPC}
   if not (csDesigning in ComponentState) then
     MonitorHook.DBDisconnect(Self);
-  {$ENDIF}
 
   for i := 0 to FSQLObjects.Count - 1 do
     if FSQLObjects[i] <> nil then
@@ -1609,8 +1601,7 @@ begin
         FAfterRollbackRetaining(Self);
     end;
   end;
-  //TODO: Monitor
-  {$IFNDEF MDO_FPC}
+
   if not (csDesigning in ComponentState) then
   begin
     case Action of
@@ -1624,8 +1615,7 @@ begin
         MonitorHook.TRRollbackRetaining(Self);
     end;
   end;
-  {$ENDIF}
-  
+
   if (Assigned(FOnEndTransaction)) and (not Force) and
     (Action in [TARollBack, TACommit]) then
     FOnEndTransaction(Self);
@@ -1932,11 +1922,9 @@ begin
     if Assigned(FOnStartTransaction) then
       FOnStartTransaction(Self);
 
-    //TODO: Monitor
-    {$IFNDEF MDO_FPC}
     if not (csDesigning in ComponentState) then
       MonitorHook.TRStart(Self);
-    {$ENDIF}
+
   finally
     FreeMem(pteb);
   end;

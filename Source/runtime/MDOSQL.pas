@@ -333,10 +333,7 @@ type
 implementation
 
 uses
-  {$IFNDEF MDO_FPC}
-  MDOSQLMonitor,
-  {$ENDIF}
-  MDOIntf, MDOBlob;
+  MDOSQLMonitor, MDOIntf, MDOBlob;
 
 { TMDOXSQLVAR }
 {
@@ -2060,11 +2057,8 @@ begin
         raise;
       end;
   end;
-  //TODO: Monitor
-  {$IFNDEF MDO_FPC}
   if not (csDesigning in ComponentState) then
     MonitorHook.SQLExecute(Self);
-  {$ENDIF}
 end;
 
 function TMDOSQL.FieldByName(FieldName: String): TMDOXSQLVAR;
@@ -2237,11 +2231,8 @@ begin
       FBOF := False;
       result := FSQLRecord;
     end;
-    //TODO: Monitor
-    {$IFNDEF MDO_FPC}
     if not (csDesigning in ComponentState) then
       MonitorHook.SQLFetch(Self);
-    {$ENDIF}
   end;
 end;
 
@@ -2318,11 +2309,8 @@ begin
       end;
     end;
     FPrepared := True;
-    //TODO: Monitor
-    {$IFNDEF MDO_FPC}
     if not (csDesigning in ComponentState) then
       MonitorHook.SQLPrepare(Self);
-    {$ENDIF}
   except
     on E: Exception do
     begin
