@@ -1,57 +1,61 @@
 object MDOSQLEditForm: TMDOSQLEditForm
   Left = 330
-  Height = 372
+  Height = 410
   Top = 169
-  Width = 554
+  Width = 657
   Caption = 'SQL Editor'
-  ClientHeight = 372
-  ClientWidth = 554
-  LCLVersion = '0.9.29'
+  ClientHeight = 410
+  ClientWidth = 657
+  LCLVersion = '1.9.0.0'
   object StatusBarMain: TStatusBar
     Left = 0
-    Height = 20
-    Top = 352
-    Width = 554
+    Height = 23
+    Top = 387
+    Width = 657
     Panels = <>
   end
   object PanelLeft: TPanel
     Left = 0
-    Height = 328
+    Height = 363
     Top = 24
     Width = 170
     Align = alLeft
     BevelOuter = bvNone
     Caption = 'PanelLeft'
-    ClientHeight = 328
+    ClientHeight = 363
     ClientWidth = 170
     TabOrder = 1
     object ListBoxTables: TListBox
       Left = 0
-      Height = 156
-      Top = 14
+      Height = 189
+      Top = 15
       Width = 170
       Align = alClient
       DragMode = dmAutomatic
       ItemHeight = 0
       OnClick = ListBoxTablesClick
+      OnDblClick = ListBoxTablesDblClick
+      Options = [lboDrawFocusRect]
       TabOrder = 0
     end
     object ListBoxFields: TListBox
       Left = 0
       Height = 139
-      Top = 189
+      Top = 224
       Width = 170
       Align = alBottom
       DragMode = dmAutomatic
       ItemHeight = 0
       MultiSelect = True
+      OnDblClick = ListBoxFieldsDblClick
+      Options = [lboDrawFocusRect]
       TabOrder = 1
     end
     object SplitterLeft: TSplitter
       Cursor = crVSplit
       Left = 0
       Height = 5
-      Top = 170
+      Top = 204
       Width = 170
       Align = alBottom
       Beveled = True
@@ -61,7 +65,7 @@ object MDOSQLEditForm: TMDOSQLEditForm
     end
     object LabelTables: TLabel
       Left = 0
-      Height = 14
+      Height = 15
       Top = 0
       Width = 170
       Align = alTop
@@ -76,8 +80,8 @@ object MDOSQLEditForm: TMDOSQLEditForm
     end
     object LabelFields: TLabel
       Left = 0
-      Height = 14
-      Top = 175
+      Height = 15
+      Top = 209
       Width = 170
       Align = alBottom
       Alignment = taCenter
@@ -94,7 +98,7 @@ object MDOSQLEditForm: TMDOSQLEditForm
     Left = 0
     Height = 24
     Top = 0
-    Width = 554
+    Width = 657
     AutoSize = True
     Caption = 'ToolBarMain'
     Images = ImageListMain
@@ -117,8 +121,8 @@ object MDOSQLEditForm: TMDOSQLEditForm
     end
     object ToolButtonS1: TToolButton
       Left = 47
+      Height = 22
       Top = 2
-      Width = 8
       Caption = 'ToolButtonS1'
       Style = tbsSeparator
     end
@@ -141,16 +145,16 @@ object MDOSQLEditForm: TMDOSQLEditForm
   end
   object SplitterCenter: TSplitter
     Left = 170
-    Height = 328
+    Height = 363
     Top = 24
     Width = 5
     Beveled = True
   end
   inline SynEditSQL: TSynEdit
     Left = 175
-    Height = 328
+    Height = 363
     Top = 24
-    Width = 379
+    Width = 482
     Align = alClient
     Font.Height = -13
     Font.Name = 'Courier New'
@@ -164,27 +168,16 @@ object MDOSQLEditForm: TMDOSQLEditForm
     Gutter.Width = 57
     Gutter.MouseActions = <    
       item
-        Shift = []
-        ShiftMask = []
-        Button = mbLeft
         ClickCount = ccAny
         ClickDir = cdDown
-        Command = 13
-        MoveCaret = False
-        Option = 0
-        Priority = 0
+        Command = emcOnMainGutterClick
       end    
       item
-        Shift = []
-        ShiftMask = []
         Button = mbRight
-        ClickCount = ccSingle
-        ClickDir = cdUp
-        Command = 12
-        MoveCaret = False
-        Option = 0
-        Priority = 0
+        Command = emcContextMenu
       end>
+    RightGutter.Width = 0
+    RightGutter.MouseActions = <>
     Highlighter = SynSQLSyn
     Keystrokes = <    
       item
@@ -609,134 +602,99 @@ object MDOSQLEditForm: TMDOSQLEditForm
       end>
     MouseActions = <    
       item
-        Shift = []
         ShiftMask = [ssShift, ssAlt]
-        Button = mbLeft
-        ClickCount = ccSingle
         ClickDir = cdDown
-        Command = 1
+        Command = emcStartSelections
         MoveCaret = True
-        Option = 0
-        Priority = 0
       end    
       item
         Shift = [ssShift]
         ShiftMask = [ssShift, ssAlt]
-        Button = mbLeft
-        ClickCount = ccSingle
         ClickDir = cdDown
-        Command = 1
+        Command = emcStartSelections
         MoveCaret = True
         Option = 1
-        Priority = 0
       end    
       item
         Shift = [ssAlt]
         ShiftMask = [ssShift, ssAlt]
-        Button = mbLeft
-        ClickCount = ccSingle
         ClickDir = cdDown
-        Command = 3
+        Command = emcStartColumnSelections
         MoveCaret = True
-        Option = 0
-        Priority = 0
       end    
       item
         Shift = [ssShift, ssAlt]
         ShiftMask = [ssShift, ssAlt]
-        Button = mbLeft
-        ClickCount = ccSingle
         ClickDir = cdDown
-        Command = 3
+        Command = emcStartColumnSelections
         MoveCaret = True
         Option = 1
-        Priority = 0
       end    
       item
-        Shift = []
-        ShiftMask = []
         Button = mbRight
-        ClickCount = ccSingle
-        ClickDir = cdUp
-        Command = 12
-        MoveCaret = False
-        Option = 0
-        Priority = 0
+        Command = emcContextMenu
       end    
       item
-        Shift = []
-        ShiftMask = []
-        Button = mbLeft
         ClickCount = ccDouble
         ClickDir = cdDown
-        Command = 6
+        Command = emcSelectWord
         MoveCaret = True
-        Option = 0
-        Priority = 0
       end    
       item
-        Shift = []
-        ShiftMask = []
-        Button = mbLeft
         ClickCount = ccTriple
         ClickDir = cdDown
-        Command = 7
+        Command = emcSelectLine
         MoveCaret = True
-        Option = 0
-        Priority = 0
       end    
       item
-        Shift = []
-        ShiftMask = []
-        Button = mbLeft
         ClickCount = ccQuad
         ClickDir = cdDown
-        Command = 8
+        Command = emcSelectPara
         MoveCaret = True
-        Option = 0
-        Priority = 0
       end    
       item
-        Shift = []
-        ShiftMask = []
         Button = mbMiddle
-        ClickCount = ccSingle
         ClickDir = cdDown
-        Command = 10
+        Command = emcPasteSelection
         MoveCaret = True
-        Option = 0
-        Priority = 0
       end    
       item
         Shift = [ssCtrl]
         ShiftMask = [ssShift, ssAlt, ssCtrl]
-        Button = mbLeft
-        ClickCount = ccSingle
-        ClickDir = cdUp
-        Command = 11
-        MoveCaret = False
-        Option = 0
-        Priority = 0
+        Command = emcMouseLink
       end>
+    MouseTextActions = <>
     MouseSelActions = <    
       item
-        Shift = []
-        ShiftMask = []
-        Button = mbLeft
-        ClickCount = ccSingle
         ClickDir = cdDown
-        Command = 9
-        MoveCaret = False
-        Option = 0
-        Priority = 0
+        Command = emcStartDragMove
       end>
     Lines.Strings = (
       'SynEditSQL'
     )
+    VisibleSpecialChars = [vscSpace, vscTabAtLast]
+    SelectedColor.BackPriority = 50
+    SelectedColor.ForePriority = 50
+    SelectedColor.FramePriority = 50
+    SelectedColor.BoldPriority = 50
+    SelectedColor.ItalicPriority = 50
+    SelectedColor.UnderlinePriority = 50
+    SelectedColor.StrikeOutPriority = 50
     BracketHighlightStyle = sbhsBoth
+    BracketMatchColor.Background = clNone
+    BracketMatchColor.Foreground = clNone
+    BracketMatchColor.Style = [fsBold]
+    FoldedCodeColor.Background = clNone
+    FoldedCodeColor.Foreground = clGray
+    FoldedCodeColor.FrameColor = clGray
+    MouseLinkColor.Background = clNone
+    MouseLinkColor.Foreground = clBlue
+    LineHighlightColor.Background = clNone
+    LineHighlightColor.Foreground = clNone
     inline TSynGutterPartList
       object TSynGutterMarks
-        Width = 23
+        Width = 24
+        MouseActions = <>
       end
       object TSynGutterLineNumber
         Width = 17
@@ -750,35 +708,28 @@ object MDOSQLEditForm: TMDOSQLEditForm
       end
       object TSynGutterChanges
         Width = 4
+        MouseActions = <>
         ModifiedColor = 59900
         SavedColor = clGreen
       end
       object TSynGutterSeparator
         Width = 2
+        MouseActions = <>
+        MarkupInfo.Background = clWhite
+        MarkupInfo.Foreground = clGray
       end
       object TSynGutterCodeFolding
         MouseActions = <        
           item
-            Shift = []
-            ShiftMask = []
             Button = mbRight
-            ClickCount = ccSingle
-            ClickDir = cdUp
-            Command = 16
-            MoveCaret = False
-            Option = 0
-            Priority = 0
+            Command = emcCodeFoldContextMenu
           end        
           item
-            Shift = []
             ShiftMask = [ssShift]
             Button = mbMiddle
             ClickCount = ccAny
             ClickDir = cdDown
-            Command = 14
-            MoveCaret = False
-            Option = 0
-            Priority = 0
+            Command = emcCodeFoldCollaps
           end        
           item
             Shift = [ssShift]
@@ -786,65 +737,43 @@ object MDOSQLEditForm: TMDOSQLEditForm
             Button = mbMiddle
             ClickCount = ccAny
             ClickDir = cdDown
-            Command = 14
-            MoveCaret = False
+            Command = emcCodeFoldCollaps
             Option = 1
-            Priority = 0
           end        
           item
-            Shift = []
-            ShiftMask = []
-            Button = mbLeft
             ClickCount = ccAny
             ClickDir = cdDown
-            Command = 0
-            MoveCaret = False
-            Option = 0
-            Priority = 0
+            Command = emcNone
           end>
         MarkupInfo.Background = clNone
         MarkupInfo.Foreground = clGray
         MouseActionsExpanded = <        
           item
-            Shift = []
-            ShiftMask = []
-            Button = mbLeft
             ClickCount = ccAny
             ClickDir = cdDown
-            Command = 14
-            MoveCaret = False
-            Option = 0
-            Priority = 0
+            Command = emcCodeFoldCollaps
           end>
         MouseActionsCollapsed = <        
           item
             Shift = [ssCtrl]
             ShiftMask = [ssCtrl]
-            Button = mbLeft
             ClickCount = ccAny
             ClickDir = cdDown
-            Command = 15
-            MoveCaret = False
-            Option = 0
-            Priority = 0
+            Command = emcCodeFoldExpand
           end        
           item
-            Shift = []
             ShiftMask = [ssCtrl]
-            Button = mbLeft
             ClickCount = ccAny
             ClickDir = cdDown
-            Command = 15
-            MoveCaret = False
+            Command = emcCodeFoldExpand
             Option = 1
-            Priority = 0
           end>
       end
     end
   end
   object ImageListMain: TImageList
-    left = 320
-    top = 120
+    Left = 320
+    Top = 120
     Bitmap = {
       4C69040000001000000010000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
@@ -981,19 +910,19 @@ object MDOSQLEditForm: TMDOSQLEditForm
     DefaultFilter = 'Pliki SQL (*.sql)|*.sql'
     Enabled = False
     SQLDialect = sqlSybase
-    left = 352
-    top = 120
+    Left = 352
+    Top = 120
   end
   object OpenDialogSQL: TOpenDialog
     DefaultExt = '.sql'
     Filter = 'SQL|*.sql'
-    left = 320
-    top = 152
+    Left = 320
+    Top = 152
   end
   object SaveDialogSQL: TSaveDialog
     DefaultExt = '.sql'
     Filter = 'SQL|*.sql'
-    left = 352
-    top = 152
+    Left = 352
+    Top = 152
   end
 end

@@ -1,60 +1,79 @@
 object MDOServiceEditorForm: TMDOServiceEditorForm
   Left = 313
-  Height = 336
+  Height = 401
   Top = 114
   Width = 378
+  AutoSize = True
   BorderStyle = bsDialog
   Caption = 'MDO Service Editor'
-  ClientHeight = 336
+  ClientHeight = 401
   ClientWidth = 378
-  Font.Height = -11
-  Font.Name = 'MS Sans Serif'
   Position = poScreenCenter
-  LCLVersion = '0.9.29'
+  LCLVersion = '1.9.0.0'
   object GroupBox1: TGroupBox
-    Left = 5
-    Height = 141
-    Top = 5
-    Width = 366
+    Left = 8
+    Height = 160
+    Top = 8
+    Width = 362
+    Align = alTop
+    AutoSize = True
+    BorderSpacing.Around = 8
     Caption = '  Connection  '
-    ClientHeight = 123
-    ClientWidth = 362
+    ClientHeight = 140
+    ClientWidth = 358
     TabOrder = 0
     object lServer: TLabel
-      Left = 15
-      Height = 14
-      Top = 33
+      AnchorSideLeft.Control = GroupBox1
+      AnchorSideTop.Control = cbServer
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 15
+      Top = 39
       Width = 32
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 8
+      BorderSpacing.Bottom = 4
       Caption = '&Server'
       Enabled = False
       FocusControl = eServer
       ParentColor = False
     end
     object lProtocol: TLabel
-      Left = 150
-      Height = 14
-      Top = 33
-      Width = 40
+      AnchorSideLeft.Control = cbProtocol
+      AnchorSideTop.Control = lServer
+      Left = 224
+      Height = 15
+      Top = 39
+      Width = 45
       Caption = '&Protocol'
       Enabled = False
       FocusControl = cbProtocol
       ParentColor = False
     end
     object Label3: TLabel
-      Left = 15
-      Height = 14
-      Top = 78
-      Width = 47
+      AnchorSideLeft.Control = GroupBox1
+      AnchorSideTop.Control = eServer
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 15
+      Top = 89
+      Width = 48
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 8
+      BorderSpacing.Bottom = 4
       Caption = '&Database'
       FocusControl = eDataBase
       ParentColor = False
     end
     object cbServer: TComboBox
-      Left = 15
-      Height = 21
-      Top = 3
+      AnchorSideLeft.Control = GroupBox1
+      AnchorSideTop.Control = GroupBox1
+      Left = 8
+      Height = 23
+      Top = 8
       Width = 126
-      ItemHeight = 13
+      BorderSpacing.Around = 8
+      ItemHeight = 15
       Items.Strings = (
         'Local'
         'Remote'
@@ -64,12 +83,19 @@ object MDOServiceEditorForm: TMDOServiceEditorForm
       TabOrder = 0
     end
     object cbProtocol: TComboBox
-      Left = 150
-      Height = 21
-      Top = 48
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = eServer
+      AnchorSideRight.Control = GroupBox1
+      AnchorSideRight.Side = asrBottom
+      Left = 224
+      Height = 23
+      Top = 58
       Width = 126
+      Anchors = [akTop, akRight]
+      BorderSpacing.Left = 8
+      BorderSpacing.Right = 8
       Enabled = False
-      ItemHeight = 13
+      ItemHeight = 15
       Items.Strings = (
         'TCP'
         'NamedPipe'
@@ -79,120 +105,209 @@ object MDOServiceEditorForm: TMDOServiceEditorForm
       TabOrder = 1
     end
     object eServer: TEdit
-      Left = 15
-      Height = 21
-      Top = 48
-      Width = 121
+      AnchorSideLeft.Control = GroupBox1
+      AnchorSideTop.Control = lServer
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = cbProtocol
+      Left = 8
+      Height = 23
+      Top = 58
+      Width = 208
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 8
       Enabled = False
       TabOrder = 2
     end
     object eDataBase: TEdit
-      Left = 15
-      Height = 21
-      Top = 93
-      Width = 256
+      AnchorSideLeft.Control = GroupBox1
+      AnchorSideTop.Control = Label3
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = bBrowse
+      Left = 8
+      Height = 23
+      Top = 108
+      Width = 259
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 8
       TabOrder = 3
     end
     object bBrowse: TButton
-      Left = 280
+      AnchorSideTop.Control = eDataBase
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = GroupBox1
+      AnchorSideRight.Side = asrBottom
+      Left = 275
       Height = 25
-      Top = 90
+      Top = 107
       Width = 75
+      Anchors = [akTop, akRight]
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 8
       Caption = 'Browse'
       OnClick = bBrowseClick
       TabOrder = 4
     end
   end
   object GroupBox2: TGroupBox
-    Left = 5
-    Height = 151
-    Top = 150
-    Width = 366
+    Left = 8
+    Height = 182
+    Top = 176
+    Width = 362
+    Align = alTop
+    AutoSize = True
+    BorderSpacing.Around = 8
     Caption = '  Database Parameters  '
-    ClientHeight = 133
-    ClientWidth = 362
+    ClientHeight = 162
+    ClientWidth = 358
     TabOrder = 1
     object Label4: TLabel
-      Left = 10
-      Height = 14
-      Top = 2
-      Width = 54
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = GroupBox2
+      Left = 8
+      Height = 15
+      Top = 8
+      Width = 58
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 8
+      BorderSpacing.Bottom = 4
       Caption = '&User Name'
       FocusControl = eUsr
       ParentColor = False
     end
     object Label5: TLabel
-      Left = 10
-      Height = 14
-      Top = 47
-      Width = 47
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = eUsr
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 15
+      Top = 58
+      Width = 50
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 8
+      BorderSpacing.Bottom = 4
       Caption = 'Pass&word'
       FocusControl = ePwd
       ParentColor = False
     end
     object Label6: TLabel
-      Left = 175
-      Height = 14
-      Top = 2
-      Width = 39
+      AnchorSideLeft.Control = mSettings
+      AnchorSideTop.Control = GroupBox2
+      Left = 169
+      Height = 15
+      Top = 8
+      Width = 42
+      BorderSpacing.Top = 8
       Caption = '&Settings'
       FocusControl = mSettings
       ParentColor = False
     end
     object eUsr: TEdit
-      Left = 10
-      Height = 21
-      Top = 17
-      Width = 121
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = Label4
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 23
+      Top = 27
+      Width = 153
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 8
       OnChange = eUsrChange
       TabOrder = 0
     end
     object ePwd: TEdit
-      Left = 10
-      Height = 21
-      Top = 62
-      Width = 121
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = Label5
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 23
+      Top = 77
+      Width = 153
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 8
       OnChange = ePwdChange
       TabOrder = 1
     end
     object mSettings: TMemo
-      Left = 175
-      Height = 106
-      Top = 17
-      Width = 185
+      AnchorSideLeft.Control = eUsr
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Label6
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = GroupBox2
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = GroupBox2
+      AnchorSideBottom.Side = asrBottom
+      Left = 169
+      Height = 127
+      Top = 27
+      Width = 181
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 8
+      ScrollBars = ssAutoBoth
       TabOrder = 2
     end
     object cbActive: TCheckBox
-      Left = 10
-      Height = 17
-      Top = 87
-      Width = 50
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = ePwd
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 19
+      Top = 108
+      Width = 53
+      BorderSpacing.Around = 8
       Caption = '&Active'
       TabOrder = 3
     end
     object cbLoginPrompt: TCheckBox
-      Left = 10
-      Height = 17
-      Top = 107
-      Width = 82
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = cbActive
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 19
+      Top = 135
+      Width = 93
+      BorderSpacing.Around = 8
       Caption = '&Login Prompt'
       TabOrder = 4
     end
   end
   object bOk: TButton
-    Left = 114
+    AnchorSideTop.Control = GroupBox2
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = bCancel
+    Left = 212
     Height = 25
-    Top = 305
+    Top = 366
     Width = 75
+    Anchors = [akTop, akRight]
+    BorderSpacing.Around = 8
     Caption = '&OK'
     ModalResult = 1
     TabOrder = 2
   end
   object bCancel: TButton
-    Left = 189
+    AnchorSideTop.Control = GroupBox2
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 295
     Height = 25
-    Top = 305
+    Top = 366
     Width = 75
+    Anchors = [akTop, akRight]
+    BorderSpacing.Around = 8
     Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 3

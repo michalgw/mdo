@@ -43,9 +43,6 @@ unit MDOServices;
 interface
 
 uses
-  {$IFNDEF MDO_FPC}
-  Windows, Messages, Graphics, Controls, Forms, Dialogs, MDODialogs,
-  {$ENDIF}
   SysUtils, Classes, MDOHeader, MDO, MDOExternals;
 
 const
@@ -494,6 +491,7 @@ type
 implementation
 
 uses
+  //TODO: Monitor
   {$IFNDEF MDO_FPC}
   MDOSQLMonitor,
   {$ENDIF}
@@ -513,8 +511,8 @@ begin
   FserverName := '';
   FParams := TStringList.Create;
   FParamsChanged := True;
-  TStringList(FParams).OnChange := ParamsChange;
-  TStringList(FParams).OnChanging := ParamsChanging;
+  TStringList(FParams).OnChange := @ParamsChange;
+  TStringList(FParams).OnChanging := @ParamsChanging;
   FSPB := nil;
   FQuerySPB := nil;
   FBufferSize := DefaultBufferSize;
@@ -573,7 +571,7 @@ begin
   
   if Assigned(FOnAttach) then
     FOnAttach(Self);
-
+  //TODO: Monitor
   {$IFNDEF MDO_FPC}
   MonitorHook.ServiceAttach(Self);
   {$ENDIF}
@@ -617,6 +615,7 @@ begin
   end
   else
     FHandle := nil;
+  //TODO: Monitor
   {$IFNDEF MDO_FPC}
   MonitorHook.ServiceDetach(Self);
   {$ENDIF}
@@ -748,6 +747,7 @@ begin
     FQuerySPBLength := 0;
     FQueryParams := '';
   end;
+  //TODO: Monitor
   {$IFNDEF MDO_FPC}
   MonitorHook.ServiceQuery(Self);
   {$ENDIF}
@@ -761,11 +761,7 @@ begin
       Attach;
   except
     if csDesigning in ComponentState then
-      {$IFDEF MDO_FPC}
       Classes.ApplicationHandleException(nil)
-      {$ELSE}
-      Application.HandleException(Self)
-      {$ENDIF}
     else
       raise;
   end;
@@ -1222,6 +1218,7 @@ begin
     FStartSPBLength := 0;
     FStartParams := '';
   end;
+  //TODO: Monitor
   {$IFNDEF MDO_FPC}
   MonitorHook.ServiceStart(Self);
   {$ENDIF}

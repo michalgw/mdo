@@ -230,7 +230,7 @@ procedure TMDOStoredProc.DefineProperties(Filer: TFiler);
   
 begin
   inherited DefineProperties(Filer);
-  Filer.DefineProperty('ParamData', ReadParamData, WriteParamData, WriteData); {do not localize}
+  Filer.DefineProperty('ParamData', @ReadParamData, @WriteParamData, WriteData); {do not localize}
 end;
 
 procedure TMDOStoredProc.Disconnect;

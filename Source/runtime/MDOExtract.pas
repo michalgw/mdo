@@ -34,9 +34,6 @@ unit MDOExtract;
 interface
 
 uses
-  {$IFNDEF MDO_FPC}
-  Windows, Messages,
-  {$ENDIF}
   SysUtils, Classes, MDODatabase, MDODatabaseInfo, MDOSQL, MDOUtils, MDOHeader,
   MDO, MDOIntf;
 

@@ -162,7 +162,7 @@ begin
       SegLen := BlobSize - CurPos;
     if not ((isc_get_segment(StatusVector, hBlobHandle, @BytesRead, SegLen,
                              LocalBuffer) = 0) or
-            (StatusVectorArray[1] = isc_segment)) then
+            (StatusVectorArray^[1] = isc_segment)) then
       MDODatabaseError;
     Inc(LocalBuffer, BytesRead);
     Inc(CurPos, BytesRead);

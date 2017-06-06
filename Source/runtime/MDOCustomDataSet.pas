@@ -33,14 +33,8 @@ unit MDOCustomDataSet;
 interface
 
 uses
-  {$IFNDEF MDO_FPC}
-  Windows, StdVCL, Forms, Controls,
-  {$ENDIF}
   SysUtils, Classes, MDOExternals, MDO, MDOHeader, MDODatabase, MDOSQL, Db,
-  MDOUtils, MDOBlob
-  {$IFDEF MDO_DELPHI6_UP}
-    , variants, FmtBcd
-  {$ENDIF};
+  MDOUtils, MDOBlob, variants, FmtBcd;
 
 const
   BufferCacheSize    =  1000;  { Allocate cache in this many record chunks}
@@ -109,11 +103,11 @@ type
   TMDOStringField = class (TStringField)
   public
     constructor create(AOwner: TComponent); override;
-    class procedure CheckTypeSize(Value: Integer); override;
+    class procedure CheckTypeSize(AValue: Integer); override;
     function GetAsString: string; override;
     function GetAsVariant: Variant; override;
-    function GetValue(var Value: string): Boolean;
-    procedure SetAsString(const Value: string); override;
+    function GetValue(var AValue: string): Boolean;
+    procedure SetAsString(const AValue: string); override;
   end;
   
   { TMDOBCDField }
@@ -125,7 +119,7 @@ type
   }
   TMDOBCDField = class (TBCDField)
   protected
-    class procedure CheckTypeSize(Value: Integer); override;
+    class procedure CheckTypeSize(AValue: Integer); override;
     function GetAsCurrency: Currency; override;
     function GetAsString: string; override;
     function GetAsVariant: Variant; override;
@@ -336,7 +330,7 @@ type
     function GetRecordCount: Integer; override;
     function GetRecordSize: Word; override;
     procedure InitRecord(Buffer: PChar); override;
-    procedure InternalAddRecord(Buffer: Pointer; Append: Boolean); override;
+    procedure InternalAddRecord(Buffer: Pointer; AAppend: Boolean); override;
     procedure InternalBatchInput(InputObject: TMDOBatchInput); virtual;
     procedure InternalBatchOutput(OutputObject: TMDOBatchOutput); virtual;
     procedure InternalCancel; override;
@@ -346,7 +340,7 @@ type
     procedure InternalFirst; override;
     function InternalGetFieldData(Field: TField; Buffer: Pointer): Boolean; 
             virtual;
-    procedure InternalGotoBookmark(Bookmark: Pointer); override;
+    procedure InternalGotoBookmark(ABookmark: Pointer); override;
     procedure InternalHandleException; override;
     procedure InternalInitFieldDefs; override;
     procedure InternalInitRecord(Buffer: PChar); override;
@@ -382,10 +376,6 @@ type
     procedure SetBookmarkFlag(Buffer: PChar; Value: TBookmarkFlag); override;
     procedure SetCachedUpdates(Value: Boolean);
     procedure SetDataSource(Value: TDataSource);
-    procedure SetFieldData(Field : TField; Buffer : Pointer); overload;
-            override;
-    procedure SetFieldData(Field : TField; Buffer : Pointer; NativeFormat :
-            Boolean); overload; override;
     procedure SetRecNo(Value: Integer); override;
     property AfterDatabaseDisconnect: TNotifyEvent read
             FAfterDatabaseDisconnect write FAfterDatabaseDisconnect;
@@ -428,7 +418,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure ApplyUpdates;
-    function BookmarkValid(Bookmark: TBookmark): Boolean; override;
+    function BookmarkValid(ABookmark: TBookmark): Boolean; override;
     function CachedUpdateStatus: TCachedUpdateStatus;
     procedure CancelUpdates;
     function CompareBookmarks(Bookmark1, Bookmark2: TBookmark): Integer; 
@@ -437,14 +427,14 @@ type
             override;
     procedure FetchAll;
     function GetCurrentRecord(Buffer: PChar): Boolean; override;
-{$IFNDEF MDO_FPC}
-    function GetFieldData(FieldNo: Integer; Buffer: Pointer): Boolean; overload;
-            override;
-{$ENDIF}
-    function GetFieldData(Field : TField; Buffer : Pointer): Boolean; overload; 
+    function GetFieldData(Field : TField; Buffer : Pointer): Boolean; overload;
             override;
     function GetFieldData(Field : TField; Buffer : Pointer; NativeFormat : 
             Boolean): Boolean; overload; override;
+    procedure SetFieldData(Field : TField; Buffer : Pointer); overload;
+            override;
+    procedure SetFieldData(Field : TField; Buffer : Pointer; NativeFormat :
+            Boolean); overload; override;
     function IsSequenced: Boolean; override;
     function Locate(const KeyFields: string; const KeyValues: Variant; Options: 
             TLocateOptions): Boolean; override;
@@ -488,9 +478,6 @@ type
     property Database: TMDODataBase read GetDatabase write SetDatabase;
     property ForcedRefresh: Boolean read FForcedRefresh write FForcedRefresh 
             default False;
-    {$IFNDEF MDO_FPC}
-    property ObjectView default False;
-    {$ENDIF}
     property OnCalcFields;
     property OnDeleteError;
     property OnEditError;
@@ -589,7 +576,6 @@ type
   
 const
   MDO_DEFAULT_BOOL_DOMAIN = 'T_BOOLEAN';
-{$IFDEF MDO_FPC}
   DefaultFieldClasses : Array [TFieldType] of TFieldClass =
     ( { ftUnknown} Tfield,
       { ftString} TMDOStringField,
@@ -632,64 +618,11 @@ const
       { ftFixedWideString} TWideStringField,
       { ftWideMemo} TWideMemoField
     );
-{$ELSE}
-DefaultFieldClasses: array[TFieldType] of TFieldClass = (
-    nil,                { ftUnknown }
-    TMDOStringField,    { ftString }
-    TSmallintField,     { ftSmallint }
-    TIntegerField,      { ftInteger }
-    TWordField,         { ftWord }
-    TMDOBooleanField,   { ftBoolean }
-    TFloatField,        { ftFloat }
-    TCurrencyField,     { ftCurrency }
-    TMDOBCDField,       { ftBCD }
-    TDateField,         { ftDate }
-    TTimeField,         { ftTime }
-    TDateTimeField,     { ftDateTime }
-    TBytesField,        { ftBytes }
-    TVarBytesField,     { ftVarBytes }
-    TAutoIncField,      { ftAutoInc }
-    TBlobField,         { ftBlob }
-    TMemoField,         { ftMemo }
-    TGraphicField,      { ftGraphic }
-    TBlobField,         { ftFmtMemo }
-    TBlobField,         { ftParadoxOle }
-    TBlobField,         { ftDBaseOle }
-    TBlobField,         { ftTypedBinary }
-    nil,                { ftCursor }
-    TStringField,       { ftFixedChar }
-    nil,                {TWideStringField } { ftWideString }
-    TLargeIntField,     { ftLargeInt }
-    TADTField,          { ftADT }
-    TArrayField,        { ftArray }
-    TReferenceField,    { ftReference }
-    TDataSetField,     { ftDataSet }
-    TBlobField,         { ftOraBlob }
-    TMemoField,         { ftOraClob }
-    TVariantField,      { ftVariant }
-    TInterfaceField,    { ftInterface }
-    TIDispatchField,    { ftIDispatch }
-    TGuidField          { ftGuid }
-  {$IFDEF MDO_DELPHI6_UP}
-    , TDateTimeField    { ftTimeStamp }
-    , TMDOBCDField      { ftFMTBcd }
-  {$ENDIF}
-  {$IFDEF MDO_DELPHI2006}
-    , nil //ftFixedWideChar
-    , nil //ftWideMemo
-    , nil //ftOraTimeStamp
-    , nil //ftOraInterval)
-  {$ENDIF}
-
-    );
-{$ENDIF}
 
 var
   { Domain name for boolean field }
+  //TODO: Change to native boolean field
   MDO_BOOL_DOMAIN: String = MDO_DEFAULT_BOOL_DOMAIN;
-{$IFNDEF MDO_FPC}
-  CreateProviderProc: function(DataSet: TMDOCustomDataSet): IProvider = nil;
-{$ENDIF}
 
 implementation
 
@@ -723,7 +656,7 @@ begin
   inherited Create(AOwner);
 end;
 
-class procedure TMDOStringField.CheckTypeSize(Value: Integer);
+class procedure TMDOStringField.CheckTypeSize(AValue: Integer);
 begin
   { don't check string size. all sizes valid }
 end;
@@ -740,7 +673,7 @@ begin
   if GetValue(S) then Result := S else Result := Null;
 end;
 
-function TMDOStringField.GetValue(var Value: string): Boolean;
+function TMDOStringField.GetValue(var AValue: string): Boolean;
 var
   Buffer: PChar;
 begin
@@ -750,23 +683,23 @@ begin
     Result := GetData(Buffer);
     if Result then
     begin
-      Value := string(Buffer);
-      if Transliterate and (Value <> '') then
-        DataSet.Translate(PChar(Value), PChar(Value), False);
+      AValue := string(Buffer);
+      if Transliterate and (AValue <> '') then
+        DataSet.Translate(PChar(AValue), PChar(AValue), False);
     end
   finally
     FreeMem(Buffer);
   end;
 end;
 
-procedure TMDOStringField.SetAsString(const Value: string);
+procedure TMDOStringField.SetAsString(const AValue: string);
 var
   Buffer: PChar;
 begin
   Buffer := nil;
   MDOAlloc(Buffer, 0, Size + 1);
   try
-    StrLCopy(Buffer, PChar(Value), Size);
+    StrLCopy(Buffer, PChar(AValue), Size);
     if Transliterate then
       DataSet.Translate(Buffer, Buffer, True);
     SetData(Buffer);
@@ -784,6 +717,7 @@ constructor TMDOBCDField.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   SetDataType(ftBCD);
+  //TODO: Firebird have always 8 byte?
   {$IFDEF MDO_FPC}
   Size := inherited GetDataSize;
   {$ELSE}
@@ -791,7 +725,7 @@ begin
   {$ENDIF}
 end;
 
-class procedure TMDOBCDField.CheckTypeSize(Value: Integer);
+class procedure TMDOBCDField.CheckTypeSize(AValue: Integer);
 begin
   { No need to check as the base type is currency, not BCD }
 end;
@@ -824,6 +758,7 @@ end;
 
 function TMDOBCDField.GetDataSize: Integer;
 begin
+  //TODO: Firebird have always 8 byte?
   {$IFDEF MDO_FPC}
   Result := inherited GetDataSize;
   {$ELSE}
@@ -906,31 +841,31 @@ begin
   FBlobStreamList := TList.Create;
   FDataLink := TMDODataLink.Create(Self);
   FQDelete := TMDOSQL.Create(Self);
-  FQDelete.OnSQLChanging := SQLChanging;
+  FQDelete.OnSQLChanging := @SQLChanging;
   FQDelete.GoToFirstRecordOnExecute := False;
   FQInsert := TMDOSQL.Create(Self);
-  FQInsert.OnSQLChanging := SQLChanging;
+  FQInsert.OnSQLChanging := @SQLChanging;
   FQInsert.GoToFirstRecordOnExecute := False;
   FQRefresh := TMDOSQL.Create(Self);
-  FQRefresh.OnSQLChanging := SQLChanging;
+  FQRefresh.OnSQLChanging := @SQLChanging;
   FQRefresh.GoToFirstRecordOnExecute := False;
   FQSelect := TMDOSQL.Create(Self);
-  FQSelect.OnSQLChanging := SQLChanging;
+  FQSelect.OnSQLChanging := @SQLChanging;
   FQSelect.GoToFirstRecordOnExecute := False;
   FQModify := TMDOSQL.Create(Self);
-  FQModify.OnSQLChanging := SQLChanging;
+  FQModify.OnSQLChanging := @SQLChanging;
   FQModify.GoToFirstRecordOnExecute := False;
   FUpdateRecordTypes := [cusUnmodified, cusModified, cusInserted];
   FParamCheck := True;
   FForcedRefresh := False;
   {Bookmark Size is Integer for IBX}
   BookmarkSize := SizeOf(Integer);
-  FBase.BeforeDatabaseDisconnect := DoBeforeDatabaseDisconnect;
-  FBase.AfterDatabaseDisconnect := DoAfterDatabaseDisconnect;
-  FBase.OnDatabaseFree := DoDatabaseFree;
-  FBase.BeforeTransactionEnd := DoBeforeTransactionEnd;
-  FBase.AfterTransactionEnd := DoAfterTransactionEnd;
-  FBase.OnTransactionFree := DoTransactionFree;
+  FBase.BeforeDatabaseDisconnect := @DoBeforeDatabaseDisconnect;
+  FBase.AfterDatabaseDisconnect := @DoAfterDatabaseDisconnect;
+  FBase.OnDatabaseFree := @DoDatabaseFree;
+  FBase.BeforeTransactionEnd := @DoBeforeTransactionEnd;
+  FBase.AfterTransactionEnd := @DoAfterTransactionEnd;
+  FBase.OnTransactionFree := @DoTransactionFree;
   if AOwner is TMDODatabase then
     Database := TMDODatabase(AOwner)
   else
@@ -1027,9 +962,9 @@ begin
   if (FCache = FBufferCache) then
   begin
     case Origin of
-      {$IFDEF MDO_FPC}soFromBeginning{$ELSE}FILE_BEGIN{$ENDIF}:  FBPos := Offset;
-      {$IFDEF MDO_FPC}soFromCurrent{$ELSE}FILE_CURRENT{$ENDIF}:  FBPos := FBPos + Offset;
-      {$IFDEF MDO_FPC}soFromEnd{$ELSE}FILE_END{$ENDIF}:          FBPos := DWORD(FBEnd) + Offset;
+      soFromBeginning: FBPos := Offset;
+      soFromCurrent:   FBPos := FBPos + Offset;
+      soFromEnd:       FBPos := DWORD(FBEnd) + Offset;
     end;
     OldCacheSize := FCacheSize;
     while (FBPos >= DWORD(FCacheSize)) do
@@ -1040,9 +975,9 @@ begin
   end
   else begin
     case Origin of
-      {$IFDEF MDO_FPC}soFromBeginning{$ELSE}FILE_BEGIN{$ENDIF}:  FOBPos := Offset;
-      {$IFDEF MDO_FPC}soFromCurrent{$ELSE}FILE_CURRENT{$ENDIF}:  FOBPos := FOBPos + Offset;
-      {$IFDEF MDO_FPC}soFromEnd{$ELSE}FILE_END{$ENDIF}:          FOBPos := DWORD(FOBEnd) + Offset;
+      soFromBeginning: FOBPos := Offset;
+      soFromCurrent:   FOBPos := FOBPos + Offset;
+      soFromEnd:       FOBPos := DWORD(FOBEnd) + Offset;
     end;
     OldCacheSize := FOldCacheSize;
     while (FBPos >= DWORD(FOldCacheSize)) do
@@ -1072,10 +1007,10 @@ end;
 
 procedure TMDOCustomDataSet.ApplyUpdates;
 var
-  CurBookmark: {$IFDEF MDO_NEW_BOOKMARK}TBookmark{$ELSE}String{$ENDIF};
+  CurBookmark: TBookmark;
   Buffer: PRecordData;
   CurUpdateTypes: TMDOUpdateRecordTypes;
-  UpdateAction: TMDOUpdateAction;
+  AUpdateAction: TMDOUpdateAction;
   UpdateKind: TUpdateKind;
   bRecordsSkipped: Boolean;
   
@@ -1115,15 +1050,15 @@ var
   
   procedure UpdateUsingOnUpdateRecord;
   begin
-    UpdateAction := uaFail;
+    AUpdateAction := uaFail;
     try
-      FOnUpdateRecord(Self, UpdateKind, UpdateAction);
+      FOnUpdateRecord(Self, UpdateKind, AUpdateAction);
     except
       on E: Exception do
       begin
         if (E is EDatabaseError) and Assigned(FOnUpdateError) then
-          FOnUpdateError(Self, EMDOError(E), UpdateKind, UpdateAction);
-        if UpdateAction = uaFail then
+          FOnUpdateError(Self, EMDOError(E), UpdateKind, AUpdateAction);
+        if AUpdateAction = uaFail then
             raise;
       end;
     end;
@@ -1137,7 +1072,7 @@ var
     except
       on E: Exception do
         if (E is EDatabaseError) and Assigned(FOnUpdateError) then
-          FOnUpdateError(Self, EMDOError(E), UpdateKind, UpdateAction);
+          FOnUpdateError(Self, EMDOError(E), UpdateKind, AUpdateAction);
     end;
   end;
   
@@ -1155,10 +1090,10 @@ var
     except
       on E: EMDOError do
       begin
-        UpdateAction := uaFail;
+        AUpdateAction := uaFail;
         if Assigned(FOnUpdateError) then
-          FOnUpdateError(Self, E, UpdateKind, UpdateAction);
-        case UpdateAction of
+          FOnUpdateError(Self, E, UpdateKind, AUpdateAction);
+        case AUpdateAction of
           uaFail: raise;
           uaAbort: SysUtils.Abort;
           uaSkip: bRecordsSkipped := True;
@@ -1183,7 +1118,7 @@ begin
     begin
       Buffer := PRecordData(GetActiveBuf);
       GetUpdateKind;
-      UpdateAction := uaApply;
+      AUpdateAction := uaApply;
       if Assigned(FUpdateObject) or Assigned(FOnUpdateRecord) then
       begin
         if (Assigned(FOnUpdateRecord)) then
@@ -1191,7 +1126,7 @@ begin
         else
           if Assigned(FUpdateObject) then
             UpdateUsingUpdateObject;
-        case UpdateAction of
+        case AUpdateAction of
           uaFail:
             MDOError(mdoeUserAbort, [nil]);
           uaAbort:
@@ -1204,10 +1139,10 @@ begin
             Continue;
         end;
       end;
-      if (not Assigned(FUpdateObject)) and (UpdateAction = UaApply) then
+      if (not Assigned(FUpdateObject)) and (AUpdateAction = UaApply) then
       begin
         UpdateUsingInternalquery;
-        UpdateAction := uaApplied;
+        AUpdateAction := uaApplied;
       end;
       Next;
     end;
@@ -1219,12 +1154,12 @@ begin
   end;
 end;
 
-function TMDOCustomDataSet.BookmarkValid(Bookmark: TBookmark): Boolean;
+function TMDOCustomDataSet.BookmarkValid(ABookmark: TBookmark): Boolean;
 begin
   Result := false;
-  if not Assigned(Bookmark) then
+  if not Assigned(ABookmark) then
     exit;
-  Result := PInteger(Bookmark)^ < FRecordCount;
+  Result := PInteger(ABookmark)^ < FRecordCount;
 end;
 
 function TMDOCustomDataSet.CachedUpdateStatus: TCachedUpdateStatus;
@@ -1652,8 +1587,9 @@ end;
 procedure TMDOCustomDataSet.FetchAll;
 var
   SetCursor: Boolean;
-  CurBookmark: {$IFDEF MDO_NEW_BOOKMARK}TBookmark{$ELSE}String{$ENDIF};
+  CurBookmark: TBookmark;
 begin
+  //TODO: Cursor hour glass handler
   {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
@@ -1671,6 +1607,7 @@ begin
       EnableControls;
     end;
   finally
+    //TODO: Cursor hour glass handler
     {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
@@ -1944,15 +1881,7 @@ begin
   Result := DefaultFieldClasses[FieldType];
 end;
 
-{$IFNDEF MDO_FPC}
-function TMDOCustomDataSet.GetFieldData(FieldNo: Integer; Buffer: Pointer): 
-        Boolean;
-begin
-  result := GetFieldData(FieldByNumber(FieldNo), buffer);
-end;
-{$ENDIF}
-
-function TMDOCustomDataSet.GetFieldData(Field : TField; Buffer : Pointer): 
+function TMDOCustomDataSet.GetFieldData(Field : TField; Buffer : Pointer):
         Boolean;
 var
   lTempCurr: System.Currency;
@@ -1961,6 +1890,7 @@ begin
   begin
     Result := InternalGetFieldData(Field, @lTempCurr);
     if Result then
+    //TODO: Verify this part
     {$IFDEF MDO_FPC}
       Currency(Buffer^) := lTempCurr;
     {$ELSE}
@@ -2091,11 +2021,11 @@ begin
   end;
 end;
 
-procedure TMDOCustomDataSet.InternalAddRecord(Buffer: Pointer; Append: Boolean);
+procedure TMDOCustomDataSet.InternalAddRecord(Buffer: Pointer; AAppend: Boolean);
 begin
   CheckEditState;
   begin
-     { When adding records, we *always* append.
+     { When adding records, we *always* AAppend.
        Insertion is just too costly }
     AdjustRecordOnInsert(Buffer);
     with PRecordData(Buffer)^ do
@@ -2191,6 +2121,7 @@ var
   Buff: PChar;
   SetCursor: Boolean;
 begin
+  //TODO: Cursor hour glass handler
   {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
@@ -2220,6 +2151,7 @@ begin
     end else
       MDOError(mdoeCannotDelete, [nil]);
   finally
+    //TODO: Cursor hour glass handler
     {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
@@ -2250,6 +2182,7 @@ var
   SetCursor: Boolean;
 begin
   DidActivate := False;
+  //TODO: Cursor hour glass handler
   {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
@@ -2271,6 +2204,7 @@ begin
   finally
     if DidActivate then
       DeactivateTransaction;
+    //TODO: Cursor hour glass handler
     {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
@@ -2287,7 +2221,7 @@ function TMDOCustomDataSet.InternalGetFieldData(Field: TField; Buffer:
         Pointer): Boolean;
 var
   Buff, Data: PChar;
-  CurrentRecord: PRecordData;
+  ACurrentRecord: PRecordData;
 begin
   result := False;
   Buff := GetActiveBuf;
@@ -2296,7 +2230,7 @@ begin
     exit;
   { The intention here is to stuff the buffer with the data for the
    referenced field for the current record }
-  CurrentRecord := PRecordData(Buff);
+  ACurrentRecord := PRecordData(Buff);
   if (Field.FieldNo < 0) then
   begin
     Inc(Buff, FRecordSize + Field.Offset);
@@ -2305,13 +2239,13 @@ begin
       Move(Buff[1], Buffer^, Field.DataSize);
   end
   else if (FMappedFieldPosition[Field.FieldNo - 1] > 0) and
-     (FMappedFieldPosition[Field.FieldNo - 1] <= CurrentRecord^.rdFieldCount) then
+     (FMappedFieldPosition[Field.FieldNo - 1] <= ACurrentRecord^.rdFieldCount) then
   begin
-    result := not CurrentRecord^.rdFields[FMappedFieldPosition[Field.FieldNo - 1]].fdIsNull;
+    result := not ACurrentRecord^.rdFields[FMappedFieldPosition[Field.FieldNo - 1]].fdIsNull;
     if result and (Buffer <> nil) then
-      with CurrentRecord^.rdFields[FMappedFieldPosition[Field.FieldNo - 1]] do
+      with ACurrentRecord^.rdFields[FMappedFieldPosition[Field.FieldNo - 1]] do
       begin
-        Data := Buff + CurrentRecord^.rdFields[FMappedFieldPosition[Field.FieldNo - 1]].fdDataOfs;
+        Data := Buff + ACurrentRecord^.rdFields[FMappedFieldPosition[Field.FieldNo - 1]].fdDataOfs;
         if (fdDataType = SQL_VARYING) or (fdDataType = SQL_TEXT) then
         begin
           Move(Data^, Buffer^, fdDataLength);
@@ -2410,13 +2344,14 @@ begin
   end;;
 end;
 
-procedure TMDOCustomDataSet.InternalGotoBookmark(Bookmark: Pointer);
+procedure TMDOCustomDataSet.InternalGotoBookmark(ABookmark: Pointer);
 begin
-  FCurrentRecord := PInteger(Bookmark)^;
+  FCurrentRecord := PInteger(ABookmark)^;
 end;
 
 procedure TMDOCustomDataSet.InternalHandleException;
 begin
+  //TODO: Remove this function
   {$IFDEF MDO_FPC}
   inherited;
   {$ELSE}
@@ -2649,6 +2584,7 @@ begin
         begin
           FMappedFieldPosition[FieldIndex] := FieldPosition;
           Inc(FieldIndex);
+          //TODO: Change with FieldDefs.Add(...
           with FieldDefs.AddFieldDef do
           begin
             Name := string( FieldAliasName );
@@ -2725,7 +2661,7 @@ function TMDOCustomDataSet.InternalLocate(const KeyFields: string; const
         KeyValues: Variant; Options: TLocateOptions): Boolean;
 var
   fl: TList;
-  CurBookmark: {$IFDEF MDO_NEW_BOOKMARK}TBookmark{$ELSE}String{$ENDIF};
+  CurBookmark: TBookmark;
   fld, val: Variant;
   i, fld_cnt: Integer;
 begin
@@ -2799,6 +2735,7 @@ var
   end;
   
 begin
+  //TODO: Cursor hour glass handler
   {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
@@ -2864,6 +2801,7 @@ begin
     else
       FQSelect.ExecQuery;
   finally
+    //TODO: Cursor hour glass handler
     {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
@@ -2878,6 +2816,7 @@ var
   SetCursor: Boolean;
   bInserting: Boolean;
 begin
+  //TODO: Cursor hour glass handler
   {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
@@ -2919,6 +2858,7 @@ begin
     if bInserting then
       Inc(FRecordCount);
   finally
+    //TODO: Cursor hour glass handler
     {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
@@ -2976,6 +2916,7 @@ begin
   if FInternalPrepared then
     Exit;
   DidActivate := False;
+  //TODO: Cursor hour glass handler
   {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
@@ -3037,6 +2978,7 @@ begin
   finally
     if DidActivate then
       DeactivateTransaction;
+    //TODO: Cursor hour glass handler
     {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
@@ -3057,6 +2999,7 @@ var
   ofs: DWORD;
   Qry: TMDOSQL;
 begin
+  //TODO: Cursor hour glass handler
   {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
@@ -3105,6 +3048,7 @@ begin
     else
       MDOError(mdoeCannotRefresh, [nil]);
   finally
+    //TODO: Cursor hour glass handler
     {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
@@ -3332,7 +3276,7 @@ end;
 function TMDOCustomDataSet.Locate(const KeyFields: string; const KeyValues: 
         Variant; Options: TLocateOptions): Boolean;
 var
-  CurBookmark: {$IFDEF MDO_NEW_BOOKMARK}TBookmark{$ELSE}String{$ENDIF};
+  CurBookmark: TBookmark;
 begin
   DisableControls;
   try
@@ -3361,7 +3305,7 @@ function TMDOCustomDataSet.Lookup(const KeyFields: string; const KeyValues:
         Variant; const ResultFields: string): Variant;
 var
   fl: TList;
-  CurBookmark: {$IFDEF MDO_NEW_BOOKMARK}TBookmark{$ELSE}String{$ENDIF};
+  CurBookmark: TBookmark;
 begin
   DisableControls;
   fl := TList.Create;
@@ -3523,9 +3467,9 @@ end;
 function TMDOCustomDataSet.PSUpdateRecord(UpdateKind: TUpdateKind; Delta: 
         TDataSet): Boolean;
 var
-  UpdateAction: TMDOUpdateAction;
+  AUpdateAction: TMDOUpdateAction;
   SQL: string;
-  Params: TParams;
+  AParams: TParams;
   
   procedure AssignParams(DataSet: TDataSet; Params: TParams);
   var
@@ -3557,11 +3501,11 @@ begin
   Result := False;
   if Assigned(OnUpdateRecord) then
   begin
-    UpdateAction := uaFail;
+    AUpdateAction := uaFail;
     if Assigned(FOnUpdateRecord) then
     begin
-      FOnUpdateRecord(Delta, UpdateKind, UpdateAction);
-      Result := UpdateAction = uaApplied;
+      FOnUpdateRecord(Delta, UpdateKind, AUpdateAction);
+      Result := AUpdateAction = uaApplied;
     end;
   end
   else if Assigned(FUpdateObject) then
@@ -3569,15 +3513,15 @@ begin
     SQL := FUpdateObject.GetSQL(UpdateKind).Text;
     if SQL <> '' then
     begin
-      Params := TParams.Create;
+      AParams := TParams.Create;
       try
-        Params.ParseSQL(SQL, True);
-        AssignParams(Delta, Params);
-        if PSExecuteStatement(SQL, Params) = 0 then
+        AParams.ParseSQL(SQL, True);
+        AssignParams(Delta, AParams);
+        if PSExecuteStatement(SQL, AParams) = 0 then
           MDOError(mdoeNoRecordsAffected, [nil]);
         Result := True;
       finally
-        Params.Free;
+        AParams.Free;
       end;
     end;
   end;
@@ -3596,7 +3540,7 @@ begin
   else
     pCache := FOldBufferCache + Integer(pCache);
   Move(pCache^, Buffer^, DWORD(FRecordBufferSize));
-  AdjustPosition(FCache, FRecordBufferSize, {$IFDEF MDO_FPC}soFromCurrent{$ELSE}FILE_CURRENT{$ENDIF});
+  AdjustPosition(FCache, FRecordBufferSize, soFromCurrent);
 end;
 
 procedure TMDOCustomDataSet.ReadRecordCache(RecordNumber: Integer; Buffer: 
@@ -3609,7 +3553,7 @@ begin
     ReadRecordCache(RecordNumber, Buffer, False);
     if FCachedUpdates and
       (PRecordData(Buffer)^.rdSavedOffset <> $FFFFFFFF) then
-      ReadCache(FOldBufferCache, PRecordData(Buffer)^.rdSavedOffset, {$IFDEF MDO_FPC}soFromBeginning{$ELSE}FILE_BEGIN{$ENDIF},
+      ReadCache(FOldBufferCache, PRecordData(Buffer)^.rdSavedOffset, soFromBeginning,
                 Buffer)
     else
       if ReadOldBuffer and
@@ -3617,7 +3561,7 @@ begin
          CopyRecordBuffer( FOldBuffer, Buffer )
   end
   else
-    ReadCache(FBufferCache, RecordNumber * FRecordBufferSize, {$IFDEF MDO_FPC}soFromBeginning{$ELSE}FILE_BEGIN{$ENDIF}, Buffer);
+    ReadCache(FBufferCache, RecordNumber * FRecordBufferSize, soFromBeginning, Buffer);
 end;
 
 procedure TMDOCustomDataSet.RecordModified(Value: Boolean);
@@ -3696,15 +3640,15 @@ begin
       if (PRecordData(Buffer)^.rdSavedOffset = $FFFFFFFF) then
       begin
         PRecordData(Buffer)^.rdSavedOffset := AdjustPosition(FOldBufferCache, 0,
-                                                             {$IFDEF MDO_FPC}soFromEnd{$ELSE}FILE_END{$ENDIF});
+                                                             soFromEnd);
         CopyOldBuffer;
-          WriteCache(FOldBufferCache, 0, {$IFDEF MDO_FPC}soFromCurrent{$ELSE}FILE_CURRENT{$ENDIF}, OldBuffer);
+          WriteCache(FOldBufferCache, 0, soFromCurrent, OldBuffer);
           WriteCache(FBufferCache, PRecordData(Buffer)^.rdRecordNumber * FRecordBufferSize,
-                     {$IFDEF MDO_FPC}soFromBeginning{$ELSE}FILE_BEGIN{$ENDIF}, Buffer);
+                     soFromBeginning, Buffer);
       end
       else begin
         CopyOldBuffer;
-        WriteCache(FOldBufferCache, PRecordData(Buffer)^.rdSavedOffset, {$IFDEF MDO_FPC}soFromBeginning{$ELSE}FILE_BEGIN{$ENDIF},
+        WriteCache(FOldBufferCache, PRecordData(Buffer)^.rdSavedOffset, soFromBeginning,
                    OldBuffer);
       end;
     finally
@@ -3772,6 +3716,7 @@ begin
   end;
 end;
 
+//TODO: Check this routine, maybe usless
 procedure TMDOCustomDataSet.SetFieldData(Field : TField; Buffer : Pointer);
 {$IFNDEF MDO_FPC}
 var
@@ -3896,6 +3841,7 @@ begin
               Qry.Params[i].AsTime := TimeStampToDateTime(ts);
             end;
             SQL_TIMESTAMP:
+              //TODO: check 64bit routine
               Qry.Params[i].AsDateTime := TimeStampToDateTime(MSecsToTimeStamp({$IFDEF MDO_64BIT}trunc{$ENDIF}(PDouble(data)^)));
           end;
         end;
@@ -4074,7 +4020,7 @@ begin
   else
     pCache := FOldBufferCache + Integer(pCache);
   Move(Buffer^, pCache^, FRecordBufferSize);
-  dwEnd := AdjustPosition(FCache, FRecordBufferSize, {$IFDEF MDO_FPC}soFromCurrent{$ELSE}FILE_CURRENT{$ENDIF});
+  dwEnd := AdjustPosition(FCache, FRecordBufferSize, soFromCurrent);
   if not bOld then
   begin
     if (dwEnd > FBEnd) then
@@ -4093,7 +4039,7 @@ begin
   begin
     if FUniDirectional then
       RecordNumber := RecordNumber mod UniCache;
-    WriteCache(FBufferCache, RecordNumber * FRecordBufferSize, {$IFDEF MDO_FPC}soFromBeginning{$ELSE}FILE_BEGIN{$ENDIF}, Buffer);
+    WriteCache(FBufferCache, RecordNumber * FRecordBufferSize, soFromBeginning, Buffer);
   end;
 end;
 
@@ -4291,9 +4237,7 @@ begin
   Result := (FGenerator <> '') and (FField <> '');
 end;
 
-{$IFDEF MDO_FPC}
 initialization
   RegisterClasses([TMDOStringField, TMDOBCDField, TMDOBooleanField]);
-{$ENDIF}
 
 end.

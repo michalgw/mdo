@@ -34,17 +34,10 @@ unit MDOUtils;
 interface
 
 uses
-  {$IFNDEF MDO_FPC}
-  Windows,
-  {$ENDIF}
   SysUtils;
 
 const
-  {$IFDEF MDO_FPC}
   CRLF = LineEnding;
-  {$ELSE}
-  CRLF = #13 + #10;
-  {$ENDIF}
   CR   = #13;
   LF   = #10;
   TAB  = #9;

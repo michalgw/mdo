@@ -631,7 +631,7 @@ begin
   try
     SetLength(FUninstallFile, ISC_INSTALL_MAX_PATH);
     Call(isc_install_execute(Handle, PChar(FSourceDir), PChar(FDestinationDir),
-                            StatusCallback, Pointer(self), ErrorCallback,
+                            @StatusCallback, Pointer(self), @ErrorCallback,
                             Pointer(self), PChar(FUninstallFile)));
     SetLength(FUninstallFile, StrLen(PChar(FUninstallFile)));
   finally
@@ -747,8 +747,8 @@ begin
   if FUninstallFile = '' then
     IBInstallerError(ieNoUninstallFile, []);
   
-  Call(isc_uninstall_execute(PChar(FUninstallFile), StatusCallback, Pointer(self),
-                             ErrorCallback, Pointer(self)));
+  Call(isc_uninstall_execute(PChar(FUninstallFile), @StatusCallback, Pointer(self),
+                             @ErrorCallback, Pointer(self)));
 end;
 
 { EIBInstall }

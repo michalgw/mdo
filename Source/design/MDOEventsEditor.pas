@@ -34,20 +34,19 @@ unit MDOEventsEditor;
 interface
 
 uses
-  {$IFDEF MDO_FPC}
   LResources, LCLType,
-  {$ELSE}
-  Windows, Messages,
-  {$ENDIF}
   SysUtils, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, StdCtrls,
   Grids, MDOEvents;
 
 type
+
+  { TMDOEventsEditorForm }
+
   TMDOEventsEditorForm = class (TForm)
     bCancel: TButton;
     bOK: TButton;
     cEvents: TStringGrid;
-    Panel1: TPanel;
+    GroupBox1: TGroupBox;
     Panel2: TPanel;
     RequestedEvents: TLabel;
     procedure FormCreate(Sender: TObject);
@@ -57,11 +56,7 @@ function EditAlerterEvents(Events: TStrings): Boolean;
 
 implementation
 
-{$IFDEF MDO_FPC}
 {$R *.lfm}
-{$ELSE}
-{$R *.DFM}
-{$ENDIF}
 
 function EditAlerterEvents(Events: TStrings): Boolean;
 var

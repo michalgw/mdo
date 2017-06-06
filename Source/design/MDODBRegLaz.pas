@@ -14,24 +14,7 @@
 
 unit MDODBRegLaz;
 
-(*
-{ Compiler defines }
-{$A+} {Aligned records: On }
-{$B-} {Short circuit boolean expressions: Off }
-{$G+} {Imported data: On }
-{$H+} {Huge Strings: On }
-{$J-} {Modification of Typed Constants: Off }
-{$M+} {Generate run-time type information: On }
-{$O+} {Optimization: On }
-{$Q-} {Overflow checks: Off }
-{$R-} {Range checks: Off }
-{$T+} {Typed address: On }
-{$U+} {Pentim-safe FDIVs: On }
-{$W-} {Always generate stack frames: Off }
-{$X+} {Extended syntax: On }
-{$Z1} {Minimum Enumeration Size: 1 Byte }
-{.$I MDO.INC}
-*)
+{$I MDO.INC}
 
 interface
 
@@ -422,7 +405,7 @@ begin
   Result := nil;
   PropInfo := TypInfo.GetPropInfo(Instance.ClassInfo, PropName);
   if (PropInfo <> nil) and (PropInfo^.PropType^.Kind = tkClass) then
-    Result := TObject(GetOrdProp(Instance, PropInfo)) as TPersistent;
+    Result := GetObjectProp(Instance, PropInfo) as TPersistent;
 end;
 
 function GetIndexDefs(Component: TPersistent): TIndexDefs;
@@ -508,8 +491,8 @@ begin
   Query := TMDOQuery(GetComponent(0));
   if Assigned(Query.Database) then
   begin
-    FGetTableNamesProc := Query.Database.GetTableNames;
-    FGetFieldNamesProc := Query.Database.GetFieldNames;
+    FGetTableNamesProc := @Query.Database.GetTableNames;
+    FGetFieldNamesProc := @Query.Database.GetFieldNames;
   end
   else
   begin
@@ -520,18 +503,18 @@ begin
 end;
 
 function TMDOQuerySQLProperty.QueryInterface(const IID: TGUID; out Obj):
-        HResult;
+        HResult; stdcall;
 begin
   if GetInterface(IID, Obj) then Result := S_OK else Result := E_NOINTERFACE;
 end;
 
-function TMDOQuerySQLProperty._AddRef: Integer;
+function TMDOQuerySQLProperty._AddRef: Integer; stdcall;
 begin
   Result := -1;
   // non-refcounted memorymanagement
 end;
 
-function TMDOQuerySQLProperty._Release: Integer;
+function TMDOQuerySQLProperty._Release: Integer; stdcall;
 begin
   Result := -1;
   // non-refcounted memorymanagement
@@ -549,8 +532,8 @@ begin
   MDODataset := TMDODataset(GetComponent(0));
   if Assigned(MDODataSet.Database) then
   begin
-    FGetTableNamesProc := MDODataset.Database.GetTableNames;
-    FGetFieldNamesProc := MDODataset.Database.GetFieldNames;
+    FGetTableNamesProc := @MDODataset.Database.GetTableNames;
+    FGetFieldNamesProc := @MDODataset.Database.GetFieldNames;
   end
   else
   begin
@@ -572,8 +555,8 @@ begin
   MDOSQL := TMDOSQL(GetComponent(0));
   if Assigned(MDOSQL.Database) then
   begin
-    FGetTableNamesProc := MDOSQL.Database.GetTableNames;
-    FGetFieldNamesProc := MDOSQL.Database.GetFieldNames;
+    FGetTableNamesProc := @MDOSQL.Database.GetTableNames;
+    FGetFieldNamesProc := @MDOSQL.Database.GetFieldNames;
   end
   else
   begin
@@ -594,8 +577,8 @@ var
 begin
   MDOUpdSQL := TMDOUpdateSQL(Component);
   
-  GetTableNames := MDOUpdSQL.DataSet.Database.GetTableNames;
-  GetFieldNames := MDOUpdSQL.DataSet.Database.GetFieldNames;
+  GetTableNames := @MDOUpdSQL.DataSet.Database.GetTableNames;
+  GetFieldNames := @MDOUpdSQL.DataSet.Database.GetFieldNames;
   
   if EditMDOUpdateSQL(MDOUpdSQL, GetTableNames, GetFieldnames) then
     Designer.Modified;
@@ -652,8 +635,8 @@ begin
     MDODataset := TMDODataset(Component);
     if Assigned(MDODataSet.Database) then
     begin
-      FGetTableNamesProc := MDODataset.Database.GetTableNames;
-      FGetFieldNamesProc := MDODataset.Database.GetFieldNames;
+      FGetTableNamesProc := @MDODataset.Database.GetTableNames;
+      FGetFieldNamesProc := @MDODataset.Database.GetFieldNames;
     end
     else
     begin
@@ -821,8 +804,8 @@ begin
         begin
           if Assigned(Query.Database) then
           begin
-            FGetTableNamesProc := Query.Database.GetTableNames;
-            FGetFieldNamesProc := Query.Database.GetFieldNames;
+            FGetTableNamesProc := @Query.Database.GetTableNames;
+            FGetFieldNamesProc := @Query.Database.GetFieldNames;
           end
           else
           begin

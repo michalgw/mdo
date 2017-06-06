@@ -34,11 +34,7 @@ unit MDOUpdateSQLEditor;
 interface
 
 uses
-  {$IFDEF MDO_FPC}
   LResources,
-  {$ELSE}
-  Windows,
-  {$ENDIF}
   Forms, DB, ExtCtrls, StdCtrls, Controls, ComCtrls, Classes, SysUtils, Menus,
   MDO, MDODatabase, MDOUpdateSQL, MDOCustomDataSet, MDOTable, MDOQuery,
   MDOConst, MDOUtils;
@@ -50,6 +46,9 @@ type
           object;
   TGetFieldNamesProc = procedure (const TableName: string; List: TStrings) of 
           object;
+
+  { TMDOUpdateSQLEditForm }
+
   TMDOUpdateSQLEditForm = class (TForm)
     CancelButton: TButton;
     DefaultButton: TButton;
@@ -58,16 +57,19 @@ type
     gboSQLGeneration: TGroupBox;
     GenerateButton: TButton;
     GetTableFieldsButton: TButton;
+    GroupBox1: TGroupBox;
     HelpButton: TButton;
     KeyFieldList: TListBox;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
-    Label4: TLabel;
     miClearAll: TMenuItem;
     miSelectAll: TMenuItem;
     okButton: TButton;
     Panel1: TPanel;
+    Panel2: TPanel;
+    Panel3: TPanel;
+    Panel4: TPanel;
     pcoUpdate: TPageControl;
     PrimaryKeyButton: TButton;
     QuoteFields: TCheckBox;
@@ -164,11 +166,7 @@ function EditMDODataSet(ADataSet: TMDODataSet; GetTableNamesProc:
 
 implementation
 
-{$IFDEF MDO_FPC}
 {$R *.lfm}
-{$ELSE}
-{$R *.DFM}
-{$ENDIF}
 
 uses Dialogs, {LibHelp,} TypInfo;
 
@@ -389,7 +387,7 @@ begin
       NextToken;
       while FToken = stSymbol do
       begin
-        List.AddObject(FTokenString, Pointer(Integer(FSymbolQuoted)));
+        List.AddObject(FTokenString, TObject(PtrInt(FSymbolQuoted)));
         if NextToken = stSymbol then
           NextToken;
         if FToken = stComma then
@@ -485,6 +483,7 @@ var
   QuoteChar: Char;
   IsParam: Boolean;
 
+  //TODO: ?
   {$IFNDEF MDO_FPC}
   function IsKatakana(const Chr: Byte): Boolean;
   begin
@@ -614,7 +613,7 @@ begin
       if (Items.Count > 0) and (ItemIndex = -1) then
         ItemIndex := Items.IndexOf(Text);
     end;
-  ShowWait(GetDataSetFieldNames);
+  ShowWait(@GetDataSetFieldNames);
   FDatasetDefaults := True;
   SetDefaultSelections;
   KeyfieldList.SetFocus;
@@ -668,7 +667,7 @@ begin
     if (@GetTableNames <> nil) then
       GetTableNames(UpdateTableName.Items, false);
   
-    ShowWait(InitGenerateOptions);
+    ShowWait(@InitGenerateOptions);
   
     pcoUpdate.ActivePage := pcoUpdate.Pages[0];
     if ShowModal = mrOk then
@@ -919,7 +918,7 @@ end;
 
 procedure TMDOUpdateSQLEditForm.GetTableFieldsButtonClick(Sender: TObject);
 begin
-  ShowWait(GetTableFieldNames);
+  ShowWait(@GetTableFieldNames);
   SetDefaultSelections;
   SettingsChanged(Sender);
 end;
@@ -1061,7 +1060,7 @@ end;
 
 procedure TMDOUpdateSQLEditForm.PrimaryKeyButtonClick(Sender: TObject);
 begin
-  ShowWait(SelectPrimaryKeyFields);
+  ShowWait(@SelectPrimaryKeyFields);
   SettingsChanged(Sender);
 end;
 
@@ -1138,16 +1137,16 @@ end;
 
 procedure TMDOUpdateSQLEditForm.ShowWait(WaitMethod: TWaitMethod);
 var
-  SetCursor: Boolean;
+  ASetCursor: Boolean;
 begin
-  SetCursor := Screen.Cursor = crDefault;
-  if SetCursor then
+  ASetCursor := Screen.Cursor = crDefault;
+  if ASetCursor then
     Screen.Cursor := crHourGlass;
   Screen.Cursor := crHourGlass;
   try
     WaitMethod;
   finally
-    if SetCursor and (Screen.Cursor = crHourGlass) then
+    if ASetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
   end;
 end;

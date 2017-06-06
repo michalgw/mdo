@@ -1,95 +1,151 @@
 object MDODatabaseEditForm: TMDODatabaseEditForm
   Left = 235
-  Height = 485
+  Height = 475
   Top = 38
   Width = 377
+  AutoSize = True
   BorderStyle = bsDialog
   Caption = 'Database Editor'
-  ClientHeight = 485
+  ClientHeight = 475
   ClientWidth = 377
-  Font.Height = -11
-  Font.Name = 'MS Sans Serif'
   Position = poScreenCenter
-  LCLVersion = '0.9.29'
+  LCLVersion = '1.9.0.0'
   object GroupBox3: TGroupBox
     Left = 8
     Height = 257
-    Top = 176
+    Top = 171
     Width = 361
+    Align = alTop
+    BorderSpacing.Around = 8
     Caption = 'Database parameters'
-    ClientHeight = 239
+    ClientHeight = 237
     ClientWidth = 357
     TabOrder = 1
     object Label2: TLabel
-      Left = 24
-      Height = 14
+      AnchorSideLeft.Control = GroupBox3
+      AnchorSideTop.Control = GroupBox3
+      Left = 8
+      Height = 15
       Top = 8
-      Width = 55
+      Width = 59
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 8
       Caption = 'User name:'
       ParentColor = False
     end
     object Label3: TLabel
-      Left = 24
-      Height = 14
-      Top = 56
-      Width = 50
+      AnchorSideLeft.Control = GroupBox3
+      AnchorSideTop.Control = UserName
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 15
+      Top = 58
+      Width = 53
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 8
       Caption = 'Password:'
       ParentColor = False
     end
     object Label4: TLabel
-      Left = 24
-      Height = 14
-      Top = 104
+      AnchorSideLeft.Control = GroupBox3
+      AnchorSideTop.Control = Password
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 15
+      Top = 108
       Width = 50
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 8
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 4
       Caption = 'SQL Role:'
       ParentColor = False
     end
     object Label5: TLabel
-      Left = 24
-      Height = 14
-      Top = 152
-      Width = 67
+      AnchorSideLeft.Control = GroupBox3
+      AnchorSideTop.Control = SQLRole
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 15
+      Top = 158
+      Width = 72
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 8
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 4
       Caption = 'Character set:'
       ParentColor = False
     end
     object Label6: TLabel
+      AnchorSideLeft.Control = DatabaseParams
+      AnchorSideTop.Control = GroupBox3
       Left = 136
-      Height = 14
+      Height = 15
       Top = 8
-      Width = 42
+      Width = 45
+      BorderSpacing.Top = 8
+      BorderSpacing.Bottom = 4
       Caption = 'Settings:'
       ParentColor = False
     end
     object UserName: TEdit
-      Left = 24
-      Height = 21
-      Top = 24
-      Width = 100
+      AnchorSideLeft.Control = GroupBox3
+      AnchorSideTop.Control = Label2
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 23
+      Top = 27
+      Width = 120
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 8
       OnChange = UserNameChange
       TabOrder = 0
     end
     object Password: TEdit
-      Left = 24
-      Height = 21
-      Top = 72
-      Width = 100
+      AnchorSideLeft.Control = GroupBox3
+      AnchorSideTop.Control = Label3
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 23
+      Top = 77
+      Width = 120
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 8
       OnChange = PasswordChange
       TabOrder = 1
     end
     object SQLRole: TEdit
-      Left = 24
-      Height = 21
-      Top = 120
-      Width = 100
+      AnchorSideLeft.Control = GroupBox3
+      AnchorSideTop.Control = Label4
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 23
+      Top = 127
+      Width = 120
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 8
       OnChange = SQLRoleChange
       TabOrder = 2
     end
     object CharacterSet: TComboBox
-      Left = 24
-      Height = 21
-      Top = 168
-      Width = 100
-      ItemHeight = 13
+      AnchorSideLeft.Control = GroupBox3
+      AnchorSideTop.Control = Label5
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 23
+      Top = 177
+      Width = 120
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 8
+      ItemHeight = 15
       ItemIndex = 0
       Items.Strings = (
         'None'
@@ -124,100 +180,165 @@ object MDODatabaseEditForm: TMDODatabaseEditForm
       Text = 'None'
     end
     object LoginPrompt: TCheckBox
-      Left = 24
-      Height = 17
-      Top = 200
-      Width = 79
+      AnchorSideLeft.Control = GroupBox3
+      AnchorSideTop.Control = CharacterSet
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 19
+      Top = 208
+      Width = 90
+      BorderSpacing.Around = 8
       Caption = 'LoginPrompt'
       TabOrder = 4
     end
     object DatabaseParams: TMemo
+      AnchorSideLeft.Control = UserName
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Label6
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = GroupBox3
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = GroupBox3
+      AnchorSideBottom.Side = asrBottom
       Left = 136
-      Height = 161
-      Top = 24
-      Width = 201
+      Height = 202
+      Top = 27
+      Width = 213
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 8
+      ScrollBars = ssAutoBoth
       TabOrder = 5
     end
   end
   object GroupBox2: TGroupBox
     Left = 8
-    Height = 153
+    Height = 155
     Top = 8
     Width = 361
+    Align = alTop
+    AutoSize = True
+    BorderSpacing.Around = 8
     Caption = 'Connection'
     ClientHeight = 135
     ClientWidth = 357
     TabOrder = 0
     object Label8: TLabel
-      Left = 152
-      Height = 14
-      Top = 36
-      Width = 43
+      AnchorSideLeft.Control = Protocol
+      AnchorSideTop.Control = ClientLibrary
+      AnchorSideTop.Side = asrBottom
+      Left = 180
+      Height = 15
+      Top = 35
+      Width = 48
+      BorderSpacing.Top = 8
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 4
       Caption = 'Protocol:'
-      Enabled = False
       ParentColor = False
     end
     object Label7: TLabel
-      Left = 16
-      Height = 14
-      Top = 36
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = ClientLibrary
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 15
+      Top = 35
       Width = 35
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 8
+      BorderSpacing.Bottom = 4
       Caption = 'Server:'
-      Enabled = False
       ParentColor = False
     end
     object Label9: TLabel
-      Left = 16
-      Height = 14
-      Top = 88
-      Width = 50
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = ServerName
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 15
+      Top = 85
+      Width = 51
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 8
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 4
       Caption = 'Database:'
       ParentColor = False
     end
     object Label1: TLabel
-      Left = 158
-      Height = 14
+      AnchorSideTop.Control = ClientLibrary
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = ClientLibrary
+      Left = 168
+      Height = 15
       Top = 10
-      Width = 64
+      Width = 73
+      Anchors = [akTop, akRight]
       Caption = 'Client Library:'
       ParentColor = False
     end
     object LocalRbtn: TRadioButton
-      Left = 16
-      Height = 17
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = GroupBox2
+      Left = 8
+      Height = 19
       Top = 8
-      Width = 46
+      Width = 48
+      BorderSpacing.Around = 8
       Caption = 'Local'
       Checked = True
       OnClick = LocalRbtnClick
-      State = cbChecked
       TabOrder = 0
+      TabStop = True
     end
     object RemoteRbtn: TRadioButton
-      Left = 72
-      Height = 17
+      AnchorSideLeft.Control = LocalRbtn
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = GroupBox2
+      Left = 64
+      Height = 19
       Top = 8
-      Width = 57
+      Width = 61
+      BorderSpacing.Around = 8
       Caption = 'Remote'
       OnClick = LocalRbtnClick
       TabOrder = 1
-      TabStop = False
     end
     object ServerName: TEdit
-      Left = 16
-      Height = 21
-      Top = 52
-      Width = 121
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = Label7
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = Protocol
+      Left = 8
+      Height = 23
+      Top = 54
+      Width = 164
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 8
       Enabled = False
       TabOrder = 3
     end
     object Protocol: TComboBox
-      Left = 152
-      Height = 21
-      Top = 52
+      AnchorSideTop.Control = Label8
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = Browse
+      Left = 180
+      Height = 23
+      Top = 54
       Width = 97
+      Anchors = [akTop, akRight]
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 8
       Enabled = False
-      ItemHeight = 13
+      ItemHeight = 15
       Items.Strings = (
         'TCP'
         'NamedPiped'
@@ -227,26 +348,51 @@ object MDODatabaseEditForm: TMDODatabaseEditForm
       TabOrder = 4
     end
     object Browse: TButton
-      Left = 262
+      AnchorSideTop.Control = Label7
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = GroupBox2
+      AnchorSideRight.Side = asrBottom
+      Left = 285
       Height = 25
-      Top = 52
-      Width = 75
+      Top = 54
+      Width = 64
+      Anchors = [akTop, akRight]
+      AutoSize = True
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 8
       Caption = '&Browse'
       OnClick = BrowseClick
       TabOrder = 5
     end
     object DatabaseName: TEdit
-      Left = 16
-      Height = 21
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = Label9
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = GroupBox2
+      AnchorSideRight.Side = asrBottom
+      Left = 8
+      Height = 23
       Top = 104
-      Width = 321
+      Width = 341
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 8
       TabOrder = 6
     end
     object ClientLibrary: TComboBox
-      Left = 237
+      AnchorSideTop.Control = GroupBox2
+      AnchorSideRight.Control = GroupBox2
+      AnchorSideRight.Side = asrBottom
+      Left = 249
       Height = 19
       Top = 8
       Width = 100
+      Anchors = [akTop, akRight]
+      BorderSpacing.Around = 8
       ItemHeight = 13
       Items.Strings = (
         'Auto Detect'
@@ -260,10 +406,15 @@ object MDODatabaseEditForm: TMDODatabaseEditForm
     end
   end
   object OkBtn: TButton
-    Left = 32
+    AnchorSideTop.Control = GroupBox3
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = CancelBtn
+    Left = 45
     Height = 25
-    Top = 448
+    Top = 436
     Width = 75
+    Anchors = [akTop, akRight]
+    BorderSpacing.Around = 8
     Caption = '&Ok'
     Default = True
     ModalResult = 1
@@ -271,29 +422,45 @@ object MDODatabaseEditForm: TMDODatabaseEditForm
     TabOrder = 2
   end
   object CancelBtn: TButton
-    Left = 112
+    AnchorSideTop.Control = GroupBox3
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = HelpBtn
+    Left = 128
     Height = 25
-    Top = 448
+    Top = 436
     Width = 75
+    Anchors = [akTop, akRight]
+    BorderSpacing.Around = 8
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 3
   end
   object HelpBtn: TButton
-    Left = 192
+    AnchorSideTop.Control = GroupBox3
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Test
+    Left = 211
     Height = 25
-    Top = 448
+    Top = 436
     Width = 75
+    Anchors = [akTop, akRight]
+    BorderSpacing.Around = 8
     Caption = '&Help'
     OnClick = HelpBtnClick
     TabOrder = 4
   end
   object Test: TButton
-    Left = 272
+    AnchorSideTop.Control = GroupBox3
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 294
     Height = 25
-    Top = 448
+    Top = 436
     Width = 75
+    Anchors = [akTop, akRight]
+    BorderSpacing.Around = 8
     Caption = '&Test'
     OnClick = TestClick
     TabOrder = 5

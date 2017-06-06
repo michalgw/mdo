@@ -33,16 +33,9 @@ interface
 {$I ..\MDO.inc}
 
 uses
-  {$IFDEF MDO_FPC}
   LResources,
-  {$ELSE}
-  Windows, Messages,
-  {$ENDIF}
   SysUtils, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, MDOServices,
-  MDOConst
-  {$IFDEF MDO_DELPHI6_UP}
-    , Variants
-  {$ENDIF};
+  MDOConst, Variants;
 
 type
   TMDOServiceEditorForm = class (TForm)
@@ -72,10 +65,10 @@ type
     procedure eUsrChange(Sender: TObject);
   private
     Service: TMDOCustomService;
-    procedure AddParam(Name, Value: string);
-    procedure DeleteParam(Name: string);
+    procedure AddParam(AName, Value: string);
+    procedure DeleteParam(AName: string);
     function Edit: Boolean;
-    function GetParam(Name: string): string;
+    function GetParam(AName: string): string;
   end;
   
 var
@@ -87,11 +80,7 @@ implementation
 
 uses TypInfo;
 
-{$IFDEF MDO_FPC}
 {$R *.lfm}
-{$ELSE}
-{$R *.dfm}
-{$ENDIF}
 
 function EditMDOService(AService: TMDOCustomService): Boolean;
 begin
@@ -107,7 +96,7 @@ end;
 {
 **************************** TMDOServiceEditorForm *****************************
 }
-procedure TMDOServiceEditorForm.AddParam(Name, Value: string);
+procedure TMDOServiceEditorForm.AddParam(AName, Value: string);
 var
   i: Integer;
   found: Boolean;
@@ -117,16 +106,16 @@ begin
     begin
       for i := 0 to mSettings.Lines.Count - 1 do
         begin
-          if (Pos(Name, LowerCase(mSettings.Lines.Names[i])) = 1) then
+          if (Pos(AName, LowerCase(mSettings.Lines.Names[i])) = 1) then
             begin
               mSettings.Lines.Values[mSettings.Lines.Names[i]] := Value;
               found := True;
               break;
             end;
         end;
-      if not found then mSettings.Lines.Add(Name + '=' + Value);
+      if not found then mSettings.Lines.Add(AName + '=' + Value);
     end
-  else DeleteParam(Name);
+  else DeleteParam(AName);
 end;
 
 procedure TMDOServiceEditorForm.bBrowseClick(Sender: TObject);
@@ -148,13 +137,13 @@ begin
   cbProtocol.Enabled := cbServer.ItemIndex = 1;
 end;
 
-procedure TMDOServiceEditorForm.DeleteParam(Name: string);
+procedure TMDOServiceEditorForm.DeleteParam(AName: string);
 var
   i: Integer;
 begin
   for i := 0 to mSettings.Lines.Count - 1 do
     begin
-      if (Pos(Name, LowerCase(mSettings.Lines.Names[i])) = 1) then
+      if (Pos(AName, LowerCase(mSettings.Lines.Names[i])) = 1) then
         begin
           mSettings.Lines.Delete(i);
           break;
@@ -230,14 +219,14 @@ begin
   AddParam('user_name', eUsr.Text);
 end;
 
-function TMDOServiceEditorForm.GetParam(Name: string): string;
+function TMDOServiceEditorForm.GetParam(AName: string): string;
 var
   i: Integer;
 begin
   Result := '';
   for i := 0 to mSettings.Lines.Count - 1 do
     begin
-      if (Pos(Name, LowerCase(mSettings.Lines.Names[i])) = 1) then
+      if (Pos(AName, LowerCase(mSettings.Lines.Names[i])) = 1) then
         begin
           Result := mSettings.Lines.Values[mSettings.Lines.Names[i]];
           break;

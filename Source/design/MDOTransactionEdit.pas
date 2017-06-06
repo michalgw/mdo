@@ -34,27 +34,24 @@ unit MDOTransactionEdit;
 interface
 
 uses
-  {$IFDEF MDO_FPC}
   LResources,
-  {$ELSE}
-  Windows, Messages,
-  {$ENDIF}
   SysUtils, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, MDODatabase,
   MDO, ExtCtrls, MDOConst;
 
 type
+
+  { TMDOTransactionEditForm }
+
   TMDOTransactionEditForm = class (TForm)
     Cancelbtn: TButton;
     GroupBox1: TGroupBox;
     HelpBtn: TButton;
     OKBtn: TButton;
-    Panel1: TPanel;
     rbReadCommitted: TRadioButton;
     rbReadOnlyTableStability: TRadioButton;
     rbReadWriteTableStability: TRadioButton;
     rbSnapShot: TRadioButton;
     TransactionParams: TMemo;
-    procedure FormCreate(Sender: TObject);
     procedure HelpBtnClick(Sender: TObject);
     procedure OKBtnClick(Sender: TObject);
     procedure rbReadCommittedClick(Sender: TObject);
@@ -77,17 +74,7 @@ function EdiTMDOtransaction(Atransaction: TMDOtransaction): Boolean;
 
 implementation
 
-{$IFDEF MDO_FPC}
 {$R *.lfm}
-{$ELSE}
-{$R *.DFM}
-{$ENDIF}
-
-{$IFNDEF MDO_FPC}
-uses
-  LibHelp;
-{$ENDIF}
-
 
 type
   TTransactionParam = (concurrency, read_committed, rec_version, nowait,
@@ -127,13 +114,6 @@ begin
     Transaction.Params := TransactionParams.Lines;
     Result := True;
   end;
-end;
-
-procedure TMDOTransactionEditForm.FormCreate(Sender: TObject);
-begin
-  {$IFNDEF MDO_FPC}
-  HelpContext := hcDIBTransactionEdit;
-  {$ENDIF}
 end;
 
 procedure TMDOTransactionEditForm.HelpBtnClick(Sender: TObject);

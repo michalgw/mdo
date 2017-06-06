@@ -39,11 +39,7 @@ unit MDODatabaseEdit;
 interface
 
 uses
-  {$IFDEF MDO_FPC}
   LResources,
-  {$ELSE}
-  Windows, Messages,
-  {$ENDIF}
   SysUtils, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls,
   MDODatabase, MDO, MDOConst, ComCtrls;
 
@@ -90,10 +86,10 @@ type
     procedure UserNameChange(Sender: TObject);
   private
     Database: TMDODatabase;
-    procedure AddParam(Name, Value: string);
-    procedure DeleteParam(Name: string);
+    procedure AddParam(AName, Value: string);
+    procedure DeleteParam(AName: string);
     function Edit: Boolean;
-    function GetParam(Name: string): string;
+    function GetParam(AName: string): string;
   end;
   
 var
@@ -103,11 +99,7 @@ function EdiTMDODatabase(ADatabase: TMDODatabase): Boolean;
 
 implementation
 
-{$IFDEF MDO_FPC}
 {$R *.lfm}
-{$ELSE}
-{$R *.DFM}
-{$ENDIF}
 
 uses TypInfo;
 
@@ -125,7 +117,7 @@ end;
 {
 ***************************** TMDODatabaseEditForm *****************************
 }
-procedure TMDODatabaseEditForm.AddParam(Name, Value: string);
+procedure TMDODatabaseEditForm.AddParam(AName, Value: string);
 var
   i: Integer;
   found: Boolean;
@@ -135,7 +127,7 @@ begin
   begin
     for i := 0 to DatabaseParams.Lines.Count - 1 do
     begin
-      if (Pos(Name, LowerCase(DatabaseParams.Lines.Names[i])) = 1) then {mbcs ok}
+      if (Pos(AName, LowerCase(DatabaseParams.Lines.Names[i])) = 1) then {mbcs ok}
       begin
         DatabaseParams.Lines.Values[DatabaseParams.Lines.Names[i]] := Value;
         found := True;
@@ -143,10 +135,10 @@ begin
       end;
     end;
     if not found then
-      DatabaseParams.Lines.Add(Name + '=' + Value);
+      DatabaseParams.Lines.Add(AName + '=' + Value);
   end
   else
-    DeleteParam(Name);
+    DeleteParam(AName);
 end;
 
 procedure TMDODatabaseEditForm.BrowseClick(Sender: TObject);
@@ -204,13 +196,13 @@ begin
     DeleteParam('lc_ctype');
 end;
 
-procedure TMDODatabaseEditForm.DeleteParam(Name: string);
+procedure TMDODatabaseEditForm.DeleteParam(AName: string);
 var
   i: Integer;
 begin
   for i := 0 to DatabaseParams.Lines.Count - 1 do
   begin
-    if (Pos(Name, LowerCase(DatabaseParams.Lines.Names[i])) = 1) then {mbcs ok}
+    if (Pos(AName, LowerCase(DatabaseParams.Lines.Names[i])) = 1) then {mbcs ok}
     begin
       DatabaseParams.Lines.Delete(i);
       break;
@@ -316,14 +308,14 @@ begin
   end;
 end;
 
-function TMDODatabaseEditForm.GetParam(Name: string): string;
+function TMDODatabaseEditForm.GetParam(AName: string): string;
 var
   i: Integer;
 begin
   Result := '';
   for i := 0 to DatabaseParams.Lines.Count - 1 do
   begin
-    if (Pos(Name, LowerCase(DatabaseParams.Lines.Names[i])) = 1) then {mbcs ok}
+    if (Pos(AName, LowerCase(DatabaseParams.Lines.Names[i])) = 1) then {mbcs ok}
     begin
       Result := DatabaseParams.Lines.Values[DatabaseParams.Lines.Names[i]];
       break;
@@ -398,10 +390,10 @@ begin
       end;
     tempDB.Params.Assign(DatabaseParams.Lines);
     tempDB.LoginPrompt := LoginPrompt.Checked;
-    if ClientLibrary.ItemIndex = 0 then
-      tempDB.ClientLib := clFBClient
+    if ClientLibrary.ItemIndex = -1 then
+      tempDB.ClientLib := clAutoDetect
     else
-      tempDB.ClientLib := clGDS32;
+      tempDB.ClientLib := TMDOClientLib(ClientLibrary.ItemIndex);
     tempDB.Connected := true;
     ShowMessage('Successful Connection');
   finally

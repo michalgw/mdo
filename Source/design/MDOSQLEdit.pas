@@ -15,6 +15,8 @@ type
 
   { TTMDOSQLEditForm }
 
+  { TMDOSQLEditForm }
+
   TMDOSQLEditForm = class(TForm)
     ImageListMain: TImageList;
     LabelTables: TLabel;
@@ -35,7 +37,9 @@ type
     ToolButtonS1: TToolButton;
     ToolButtonLoad: TToolButton;
     ToolButtonSave: TToolButton;
+    procedure ListBoxFieldsDblClick(Sender: TObject);
     procedure ListBoxTablesClick(Sender: TObject);
+    procedure ListBoxTablesDblClick(Sender: TObject);
     procedure SynEditSQLDragDrop(Sender, Source: TObject; X, Y: Integer);
     procedure SynEditSQLDragOver(Sender, Source: TObject; X, Y: Integer;
       State: TDragState; var Accept: Boolean);
@@ -95,6 +99,18 @@ begin
   LoadFields;
 end;
 
+procedure TMDOSQLEditForm.ListBoxFieldsDblClick(Sender: TObject);
+begin
+  if ListBoxFields.ItemIndex > -1 then
+    SynEditSQL.InsertTextAtCaret(ListBoxFields.Items[ListBoxFields.ItemIndex]);
+end;
+
+procedure TMDOSQLEditForm.ListBoxTablesDblClick(Sender: TObject);
+begin
+  if ListBoxTables.ItemIndex > -1 then
+    SynEditSQL.InsertTextAtCaret(ListBoxTables.Items[ListBoxTables.ItemIndex]);
+end;
+
 procedure TMDOSQLEditForm.SynEditSQLDragDrop(Sender, Source: TObject; X,
   Y: Integer);
 begin
@@ -123,7 +139,11 @@ procedure TMDOSQLEditForm.LoadTables;
 begin
   ListBoxTables.Clear;
   if (GetTableNamesProc <> nil) then
+  begin
     GetTableNamesProc(ListBoxTables.Items, false);
+    SynSQLSyn.TableNames.Clear;
+    GetTableNamesProc(SynSQLSyn.TableNames, false);
+  end;
 end;
 
 procedure TMDOSQLEditForm.LoadFields;

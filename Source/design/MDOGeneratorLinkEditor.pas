@@ -19,11 +19,7 @@ unit MDOGeneratorLinkEditor;
 interface
 
 uses
-  {$IFDEF MDO_FPC}
   LResources,
-  {$ELSE}
-  Windows, Messages,
-  {$ENDIF}
   SysUtils, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls,
   MDOCustomDataset, MDOSQL;
 
@@ -51,11 +47,7 @@ function EditMDOGeneratorLink(ADataSet: TMDODataSet): Boolean; overload;
 
 implementation
 
-{$IFDEF MDO_FPC}
 {$R *.lfm}
-{$ELSE}
-{$R *.DFM}
-{$ENDIF}
 
 function EditMDOGeneratorLink(AGeneratorLink: TMDOGeneratorLink): Boolean;
 begin

@@ -1,99 +1,78 @@
 object MDOEventsEditorForm: TMDOEventsEditorForm
   Left = 283
-  Height = 251
+  Height = 335
   Top = 221
   Width = 306
+  AutoSize = True
   BorderStyle = bsDialog
   Caption = 'EventAlerter Events'
-  ClientHeight = 251
+  ClientHeight = 335
   ClientWidth = 306
-  Font.Color = clBlack
-  Font.Height = -11
-  Font.Name = 'Default'
   OnCreate = FormCreate
   Position = poScreenCenter
-  LCLVersion = '0.9.29'
-  object Panel1: TPanel
-    Left = 0
-    Height = 251
-    Top = 0
-    Width = 306
-    Align = alClient
-    BevelOuter = bvNone
-    BorderWidth = 4
-    ClientHeight = 251
-    ClientWidth = 306
+  LCLVersion = '1.9.0.0'
+  object GroupBox1: TGroupBox
+    Left = 8
+    Height = 280
+    Top = 8
+    Width = 288
+    BorderSpacing.Around = 8
+    Caption = 'Requested Events'
+    ClientHeight = 260
+    ClientWidth = 284
     TabOrder = 0
-    object Panel2: TPanel
-      Left = 9
-      Height = 201
+    object cEvents: TStringGrid
+      Left = 8
+      Height = 244
       Top = 8
-      Width = 289
-      BevelInner = bvRaised
-      BevelOuter = bvLowered
-      ClientHeight = 201
-      ClientWidth = 289
+      Width = 268
+      Align = alClient
+      BorderSpacing.Around = 8
+      ColCount = 2
+      DefaultRowHeight = 16
+      FixedRows = 0
+      Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goRowSizing, goColSizing, goEditing, goTabs, goAlwaysShowEditor]
+      RowCount = 15
+      ScrollBars = ssVertical
       TabOrder = 0
-      object RequestedEvents: TLabel
-        Left = 10
-        Height = 15
-        Top = 4
-        Width = 89
-        Caption = 'Requested Events'
-        Font.Color = clBlack
-        Font.Height = -11
-        Font.Name = 'Default'
-        ParentColor = False
-        ParentFont = False
-      end
-      object cEvents: TStringGrid
-        Left = 9
-        Height = 171
-        Top = 22
-        Width = 271
-        ColCount = 2
-        DefaultRowHeight = 16
-        FixedRows = 0
-        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goRowSizing, goColSizing, goEditing, goTabs, goAlwaysShowEditor]
-        RowCount = 15
-        ScrollBars = ssVertical
-        TabOrder = 0
-        TitleFont.Color = clBlack
-        TitleFont.Height = -11
-        TitleFont.Name = 'Default'
-        ColWidths = (
-          27
-          227
-        )
-      end
+      ColWidths = (
+        27
+        227
+      )
     end
-    object bOK: TButton
-      Left = 72
-      Height = 25
-      Top = 219
-      Width = 75
-      Caption = '&OK'
-      Default = True
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'Default'
-      ModalResult = 1
-      ParentFont = False
-      TabOrder = 1
-    end
-    object bCancel: TButton
-      Left = 160
-      Height = 25
-      Top = 219
-      Width = 75
-      Cancel = True
-      Caption = '&Cancel'
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'Default'
-      ModalResult = 2
-      ParentFont = False
-      TabOrder = 2
-    end
+  end
+  object bOK: TButton
+    AnchorSideTop.Control = GroupBox1
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = bCancel
+    Left = 153
+    Height = 25
+    Top = 296
+    Width = 75
+    Anchors = [akTop, akRight]
+    BorderSpacing.Around = 8
+    Caption = '&OK'
+    Default = True
+    ModalResult = 1
+    ParentFont = False
+    TabOrder = 1
+  end
+  object bCancel: TButton
+    AnchorSideTop.Control = GroupBox1
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 236
+    Height = 25
+    Top = 296
+    Width = 62
+    Anchors = [akTop, akRight]
+    AutoSize = True
+    BorderSpacing.Around = 8
+    Cancel = True
+    Caption = '&Cancel'
+    ModalResult = 2
+    ParentFont = False
+    TabOrder = 2
   end
 end

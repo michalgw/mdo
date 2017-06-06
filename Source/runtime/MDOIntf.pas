@@ -34,9 +34,6 @@ unit MDOIntf;
 interface
 
 uses
-  {$IFNDEF MDO_FPC}
-  Windows,
-  {$ENDIF}
   MDOHeader, MDOInstallHeader, MDOExternals;
 
 var
@@ -205,9 +202,7 @@ function isc_install_unset_option_stub(hOption: POPTIONS_HANDLE;
 implementation
 
 uses
-  {$IFDEF MDO_FPC}
   dynlibs,
-  {$ENDIF}
   Sysutils, MDO;
 
 var
@@ -217,27 +212,19 @@ var
 
 procedure LoadFBLibrary;
 
-  function GetProcAddr(ProcName: {$IFDEF MDO_FPC}String{$ELSE}PChar{$ENDIF}): Pointer;
+  function GetProcAddr(ProcName: String): Pointer;
   begin
     Result := GetProcAddress(FBLibrary, ProcName);
     if not Assigned(Result) then
-    begin
-    {$IFDEF MDO_DELPHI5}
-      RaiseLastWin32Error;
-    {$ENDIF}
-    {$IFDEF MDO_DELPHI6_UP}
       RaiseLastOSError;
-    {$ENDIF}
-    end;
   end;
 
   procedure TryLoadLibrary(aLibrary: string);
   begin
-    if FBLibrary {$IFDEF MDO_FPC} = NilHandle {$ELSE}
-                                 <= HINSTANCE_ERROR {$ENDIF} then
+    if FBLibrary = NilHandle then
     begin
-      FBLibrary := LoadLibrary({$IFNDEF MDO_FPC}PChar{$ENDIF}(aLibrary));
-      if FBLibrary > {$IFDEF MDO_FPC} NilHandle {$ELSE} HINSTANCE_ERROR {$ENDIF} then
+      FBLibrary := LoadLibrary(aLibrary);
+      if FBLibrary > NilHandle then
          FBASE_CURRENT_DLL := aLibrary;
     end;
   end;
@@ -254,88 +241,88 @@ begin
   else
     TryLoadLibrary(FBASE_CURRENT_DLL);
 
-  if (FBLibrary > {$IFDEF MDO_FPC}NilHandle{$ELSE}HINSTANCE_ERROR{$ENDIF}) then
+  if (FBLibrary > NilHandle) then
   begin
     {$IFDEF MDO_DEBUG}
     WriteLn('Library loaded: ' + FBASE_CURRENT_DLL);
     {$ENDIF}
-    BLOB_get := GetProcAddr('BLOB_get'); {do not localize}
-    BLOB_put := GetProcAddr('BLOB_put'); {do not localize}
-    isc_sqlcode := GetProcAddr('isc_sqlcode'); {do not localize}
-    isc_sql_interprete := GetProcAddr('isc_sql_interprete'); {do not localize}
-    isc_interprete := GetProcAddr('isc_interprete'); {do not localize}
-    isc_vax_integer := GetProcAddr('isc_vax_integer'); {do not localize}
-    isc_blob_info := GetProcAddr('isc_blob_info'); {do not localize}
-    isc_open_blob2 := GetProcAddr('isc_open_blob2'); {do not localize}
-    isc_close_blob := GetProcAddr('isc_close_blob'); {do not localize}
-    isc_get_segment := GetProcAddr('isc_get_segment'); {do not localize}
-    isc_put_segment := GetProcAddr('isc_put_segment'); {do not localize}
-    isc_create_blob2 := GetProcAddr('isc_create_blob2'); {do not localize}
-    isc_decode_date := GetProcAddr('isc_decode_date'); {do not localize}
-    isc_encode_date := GetProcAddr('isc_encode_date'); {do not localize}
-    isc_dsql_free_statement := GetProcAddr('isc_dsql_free_statement'); {do not localize}
-    isc_dsql_execute2 := GetProcAddr('isc_dsql_execute2'); {do not localize}
-    isc_dsql_execute := GetProcAddr('isc_dsql_execute'); {do not localize}
-    isc_dsql_set_cursor_name := GetProcAddr('isc_dsql_set_cursor_name'); {do not localize}
-    isc_dsql_fetch := GetProcAddr('isc_dsql_fetch'); {do not localize}
-    isc_dsql_sql_info := GetProcAddr('isc_dsql_sql_info'); {do not localize}
-    isc_dsql_alloc_statement2 := GetProcAddr('isc_dsql_alloc_statement2'); {do not localize}
-    isc_dsql_prepare := GetProcAddr('isc_dsql_prepare'); {do not localize}
-    isc_dsql_describe_bind := GetProcAddr('isc_dsql_describe_bind'); {do not localize}
-    isc_dsql_describe := GetProcAddr('isc_dsql_describe'); {do not localize}
-    isc_dsql_execute_immediate := GetProcAddr('isc_dsql_execute_immediate'); {do not localize}
-    isc_drop_database := GetProcAddr('isc_drop_database'); {do not localize}
-    isc_detach_database := GetProcAddr('isc_detach_database'); {do not localize}
-    isc_attach_database := GetProcAddr('isc_attach_database'); {do not localize}
-    isc_database_info := GetProcAddr('isc_database_info'); {do not localize}
-    isc_start_multiple := GetProcAddr('isc_start_multiple'); {do not localize}
-    isc_commit_transaction := GetProcAddr('isc_commit_transaction'); {do not localize}
-    isc_commit_retaining := GetProcAddr('isc_commit_retaining'); {do not localize}
-    isc_rollback_transaction := GetProcAddr('isc_rollback_transaction'); {do not localize}
-    isc_cancel_events := GetProcAddr('isc_cancel_events'); {do not localize}
-    isc_que_events := GetProcAddr('isc_que_events'); {do not localize}
-    isc_event_counts := GetProcAddr('isc_event_counts'); {do not localize}
-    isc_event_block := GetProcAddr('isc_event_block'); {do not localize}
-    isc_free := GetProcAddr('isc_free'); {do not localize}
-    isc_add_user := GetProcAddr('isc_add_user'); {do not localize}
-    isc_delete_user := GetProcAddr('isc_delete_user'); {do not localize}
-    isc_modify_user := GetProcAddr('isc_modify_user'); {do not localize}
+    BLOB_get := TBLOB_get(GetProcAddr('BLOB_get')); {do not localize}
+    BLOB_put := TBLOB_put(GetProcAddr('BLOB_put')); {do not localize}
+    isc_sqlcode := Tisc_sqlcode(GetProcAddr('isc_sqlcode')); {do not localize}
+    isc_sql_interprete := Tisc_sql_interprete(GetProcAddr('isc_sql_interprete')); {do not localize}
+    isc_interprete := Tisc_interprete(GetProcAddr('isc_interprete')); {do not localize}
+    isc_vax_integer := Tisc_vax_integer(GetProcAddr('isc_vax_integer')); {do not localize}
+    isc_blob_info := Tisc_blob_info(GetProcAddr('isc_blob_info')); {do not localize}
+    isc_open_blob2 := Tisc_open_blob2(GetProcAddr('isc_open_blob2')); {do not localize}
+    isc_close_blob := Tisc_close_blob(GetProcAddr('isc_close_blob')); {do not localize}
+    isc_get_segment := Tisc_get_segment(GetProcAddr('isc_get_segment')); {do not localize}
+    isc_put_segment := Tisc_put_segment(GetProcAddr('isc_put_segment')); {do not localize}
+    isc_create_blob2 := Tisc_create_blob2(GetProcAddr('isc_create_blob2')); {do not localize}
+    isc_decode_date := Tisc_decode_date(GetProcAddr('isc_decode_date')); {do not localize}
+    isc_encode_date := Tisc_encode_date(GetProcAddr('isc_encode_date')); {do not localize}
+    isc_dsql_free_statement := Tisc_dsql_free_statement(GetProcAddr('isc_dsql_free_statement')); {do not localize}
+    isc_dsql_execute2 := Tisc_dsql_execute2(GetProcAddr('isc_dsql_execute2')); {do not localize}
+    isc_dsql_execute := Tisc_dsql_execute(GetProcAddr('isc_dsql_execute')); {do not localize}
+    isc_dsql_set_cursor_name := Tisc_dsql_set_cursor_name(GetProcAddr('isc_dsql_set_cursor_name')); {do not localize}
+    isc_dsql_fetch := Tisc_dsql_fetch(GetProcAddr('isc_dsql_fetch')); {do not localize}
+    isc_dsql_sql_info := Tisc_dsql_sql_info(GetProcAddr('isc_dsql_sql_info')); {do not localize}
+    isc_dsql_alloc_statement2 := Tisc_dsql_alloc_statement2(GetProcAddr('isc_dsql_alloc_statement2')); {do not localize}
+    isc_dsql_prepare := Tisc_dsql_prepare(GetProcAddr('isc_dsql_prepare')); {do not localize}
+    isc_dsql_describe_bind := Tisc_dsql_describe_bind(GetProcAddr('isc_dsql_describe_bind')); {do not localize}
+    isc_dsql_describe := Tisc_dsql_describe(GetProcAddr('isc_dsql_describe')); {do not localize}
+    isc_dsql_execute_immediate := Tisc_dsql_execute_immediate(GetProcAddr('isc_dsql_execute_immediate')); {do not localize}
+    isc_drop_database := Tisc_drop_database(GetProcAddr('isc_drop_database')); {do not localize}
+    isc_detach_database := Tisc_detach_database(GetProcAddr('isc_detach_database')); {do not localize}
+    isc_attach_database := Tisc_attach_database(GetProcAddr('isc_attach_database')); {do not localize}
+    isc_database_info := Tisc_database_info(GetProcAddr('isc_database_info')); {do not localize}
+    isc_start_multiple := Tisc_start_multiple(GetProcAddr('isc_start_multiple')); {do not localize}
+    isc_commit_transaction := Tisc_commit_transaction(GetProcAddr('isc_commit_transaction')); {do not localize}
+    isc_commit_retaining := Tisc_commit_retaining(GetProcAddr('isc_commit_retaining')); {do not localize}
+    isc_rollback_transaction := Tisc_rollback_transaction(GetProcAddr('isc_rollback_transaction')); {do not localize}
+    isc_cancel_events := Tisc_cancel_events(GetProcAddr('isc_cancel_events')); {do not localize}
+    isc_que_events := Tisc_que_events(GetProcAddr('isc_que_events')); {do not localize}
+    isc_event_counts := Tisc_event_counts(GetProcAddr('isc_event_counts')); {do not localize}
+    isc_event_block := Tisc_event_block(GetProcAddr('isc_event_block')); {do not localize}
+    isc_free := Tisc_free(GetProcAddr('isc_free')); {do not localize}
+    isc_add_user := Tisc_add_user(GetProcAddr('isc_add_user')); {do not localize}
+    isc_delete_user := Tisc_delete_user(GetProcAddr('isc_delete_user')); {do not localize}
+    isc_modify_user := Tisc_modify_user(GetProcAddr('isc_modify_user')); {do not localize}
 
     FBClientVersion := 6;
-    isc_rollback_retaining := GetProcAddress(FBLibrary, 'isc_rollback_retaining'); {do not localize}
+    isc_rollback_retaining := Tisc_rollback_retaining(GetProcAddress(FBLibrary, 'isc_rollback_retaining')); {do not localize}
     if Assigned(isc_rollback_retaining) then
     begin
-      isc_service_attach := GetProcAddr('isc_service_attach'); {do not localize}
-      isc_service_detach := GetProcAddr('isc_service_detach'); {do not localize}
-      isc_service_query := GetProcAddr('isc_service_query'); {do not localize}
-      isc_service_start := GetProcAddr('isc_service_start'); {do not localize}
-      isc_decode_sql_date := GetProcAddr('isc_decode_sql_date'); {do not localize}
-      isc_decode_sql_time := GetProcAddr('isc_decode_sql_time'); {do not localize}
-      isc_decode_timestamp := GetProcAddr('isc_decode_timestamp'); {do not localize}
-      isc_encode_sql_date := GetProcAddr('isc_encode_sql_date'); {do not localize}
-      isc_encode_sql_time := GetProcAddr('isc_encode_sql_time'); {do not localize}
-      isc_encode_timestamp := GetProcAddr('isc_encode_timestamp'); {do not localize}
+      isc_service_attach := Tisc_service_attach(GetProcAddr('isc_service_attach')); {do not localize}
+      isc_service_detach := Tisc_service_detach(GetProcAddr('isc_service_detach')); {do not localize}
+      isc_service_query := Tisc_service_query(GetProcAddr('isc_service_query')); {do not localize}
+      isc_service_start := Tisc_service_start(GetProcAddr('isc_service_start')); {do not localize}
+      isc_decode_sql_date := Tisc_decode_sql_date(GetProcAddr('isc_decode_sql_date')); {do not localize}
+      isc_decode_sql_time := Tisc_decode_sql_time(GetProcAddr('isc_decode_sql_time')); {do not localize}
+      isc_decode_timestamp := Tisc_decode_timestamp(GetProcAddr('isc_decode_timestamp')); {do not localize}
+      isc_encode_sql_date := Tisc_encode_sql_date(GetProcAddr('isc_encode_sql_date')); {do not localize}
+      isc_encode_sql_time := Tisc_encode_sql_time(GetProcAddr('isc_encode_sql_time')); {do not localize}
+      isc_encode_timestamp := Tisc_encode_timestamp(GetProcAddr('isc_encode_timestamp')); {do not localize}
     end else
     begin
       FBClientVersion := 5;
-      isc_rollback_retaining := isc_rollback_retaining_stub;
-      isc_service_attach := isc_service_attach_stub;
-      isc_service_detach := isc_service_detach_stub;
-      isc_service_query := isc_service_query_stub;
-      isc_service_start := isc_service_start_stub;
-      isc_decode_sql_date := isc_decode_sql_date_stub;
-      isc_decode_sql_time := isc_decode_sql_time_stub;
-      isc_decode_timestamp := isc_decode_timestamp_stub;
-      isc_encode_sql_date := isc_encode_sql_date_stub;
-      isc_encode_sql_time := isc_encode_sql_time_stub;
-      isc_encode_timestamp := isc_encode_timestamp_stub;
+      isc_rollback_retaining := @isc_rollback_retaining_stub;
+      isc_service_attach := @isc_service_attach_stub;
+      isc_service_detach := @isc_service_detach_stub;
+      isc_service_query := @isc_service_query_stub;
+      isc_service_start := @isc_service_start_stub;
+      isc_decode_sql_date := @isc_decode_sql_date_stub;
+      isc_decode_sql_time := @isc_decode_sql_time_stub;
+      isc_decode_timestamp := @isc_decode_timestamp_stub;
+      isc_encode_sql_date := @isc_encode_sql_date_stub;
+      isc_encode_sql_time := @isc_encode_sql_time_stub;
+      isc_encode_timestamp := @isc_encode_timestamp_stub;
     end;
   end;
 end;
 
 procedure FreeFBLibrary;
 begin
-  if FBLibrary > {$IFDEF MDO_FPC}NilHandle{$ELSE}HINSTANCE_ERROR{$ENDIF} then
+  if FBLibrary > NilHandle then
   begin
     FreeLibrary(FBLibrary);
     FBLibrary := 0;
@@ -348,46 +335,41 @@ procedure LoadFBInstallLibrary;
   begin
     Result := GetProcAddress(FBInstallLibrary, ProcName);
     if not Assigned(Result) then
-    {$IFDEF MDO_DELPHI5}
-      RaiseLastWin32Error;
-    {$ENDIF}
-    {$IFDEF MDO_DELPHI6_UP}
       RaiseLastOSError;
-    {$ENDIF}
   end;
 
 begin
-  FBInstallLibrary := LoadLibrary({$IFNDEF MDO_FPC}PChar{$ENDIF}(IB_INSTALL_DLL));
-  if (FBInstallLibrary > {$IFDEF MDO_FPC}NilHandle{$ELSE}HINSTANCE_ERROR{$ENDIF}) then
+  FBInstallLibrary := LoadLibrary(IB_INSTALL_DLL);
+  if (FBInstallLibrary > NilHandle) then
   begin
-    isc_install_clear_options := GetProcAddr('isc_install_clear_options'); {do not localize}
-    isc_install_execute := GetProcAddr('isc_install_execute'); {do not localize}
-    isc_install_get_info := GetProcAddr('isc_install_get_info'); {do not localize}
-    isc_install_get_message := GetProcAddr('isc_install_get_message'); {do not localize}
-    isc_install_load_external_text := GetProcAddr('isc_install_load_external_text'); {do not localize}
-    isc_install_precheck := GetProcAddr('isc_install_precheck'); {do not localize}
-    isc_install_set_option := GetProcAddr('isc_install_set_option'); {do not localize}
-    isc_uninstall_execute := GetProcAddr('isc_uninstall_execute'); {do not localize}
-    isc_uninstall_precheck := GetProcAddr('isc_uninstall_precheck'); {do not localize}
-    isc_install_unset_option := GetProcAddr('isc_install_unset_option'); {do not localize}
+    isc_install_clear_options := Tisc_install_clear_options(GetProcAddr('isc_install_clear_options')); {do not localize}
+    isc_install_execute := Tisc_install_execute(GetProcAddr('isc_install_execute')); {do not localize}
+    isc_install_get_info := Tisc_install_get_info(GetProcAddr('isc_install_get_info')); {do not localize}
+    isc_install_get_message := Tisc_install_get_message(GetProcAddr('isc_install_get_message')); {do not localize}
+    isc_install_load_external_text := Tisc_install_load_external_text(GetProcAddr('isc_install_load_external_text')); {do not localize}
+    isc_install_precheck := Tisc_install_precheck(GetProcAddr('isc_install_precheck')); {do not localize}
+    isc_install_set_option := Tisc_install_set_option(GetProcAddr('isc_install_set_option')); {do not localize}
+    isc_uninstall_execute := Tisc_uninstall_execute(GetProcAddr('isc_uninstall_execute')); {do not localize}
+    isc_uninstall_precheck := Tisc_uninstall_precheck(GetProcAddr('isc_uninstall_precheck')); {do not localize}
+    isc_install_unset_option := Tisc_install_unset_option(GetProcAddr('isc_install_unset_option')); {do not localize}
   end
   else begin
-    isc_install_clear_options := isc_install_clear_options_stub;
-    isc_install_execute := isc_install_execute_stub;
-    isc_install_get_info := isc_install_get_info_stub;
-    isc_install_get_message := isc_install_get_message_stub;
-    isc_install_load_external_text := isc_install_load_external_text_stub;
-    isc_install_precheck := isc_install_precheck_stub;
-    isc_install_set_option := isc_install_set_option_stub;
-    isc_uninstall_execute := isc_uninstall_execute_stub;
-    isc_uninstall_precheck := isc_uninstall_precheck_stub;
-    isc_install_unset_option := isc_install_unset_option_stub;
+    isc_install_clear_options := @isc_install_clear_options_stub;
+    isc_install_execute := @isc_install_execute_stub;
+    isc_install_get_info := @isc_install_get_info_stub;
+    isc_install_get_message := @isc_install_get_message_stub;
+    isc_install_load_external_text := @isc_install_load_external_text_stub;
+    isc_install_precheck := @isc_install_precheck_stub;
+    isc_install_set_option := @isc_install_set_option_stub;
+    isc_uninstall_execute := @isc_uninstall_execute_stub;
+    isc_uninstall_precheck := @isc_uninstall_precheck_stub;
+    isc_install_unset_option := @isc_install_unset_option_stub;
   end;
 end;
 
 procedure FreeFBInstallLibrary;
 begin
-  if FBInstallLibrary > {$IFDEF MDO_FPC}NilHandle{$ELSE}HINSTANCE_ERROR{$ENDIF} then
+  if FBInstallLibrary > NilHandle then
   begin
     FreeLibrary(FBInstallLibrary);
     FBInstallLibrary := 0;
@@ -396,9 +378,9 @@ end;
 
 function TryFBLoad: Boolean;
 begin
-  if (FBLibrary <= {$IFDEF MDO_FPC}NilHandle{$ELSE}HINSTANCE_ERROR{$ENDIF}) then
+  if (FBLibrary <= NilHandle) then
     LoadFBLibrary;
-  if (FBLibrary <= {$IFDEF MDO_FPC}NilHandle{$ELSE}HINSTANCE_ERROR{$ENDIF}) then
+  if (FBLibrary <= NilHandle) then
     result := False
   else
     result := True;
@@ -418,9 +400,9 @@ end;
 
 procedure CheckFBInstallLoaded;
 begin
-  if (FBInstallLibrary <= {$IFDEF MDO_FPC}NilHandle{$ELSE}HINSTANCE_ERROR{$ENDIF}) then
+  if (FBInstallLibrary <= NilHandle) then
     LoadFBInstallLibrary;
-  if (FBInstallLibrary <= {$IFDEF MDO_FPC}NilHandle{$ELSE}HINSTANCE_ERROR{$ENDIF}) then
+  if (FBInstallLibrary <= NilHandle) then
     MDOError(mdoeFirebirdInstallMissing, [nil]);
 end;
 

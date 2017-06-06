@@ -3085,7 +3085,7 @@ function putb(x: Char; p: PBSTREAM): Int;
 (*  The C-macro reads like this:
    putb(x,p) ((x == '\n' || (!(--(p)->bstr_cnt))) ?      // then
      BLOB_put (x,p) :                                    // else
-     ((int) (*(p)->bstr_ptr++ = (unsigned) (x)))) *)
+     ((int) ( *(p)->bstr_ptr++ = (unsigned) (x)))) *)
 begin
   Dec(p^.bstr_cnt);
   if (x = Chr(Int('n') - Int('a'))) or (p^.bstr_cnt = 0) then
@@ -3101,7 +3101,7 @@ function putbx(x: Char; p: PBSTREAM): Int;
 (*  The C-macro reads like this:
    putbx(x,p) ((!(--(p)->bstr_cnt)) ?    // then
      BLOB_put (x,p) :                    // else
-     ((int) (*(p)->bstr_ptr++ = (unsigned) (x)))) *)
+     ((int) ( *(p)->bstr_ptr++ = (unsigned) (x)))) *)
 begin
   Dec(p^.bstr_cnt);
   if (p^.bstr_cnt = 0) then

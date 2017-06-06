@@ -34,9 +34,6 @@ unit MDOBatchMove;
 interface
 
 uses
-  {$IFNDEF MDO_FPC}
-  Windows, StdVCL, Graphics, Controls,
-  {$ENDIF}
   SysUtils, Classes, Db, MDO, MDOCustomDataSet, MDODatabase,
   MDOTable;
 

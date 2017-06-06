@@ -34,12 +34,8 @@ unit MDOEvents;
 interface
 
 uses
-  {$IFDEF MDO_FPC}
-    {$IFDEF UNIX}
+  {$IFDEF UNIX}
   cthreads,
-    {$ENDIF}
-  {$ELSE}
-  Windows, Messages, Graphics, Controls, Forms, Dialogs,
   {$ENDIF}
   SysUtils, Classes, DB, MDOHeader, MDOExternals, MDO, MDODatabase;
 
@@ -73,7 +69,7 @@ type
     procedure DoQueueEvents;
     procedure EventChange(sender: TObject);
     procedure SetDatabase(Value: TMDODatabase);
-    procedure UpdateResultBuffer(length: short; updated: PChar);
+    procedure UpdateResultBuffer(length: short; AUpdated: PChar);
     procedure ValidateDatabase(Database: TMDODatabase);
   protected
     function GetNativeHandle: TISC_DB_HANDLE;
@@ -105,17 +101,13 @@ uses
 
 { TMDOEvents }
 
-procedure HandleEvent( param: integer); stdcall;
+function HandleEvent( param: Pointer): PtrInt;
 begin
   { don't let exceptions propogate out of thread }
   try
     TMDOEvents( param).HandleEvent;
   except
-    {$IFDEF MDO_FPC}
     Classes.ApplicationHandleException(nil);
-    {$ELSE}
-    Application.HandleException( nil);
-    {$ENDIF}
   end;
 end;
 
@@ -127,11 +119,7 @@ begin
   EnterCriticalSection( TMDOEvents( ptr).CS);
   TMDOEvents( ptr).UpdateResultBuffer( length, updated);
   if TMDOEvents( ptr).Queued then
-    {$IFDEF MDO_FPC}
     BeginThread( nil, 8192, @HandleEvent, ptr, 0, ThreadID);
-    {$ELSE}
-    CloseHandle( CreateThread( nil, 8192, @HandleEvent, ptr, 0, ThreadID));
-    {$ENDIF}
   LeaveCriticalSection( TMDOEvents( ptr).CS);
 end;
 
@@ -145,15 +133,11 @@ begin
   FIBLoaded := False;
   CheckFBLoaded;
   FIBLoaded := True;
-  {$IFDEF MDO_FPC}
   InitCriticalSection(CS);
-  {$ELSE}
-  InitializeCriticalSection(CS);
-  {$ENDIF}
   FEvents := TStringList.Create;
   with TStringList( FEvents) do
   begin
-    OnChange := EventChange;
+    OnChange := @EventChange;
     Duplicates := dupIgnore;
   end;
 end;
@@ -166,11 +150,7 @@ begin
     SetDatabase( nil);
     TStringList(FEvents).OnChange := nil;
     FEvents.Free;
-    {$IFDEF MDO_FPC}
     DoneCriticalsection(CS);
-    {$ELSE}
-    DeleteCriticalSection(CS);
-    {$ENDIF}
   end;
   inherited Destroy;
 end;
@@ -217,7 +197,7 @@ begin
   begin
     TStringList(Events).OnChange := nil;
     Events.Delete( MaxEvents);
-    TStringList(Events).OnChange := EventChange;
+    TStringList(Events).OnChange := @EventChange;
     MDOError(mdoeMaximumEvents, [nil]);
   end;
   if Registered then RegisterEvents;
@@ -248,14 +228,10 @@ begin
       begin
         try
         Status := StatusVectorArray;
-        if (Status[i] <> 0) and not CancelAlerts then
-            FOnEventAlert( self, Events[Events.Count-i-1], Status[i], CancelAlerts);
+        if (Status^[i] <> 0) and not CancelAlerts then
+            FOnEventAlert( self, Events[Events.Count-i-1], Status^[i], CancelAlerts);
         except
-          {$IFDEF MDO_FPC}
           Classes.ApplicationHandleException(nil);
-          {$ELSE}
-          Application.HandleException( nil);
-          {$ENDIF}
         end;
       end;
     end;
@@ -274,11 +250,7 @@ begin
     if RegisteredState then RegisterEvents;
   except
     if csDesigning in ComponentState then
-      {$IFDEF MDO_FPC}
       Classes.ApplicationHandleException(nil)
-      {$ELSE}
-      Application.HandleException( self)
-      {$ENDIF}
     else raise;
   end;
 end;
@@ -320,6 +292,15 @@ var
   eventbufptr: Pointer;
   resultbufptr: Pointer;
   buflen: Integer;
+
+function ev(no: Integer): PChar;
+begin
+  if no < Events.Count then
+    Result := @Buffer[no][0]
+  else
+    Result := nil;
+end;
+
 begin
   ValidateDatabase( Database);
   if csDesigning in ComponentState then FRegistered := true
@@ -332,6 +313,8 @@ begin
     bufptr := @buffer[0];
     eventbufptr :=  @EventBuffer;
     resultBufPtr := @ResultBuffer;
+    //TODO: Remove asm
+    (*
     {$IFNDEF MDO_64BIT}
     asm
       mov ecx, dword ptr [i]
@@ -351,6 +334,9 @@ begin
       add esp, eax
     end;
     {$ENDIF}
+    *)
+    buflen := isc_event_block(eventbufptr, resultbufptr, i, [ev(0),ev(1),ev(2),ev(3),ev(4),ev(5),
+      ev(6),ev(7),ev(8),ev(9),ev(10),ev(11),ev(12),ev(13),ev(14)]);
     EventBufferlen := Buflen;
     FRegistered := true;
     QueueEvents;
@@ -400,12 +386,12 @@ begin
   end;
 end;
 
-procedure TMDOEvents.UpdateResultBuffer(length: short; updated: PChar);
+procedure TMDOEvents.UpdateResultBuffer(length: short; AUpdated: PChar);
 var
   i: Integer;
 begin
   for i := 0 to length-1 do
-    ResultBuffer[i] := updated[i];
+    ResultBuffer[i] := AUpdated[i];
 end;
 
 procedure TMDOEvents.ValidateDatabase(Database: TMDODatabase);

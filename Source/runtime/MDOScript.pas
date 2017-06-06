@@ -600,8 +600,8 @@ constructor TMDOScript.Create(AOwner: TComponent);
 begin
   inherited;
   FSQLParser := TMDOSQLParser.Create(self);
-  FSQLParser.OnError := ParserError;
-  FSQLParser.OnParse := ParserParse;
+  FSQLParser.OnError := @ParserError;
+  FSQLParser.OnParse := @ParserParse;
   Terminator := ';'; {do not localize}
   FDDLTransaction := TMDOTransaction.Create(self);
   FDDLQuery := TMDOSQL.Create(self);

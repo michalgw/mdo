@@ -34,9 +34,6 @@ unit MDOQuery;
 interface
 
 uses
-  {$IFNDEF MDO_FPC}
-  Windows, StdVCL, Graphics, Controls,
-  {$ENDIF}
   SysUtils, Classes, Db, MDOHeader, MDO, MDOCustomDataSet, MDOSQL;
 
 type
@@ -83,6 +80,7 @@ type
     procedure BatchInput(InputObject: TMDOBatchInput);
     procedure BatchOutput(OutputObject: TMDOBatchOutput);
     procedure ExecSQL;
+    //TODO: Mark as unsuported
 {$IFNDEF MDO_FPC}
     procedure GetDetailLinkFields(MasterFields, DetailFields: TList); override;
 {$ENDIF}
@@ -104,11 +102,9 @@ type
     property BeforeDatabaseDisconnect;
     property BeforeTransactionEnd;
     property BooleanFields;
-	property BufferChunks;
+    property BufferChunks;
     property CachedUpdates;
-    {$IFNDEF MDO_FPC}
-	property Constraints stored ConstraintsStored;
-	{$ENDIF}
+    property Constraints stored ConstraintsStored;
     property DatabaseFree;
     property DataSource read GetDataSource write SetDataSource;
     property Filtered;
@@ -134,7 +130,7 @@ constructor TMDOQuery.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FSQL := TStringList.Create;
-  TStringList(SQL).OnChange := QueryChanged;
+  TStringList(SQL).OnChange := @QueryChanged;
   FParams := TParams.Create(Self);
   ParamCheck := True;
   FGenerateParamNames := False;
@@ -171,7 +167,7 @@ procedure TMDOQuery.DefineProperties(Filer: TFiler);
   
 begin
   inherited DefineProperties(Filer);
-  Filer.DefineProperty('ParamData', ReadParamData, WriteParamData, WriteData); {do not localize}
+  Filer.DefineProperty('ParamData', @ReadParamData, @WriteParamData, WriteData); {do not localize}
 end;
 
 procedure TMDOQuery.Disconnect;
@@ -336,14 +332,15 @@ begin
       FText := SQL.Text;
     DataEvent(dePropertyChange, 0);
   end else
-  {$IFDEF MDO_FPC}
+  //TODO: Check this
+  (*{$IFDEF MDO_FPC}
   begin
     FText := FParams.ParseSQL(SQL.Text, True);
     FParams.Clear;
   end;
-  {$ELSE}
+  {$ELSE}*)
     FText := FParams.ParseSQL(SQL.Text, False);
-  {$ENDIF}
+  {/$ENDIF}
   SelectSQL.Assign(SQL);
 end;
 
@@ -397,12 +394,7 @@ begin
         ftInteger:
           SQLParams[i].AsLong := Params[i].AsInteger;
         ftLargeInt:
-        {$IFDEF MDO_DELPHI5}
-          SQLParams[i].AsInt64 := StrToInt64(Params[i].Value);
-        {$ENDIF}
-        {$IFDEF MDO_DELPHI6_UP}
           SQLParams[i].AsInt64 := Params[i].Value;
-        {$ENDIF}
         ftFloat:
          SQLParams[i].AsDouble := Params[i].AsFloat;
         ftBCD, ftCurrency:

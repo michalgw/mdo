@@ -126,12 +126,10 @@ begin
               s := s + TimeToStr(DataSet.Fields[Field].Value);
             ftDateTime:
               s := s + DateTimeToStr(DataSet.Fields[Field].Value);
-{$IFDEF MDO_DELPHI6_UP}
             ftFMTBcd:
               s := s + FloatToStr(DataSet.Fields[Field].Value);
             ftTimeStamp:
               s := s + DateTimeToStr(DataSet.Fields[Field].Value);
-{$ENDIF}
           else
             s := s + '';
           end;

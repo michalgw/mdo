@@ -33,12 +33,8 @@ unit MDO;
 
 interface
 uses
-  {$IFDEF MDO_FPC}
-    {$IFDEF UNIX}
+  {$IFDEF UNIX}
   cthreads,
-    {$ENDIF}
-  {$ELSE}
-  Windows,
   {$ENDIF}
   SysUtils, Classes, MDOHeader, MDOExternals, MDOUtils, DB, MDOConst;
 
@@ -348,9 +344,6 @@ function GeTMDODataBaseErrorMessages: TMDODataBaseErrorMessages;
 implementation
 
 uses
-  {$IFNDEF MDO_FPC}
-  DBLogDlg,
-  {$ENDIF}
   MDOIntf;
 
 var
@@ -387,7 +380,7 @@ begin
     Get a local copy of the MDODataBaseErrorMessages options.
     Get the SQL error code }
   status_vector := StatusVector;
-  MDOErrorCode := StatusVectorArray[1];
+  MDOErrorCode := StatusVectorArray^[1];
   MDODataBaseErrorMessages := GeTMDODataBaseErrorMessages;
   sqlcode := isc_sqlcode(status_vector);
 
@@ -399,7 +392,7 @@ begin
     isc_sql_interprete(sqlcode, local_buffer, MDOLocalBufferLength);
     if (ShowSQLCode in MDODataBaseErrorMessages) then
       usr_msg := usr_msg + CRLF;
-    usr_msg := usr_msg + string(local_buffer);
+    usr_msg := usr_msg + PChar(local_buffer);
   end;
 
   if (ShowMDOMessage in MDODataBaseErrorMessages) then
@@ -411,7 +404,7 @@ begin
     begin
       if (usr_msg <> '') and (usr_msg[Length(usr_msg)] <> LF) then
         usr_msg := usr_msg + CRLF;
-      usr_msg := usr_msg + string(local_buffer);
+      usr_msg := usr_msg + PChar(local_buffer);
     end;
   end;
 
@@ -528,19 +521,10 @@ end;
 
 initialization
   IsMultiThread := True;
-  {$IFDEF MDO_FPC}
   InitCriticalSection(MDOCS);
-  {$ELSE}
-  InitializeCriticalSection(MDOCS);
-  LoginDialogProc := @DBLogDlg.LoginDialog; // VCL DBLogDlg
-  {$ENDIF}
   MDODataBaseErrorMessages := [ShowSQLMessage, ShowMDOMessage];
 
 finalization
-  {$IFDEF MDO_FPC}
   DoneCriticalsection(MDOCS);
-  {$ELSE}
-  DeleteCriticalSection(MDOCS);
-  {$ENDIF}
 
 end.

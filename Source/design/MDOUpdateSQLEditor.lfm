@@ -1,34 +1,38 @@
 object MDOUpdateSQLEditForm: TMDOUpdateSQLEditForm
   Left = 216
-  Height = 326
+  Height = 444
   Top = 240
-  Width = 543
+  Width = 535
   BorderStyle = bsDialog
   Caption = 'Update SQL Editor'
-  ClientHeight = 326
-  ClientWidth = 543
-  Font.Height = -11
-  Font.Name = 'MS Sans Serif'
+  ClientHeight = 444
+  ClientWidth = 535
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poScreenCenter
-  LCLVersion = '0.9.29'
+  LCLVersion = '1.9.0.0'
   object Panel1: TPanel
     Left = 0
-    Height = 45
-    Top = 281
-    Width = 543
-    Align = alClient
+    Height = 41
+    Top = 403
+    Width = 535
+    Align = alBottom
+    AutoSize = True
     BevelOuter = bvNone
-    ClientHeight = 45
-    ClientWidth = 543
+    ClientHeight = 41
+    ClientWidth = 535
     TabOrder = 1
     object okButton: TButton
-      Left = 152
+      AnchorSideTop.Control = Panel1
+      AnchorSideRight.Control = CancelButton
+      Left = 357
       Height = 25
-      Top = 10
-      Width = 75
+      Top = 8
+      Width = 41
+      Anchors = [akTop, akRight]
+      AutoSize = True
+      BorderSpacing.Around = 8
       Caption = '&Ok'
       Default = True
       ModalResult = 1
@@ -36,20 +40,31 @@ object MDOUpdateSQLEditForm: TMDOUpdateSQLEditForm
       TabOrder = 0
     end
     object CancelButton: TButton
-      Left = 240
+      AnchorSideTop.Control = Panel1
+      AnchorSideRight.Control = HelpButton
+      Left = 406
       Height = 25
-      Top = 10
-      Width = 75
+      Top = 8
+      Width = 62
+      Anchors = [akTop, akRight]
+      AutoSize = True
+      BorderSpacing.Around = 8
       Cancel = True
       Caption = '&Cancel'
       ModalResult = 2
       TabOrder = 1
     end
     object HelpButton: TButton
-      Left = 328
+      AnchorSideTop.Control = Panel1
+      AnchorSideRight.Control = Panel1
+      AnchorSideRight.Side = asrBottom
+      Left = 476
       Height = 25
-      Top = 10
-      Width = 75
+      Top = 8
+      Width = 51
+      Anchors = [akTop, akRight]
+      AutoSize = True
+      BorderSpacing.Around = 8
       Caption = '&Help'
       OnClick = HelpButtonClick
       TabOrder = 2
@@ -57,166 +72,257 @@ object MDOUpdateSQLEditForm: TMDOUpdateSQLEditForm
   end
   object pcoUpdate: TPageControl
     Left = 0
-    Height = 281
+    Height = 403
     Top = 0
-    Width = 543
+    Width = 535
     ActivePage = FieldsPage
-    Align = alTop
+    Align = alClient
     TabIndex = 0
     TabOrder = 0
     OnChanging = pcoUpdateChanging
     object FieldsPage: TTabSheet
       Caption = 'Options'
-      ClientHeight = 255
-      ClientWidth = 535
+      ClientHeight = 375
+      ClientWidth = 527
       object gboSQLGeneration: TGroupBox
         Left = 8
-        Height = 210
+        Height = 359
         Top = 8
-        Width = 512
-        Anchors = [akTop, akLeft, akRight, akBottom]
+        Width = 511
+        Align = alClient
+        BorderSpacing.Around = 8
         Caption = 'SQL Generation'
-        ClientHeight = 192
-        ClientWidth = 508
+        ClientHeight = 339
+        ClientWidth = 507
         TabOrder = 0
         object Label1: TLabel
-          Left = 15
-          Height = 14
-          Top = 2
-          Width = 60
+          AnchorSideLeft.Control = gboSQLGeneration
+          AnchorSideTop.Control = gboSQLGeneration
+          Left = 8
+          Height = 15
+          Top = 8
+          Width = 64
+          BorderSpacing.Left = 8
+          BorderSpacing.Top = 8
           Caption = 'Table name:'
           ParentColor = False
         end
-        object Label2: TLabel
-          Left = 190
-          Height = 14
-          Top = 2
-          Width = 49
-          Caption = 'Key fields:'
-          ParentColor = False
-        end
-        object Label3: TLabel
-          Left = 350
-          Height = 14
-          Top = 2
-          Width = 66
-          Caption = 'Update fields:'
-          ParentColor = False
-        end
         object QuoteFields: TCheckBox
-          Left = 15
-          Height = 17
-          Top = 172
-          Width = 96
+          AnchorSideLeft.Control = gboSQLGeneration
+          AnchorSideTop.Control = GenerateButton
+          AnchorSideTop.Side = asrBottom
+          Left = 8
+          Height = 19
+          Top = 190
+          Width = 108
+          BorderSpacing.Around = 8
           Caption = 'Quote identifiers'
           TabOrder = 5
         end
         object GenerateButton: TButton
-          Left = 15
+          AnchorSideLeft.Control = gboSQLGeneration
+          AnchorSideTop.Control = PrimaryKeyButton
+          AnchorSideTop.Side = asrBottom
+          Left = 8
           Height = 25
-          Top = 142
+          Top = 157
           Width = 150
+          BorderSpacing.Around = 8
           Caption = 'Generate SQL'
           OnClick = GenerateButtonClick
           TabOrder = 4
         end
         object PrimaryKeyButton: TButton
-          Left = 15
+          AnchorSideLeft.Control = gboSQLGeneration
+          AnchorSideTop.Control = DefaultButton
+          AnchorSideTop.Side = asrBottom
+          Left = 8
           Height = 25
-          Top = 112
+          Top = 124
           Width = 150
+          BorderSpacing.Around = 8
           Caption = 'Select primary keys'
           OnClick = PrimaryKeyButtonClick
           TabOrder = 3
         end
         object DefaultButton: TButton
-          Left = 15
+          AnchorSideLeft.Control = gboSQLGeneration
+          AnchorSideTop.Control = GetTableFieldsButton
+          AnchorSideTop.Side = asrBottom
+          Left = 8
           Height = 25
-          Top = 82
+          Top = 91
           Width = 150
+          BorderSpacing.Around = 8
           Caption = 'Dataset defaults'
           OnClick = DefaultButtonClick
           TabOrder = 2
         end
         object GetTableFieldsButton: TButton
-          Left = 15
+          AnchorSideLeft.Control = gboSQLGeneration
+          AnchorSideTop.Control = UpdateTableName
+          AnchorSideTop.Side = asrBottom
+          Left = 8
           Height = 25
-          Top = 52
+          Top = 58
           Width = 150
+          BorderSpacing.Around = 8
           Caption = 'Get table fields'
           OnClick = GetTableFieldsButtonClick
           TabOrder = 1
         end
         object UpdateTableName: TComboBox
-          Left = 15
-          Height = 21
-          Top = 22
+          AnchorSideLeft.Control = gboSQLGeneration
+          AnchorSideTop.Control = Label1
+          AnchorSideTop.Side = asrBottom
+          Left = 8
+          Height = 23
+          Top = 27
           Width = 150
-          ItemHeight = 13
+          BorderSpacing.Left = 8
+          BorderSpacing.Top = 4
+          ItemHeight = 15
           OnChange = UpdateTableNameChange
           OnClick = UpdateTableNameClick
           TabOrder = 0
         end
-        object KeyFieldList: TListBox
-          Left = 190
-          Height = 165
-          Top = 22
-          Width = 150
-          ItemHeight = 0
-          MultiSelect = True
-          PopupMenu = FieldListPopup
+        object IgnoreCalculedFields: TCheckBox
+          AnchorSideLeft.Control = gboSQLGeneration
+          AnchorSideTop.Control = QuoteFields
+          AnchorSideTop.Side = asrBottom
+          Left = 8
+          Height = 19
+          Top = 217
+          Width = 132
+          BorderSpacing.Around = 8
+          Caption = 'Ignore calculed fields'
           TabOrder = 6
         end
-        object UpdateFieldList: TListBox
-          Left = 350
-          Height = 165
-          Top = 22
-          Width = 150
-          ItemHeight = 0
-          MultiSelect = True
-          PopupMenu = FieldListPopup
+        object Panel2: TPanel
+          AnchorSideLeft.Control = UpdateTableName
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = gboSQLGeneration
+          AnchorSideRight.Control = gboSQLGeneration
+          AnchorSideRight.Side = asrBottom
+          AnchorSideBottom.Control = gboSQLGeneration
+          AnchorSideBottom.Side = asrBottom
+          Left = 166
+          Height = 323
+          Top = 8
+          Width = 333
+          Anchors = [akTop, akLeft, akRight, akBottom]
+          BorderSpacing.Left = 8
+          BorderSpacing.Top = 8
+          BorderSpacing.Right = 8
+          BorderSpacing.Bottom = 8
+          BevelOuter = bvNone
+          ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+          ChildSizing.EnlargeVertical = crsHomogenousChildResize
+          ChildSizing.Layout = cclLeftToRightThenTopToBottom
+          ChildSizing.ControlsPerLine = 2
+          ClientHeight = 323
+          ClientWidth = 333
           TabOrder = 7
-        end
-        object IgnoreCalculedFields: TCheckBox
-          Left = 15
-          Height = 17
-          Top = 208
-          Width = 120
-          Caption = 'Ignore calculed fields'
-          TabOrder = 8
+          object Panel3: TPanel
+            Left = 0
+            Height = 323
+            Top = 0
+            Width = 167
+            BevelOuter = bvNone
+            ClientHeight = 323
+            ClientWidth = 167
+            TabOrder = 0
+            object KeyFieldList: TListBox
+              AnchorSideLeft.Control = Panel3
+              AnchorSideTop.Control = Label2
+              AnchorSideTop.Side = asrBottom
+              AnchorSideRight.Control = Panel3
+              AnchorSideRight.Side = asrBottom
+              AnchorSideBottom.Control = Panel3
+              AnchorSideBottom.Side = asrBottom
+              Left = 0
+              Height = 304
+              Top = 19
+              Width = 163
+              Anchors = [akTop, akLeft, akRight, akBottom]
+              BorderSpacing.Right = 4
+              ItemHeight = 0
+              MultiSelect = True
+              Options = [lboDrawFocusRect]
+              PopupMenu = FieldListPopup
+              TabOrder = 0
+            end
+            object Label2: TLabel
+              AnchorSideLeft.Control = Panel3
+              AnchorSideTop.Control = Panel3
+              Left = 0
+              Height = 15
+              Top = 0
+              Width = 53
+              BorderSpacing.Bottom = 4
+              Caption = 'Key fields:'
+              ParentColor = False
+            end
+          end
+          object Panel4: TPanel
+            Left = 167
+            Height = 323
+            Top = 0
+            Width = 166
+            BevelOuter = bvNone
+            ClientHeight = 323
+            ClientWidth = 166
+            TabOrder = 1
+            object Label3: TLabel
+              AnchorSideLeft.Control = Panel4
+              AnchorSideTop.Control = Panel4
+              Left = 4
+              Height = 15
+              Top = 0
+              Width = 72
+              BorderSpacing.Left = 4
+              BorderSpacing.Bottom = 4
+              Caption = 'Update fields:'
+              ParentColor = False
+            end
+            object UpdateFieldList: TListBox
+              AnchorSideLeft.Control = Panel4
+              AnchorSideTop.Control = Label3
+              AnchorSideTop.Side = asrBottom
+              AnchorSideRight.Control = Panel4
+              AnchorSideRight.Side = asrBottom
+              AnchorSideBottom.Control = Panel4
+              AnchorSideBottom.Side = asrBottom
+              Left = 4
+              Height = 304
+              Top = 19
+              Width = 162
+              Anchors = [akTop, akLeft, akRight, akBottom]
+              BorderSpacing.Left = 4
+              ItemHeight = 0
+              MultiSelect = True
+              Options = [lboDrawFocusRect]
+              PopupMenu = FieldListPopup
+              TabOrder = 0
+            end
+          end
         end
       end
     end
     object SQLPage: TTabSheet
       Caption = 'Script'
-      ClientHeight = 255
-      ClientWidth = 535
+      ClientHeight = 375
+      ClientWidth = 527
       ImageIndex = 1
-      object Label4: TLabel
-        Left = 8
-        Height = 14
-        Top = 65
-        Width = 45
-        Caption = 'SQL text:'
-        ParentColor = False
-      end
-      object SQLMemo: TMemo
-        Left = 8
-        Height = 162
-        Top = 80
-        Width = 514
-        Anchors = [akTop, akLeft, akRight, akBottom]
-        OnKeyPress = SQLMemoKeyPress
-        ScrollBars = ssVertical
-        TabOrder = 0
-      end
       object StatementType: TRadioGroup
-        Left = 8
-        Height = 50
-        Top = 8
-        Width = 514
+        Left = 6
+        Height = 66
+        Top = 6
+        Width = 515
+        Align = alTop
         Anchors = [akTop, akLeft, akRight, akBottom]
         AutoFill = True
+        BorderSpacing.Around = 6
         Caption = 'StatementType'
         ChildSizing.LeftRightSpacing = 6
         ChildSizing.TopBottomSpacing = 6
@@ -226,8 +332,8 @@ object MDOUpdateSQLEditForm: TMDOUpdateSQLEditForm
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 4
-        ClientHeight = 32
-        ClientWidth = 510
+        ClientHeight = 46
+        ClientWidth = 511
         Columns = 4
         ItemIndex = 0
         Items.Strings = (
@@ -237,13 +343,36 @@ object MDOUpdateSQLEditForm: TMDOUpdateSQLEditForm
           'Refresh'
         )
         OnClick = StatementTypeClick
+        TabOrder = 0
+      end
+      object GroupBox1: TGroupBox
+        Left = 8
+        Height = 287
+        Top = 80
+        Width = 511
+        Align = alClient
+        BorderSpacing.Around = 8
+        Caption = 'SQL text'
+        ClientHeight = 267
+        ClientWidth = 507
         TabOrder = 1
+        object SQLMemo: TMemo
+          Left = 8
+          Height = 251
+          Top = 8
+          Width = 491
+          Align = alClient
+          BorderSpacing.Around = 8
+          OnKeyPress = SQLMemoKeyPress
+          ScrollBars = ssAutoBoth
+          TabOrder = 0
+        end
       end
     end
   end
   object FieldListPopup: TPopupMenu
-    left = 408
-    top = 288
+    Left = 136
+    Top = 48
     object miSelectAll: TMenuItem
       Caption = 'Select all'
       OnClick = miSelectAllClick

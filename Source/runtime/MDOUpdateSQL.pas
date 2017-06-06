@@ -34,10 +34,7 @@ unit MDOUpdateSQL;
 interface
 
 uses
-  SysUtils, Classes, DB, MDO, MDOCustomDataSet, MDOQuery
-  {$IFDEF MDO_DELPHI6_UP}
-    , Variants
-  {$ENDIF};
+  SysUtils, Classes, DB, MDO, MDOCustomDataSet, MDOQuery, Variants;
 
 type
 { TMDOUpdateSQL }
@@ -86,7 +83,7 @@ begin
   for UpdateKind := Low(TUpdateKind) to High(TUpdateKind) do
   begin
     FSQLText[UpdateKind] := TStringList.Create;
-    TStringList(FSQLText[UpdateKind]).OnChange := SQLChanged;
+    TStringList(FSQLText[UpdateKind]).OnChange := @SQLChanged;
   end;
 end;
 

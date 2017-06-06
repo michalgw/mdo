@@ -34,14 +34,8 @@ unit MDOSQL;
 interface
 
 uses
-  {$IFNDEF MDO_FPC}
-  Windows, Forms, Controls,
-  {$ENDIF}
   SysUtils, Classes, MDOHeader, MDOErrorCodes, MDOExternals, DB, MDO,
-  MDODatabase, MDOUtils, MDOConst
-  {$IFDEF MDO_DELPHI6_UP}
-    , Variants
-  {$ENDIF};
+  MDODatabase, MDOUtils, MDOConst, Variants;
 
 type
   TMDOSQL = class;
@@ -482,7 +476,7 @@ begin
     begin
       { read the blob }
       Source.FSQL.Call(isc_open_blob2(StatusVector, Source.FSQL.DBHandle,
-        Source.FSQL.TRHandle, @s_bhandle, PISC_QUAD(Source.FXSQLVAR.sqldata),
+        Source.FSQL.TRHandle, @s_bhandle, PISC_QUAD(Source.FXSQLVAR^.sqldata),
         0, nil), True);
       try
         MDOBlob.GetBlobInfo(@s_bhandle, iSegs, iMaxSeg, iSize,
@@ -499,7 +493,7 @@ begin
     begin
       { write the blob }
       FSQL.Call(isc_create_blob2(StatusVector, FSQL.DBHandle,
-        FSQL.TRHandle, @d_bhandle, PISC_QUAD(FXSQLVAR.sqldata),
+        FSQL.TRHandle, @d_bhandle, PISC_QUAD(FXSQLVAR^.sqldata),
         0, nil), True);
       try
         MDOBlob.WriteBlob(@d_bhandle, szBuff, iSize);
@@ -510,9 +504,9 @@ begin
     else
     begin
       { just copy the buffer }
-      FXSQLVAR.sqltype := SQL_TEXT;
-      FXSQLVAR.sqllen := iSize;
-      MDOAlloc(FXSQLVAR.sqldata, iSize, iSize);
+      FXSQLVAR^.sqltype := SQL_TEXT;
+      FXSQLVAR^.sqllen := iSize;
+      MDOAlloc(FXSQLVAR^.sqldata, iSize, iSize);
       Move(szBuff[0], FXSQLVAR^.sqldata[0], iSize);
     end;
   finally
@@ -1605,14 +1599,7 @@ end;
 destructor TMDOOutputDelimitedFile.Destroy;
 begin
   if FHandle <> 0 then
-  begin
-    {$IFDEF MDO_FPC}
     FileClose(FHandle);
-    {$ELSE}
-    FlushFileBuffers(FHandle);
-    CloseHandle(FHandle);
-    {$ENDIF}
-  end;
   inherited Destroy;
 end;
 
@@ -1626,14 +1613,7 @@ begin
     FColDelimiter := TAB;
   if FRowDelimiter = '' then
     FRowDelimiter := CRLF;
-  {$IFDEF MDO_FPC}
   FHandle := FileCreate(Filename);
-  {$ELSE}
-  FHandle := CreateFile(PChar(Filename), GENERIC_WRITE, 0, nil, CREATE_ALWAYS,
-                        FILE_ATTRIBUTE_NORMAL, 0);
-  if FHandle = INVALID_HANDLE_VALUE then
-    FHandle := 0;
-  {$ENDIF}
   if FOutputTitles then
   begin
     for i := 0 to Columns.Count - 1 do
@@ -1642,11 +1622,7 @@ begin
       else
         st := st + FColDelimiter + string(Columns[i].Data^.aliasname);
     st := st + FRowDelimiter;
-    {$IFDEF MDO_FPC}
     FileWrite(FHandle, st[1], Length(st));
-    {$ELSE}
-    WriteFile(FHandle, st[1], Length(st), BytesWritten, nil);
-    {$ENDIF}
   end;
 end;
 
@@ -1667,11 +1643,7 @@ begin
       st := st + StripString(Columns[i].AsString, FColDelimiter + FRowDelimiter);
     end;
     st := st + FRowDelimiter;
-    {$IFDEF MDO_FPC}
     BytesWritten := FileWrite(FHandle, st[1], Length(st));
-    {$ELSE}
-    WriteFile(FHandle, st[1], Length(st), BytesWritten, nil);
-    {$ENDIF}
     if BytesWritten = DWORD(Length(st)) then
       result := True;
   end
@@ -1794,27 +1766,13 @@ end;
 destructor TMDOOutputRawFile.Destroy;
 begin
   if FHandle <> 0 then
-  begin
-    {$IFDEF MDO_FPC}
     FileClose(FHandle);
-    {$ELSE}
-    FlushFileBuffers(FHandle);
-    CloseHandle(FHandle);
-    {$ENDIF}
-  end;
   inherited Destroy;
 end;
 
 procedure TMDOOutputRawFile.ReadyFile;
 begin
-  {$IFDEF MDO_FPC}
   FHandle := FileCreate(Filename);
-  {$ELSE}
-  FHandle := CreateFile(PChar(Filename), GENERIC_WRITE, 0, nil, CREATE_ALWAYS,
-                        FILE_ATTRIBUTE_NORMAL, 0);
-  if FHandle = INVALID_HANDLE_VALUE then
-    FHandle := 0;
-  {$ENDIF}
 end;
 
 function TMDOOutputRawFile.WriteColumns: Boolean;
@@ -1827,12 +1785,7 @@ begin
   begin
     for i := 0 to Columns.Count - 1 do
     begin
-      {$IFDEF MDO_FPC}
       BytesWritten := FileWrite(FHandle, Columns[i].Data^.sqldata^, Columns[i].Data^.sqllen);
-      {$ELSE}
-      WriteFile(FHandle, Columns[i].Data^.sqldata^, Columns[i].Data^.sqllen,
-                BytesWritten, nil);
-      {$ENDIF}
       if BytesWritten <> DWORD(Columns[i].Data^.sqllen) then
         exit;
     end;
@@ -1847,11 +1800,7 @@ end;
 destructor TMDOInputRawFile.Destroy;
 begin
   if FHandle <> 0 then
-    {$IFDEF MDO_FPC}
     FileClose(FHandle);
-    {$ELSE}
-    CloseHandle(FHandle);
-    {$ENDIF}
   inherited Destroy;
 end;
 
@@ -1865,12 +1814,7 @@ begin
   begin
     for i := 0 to Params.Count - 1 do
     begin
-      {$IFDEF MDO_FPC}
       BytesRead := FileRead(FHandle, Params[i].Data^.sqldata^, Params[i].Data^.sqllen);
-      {$ELSE}
-      ReadFile(FHandle, Params[i].Data^.sqldata^, Params[i].Data^.sqllen,
-               BytesRead, nil);
-      {$ENDIF}
       if BytesRead <> DWORD(Params[i].Data^.sqllen) then
         exit;
     end;
@@ -1881,19 +1825,8 @@ end;
 procedure TMDOInputRawFile.ReadyFile;
 begin
   if FHandle <> 0 then
-  {$IFDEF MDO_FPC}
     FileClose(FHandle);
-  {$ELSE}
-    CloseHandle(FHandle);
-  FHandle := CreateFile(PChar(Filename), GENERIC_READ, 0, nil, OPEN_EXISTING,
-                        FILE_FLAG_SEQUENTIAL_SCAN, 0);
-  {$ENDIF}
-  {$IFDEF MDO_FPC}
   FHandle := FileOpen(Filename, fmOpenRead);
-  {$ELSE}
-  if FHandle = INVALID_HANDLE_VALUE then
-    FHandle := 0;
-  {$ENDIF}
 end;
 
 { TMDOSQL }
@@ -1909,14 +1842,14 @@ begin
   FGenerateParamNames := False;
   FGoToFirstRecordOnExecute := True;
   FBase := TMDOBase.Create(Self);
-  FBase.BeforeDatabaseDisconnect := DoBeforeDatabaseDisconnect;
-  FBase.BeforeTransactionEnd := BeforeTransactionEnd;
+  FBase.BeforeDatabaseDisconnect := @DoBeforeDatabaseDisconnect;
+  FBase.BeforeTransactionEnd := @BeforeTransactionEnd;
   FBOF := False;
   FEOF := False;
   FPrepared := False;
   FRecordCount := 0;
   FSQL := TStringList.Create;
-  TStringList(FSQL).OnChanging := SQLChanging;
+  TStringList(FSQL).OnChanging := @SQLChanging;
   FProcessedSQL := TStringList.Create;
   FHandle := nil;
   FSQLParams := TMDOXSQLDA.Create(self);
@@ -2127,6 +2060,7 @@ begin
         raise;
       end;
   end;
+  //TODO: Monitor
   {$IFNDEF MDO_FPC}
   if not (csDesigning in ComponentState) then
     MonitorHook.SQLExecute(Self);
@@ -2303,6 +2237,7 @@ begin
       FBOF := False;
       result := FSQLRecord;
     end;
+    //TODO: Monitor
     {$IFNDEF MDO_FPC}
     if not (csDesigning in ComponentState) then
       MonitorHook.SQLFetch(Self);
@@ -2383,6 +2318,7 @@ begin
       end;
     end;
     FPrepared := True;
+    //TODO: Monitor
     {$IFNDEF MDO_FPC}
     if not (csDesigning in ComponentState) then
       MonitorHook.SQLPrepare(Self);

@@ -104,6 +104,7 @@ type
     procedure SwitchToIndex;
   protected
     procedure DataEvent(Event: TDataEvent; Info: PtrInt); override;
+    //TODO: Mark as unsuported
 {$IFNDEF MDO_FPC}
     procedure DefChanged(Sender: TObject); override;
 {$ENDIF}
@@ -130,12 +131,13 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure AddIndex(const Name, Fields: string; Options: TIndexOptions; 
+    procedure AddIndex(const AName, AFields: string; Options: TIndexOptions;
             const DescFields: string = '');
     procedure CreateTable;
-    procedure DeleteIndex(const Name: string);
+    procedure DeleteIndex(const AName: string);
     procedure DeleteTable;
     procedure EmptyTable;
+    //TODO: Remove or mark as unsuported
 {$IFNDEF MDO_FPC}
     procedure GetDetailLinkFields(MasterFields, DetailFields: TList); override;
 {$ENDIF}
@@ -156,9 +158,7 @@ type
     property BooleanFields;
     property BufferChunks;
     property CachedUpdates;
-{$IFNDEF MDO_FPC}
     property Constraints stored ConstraintsStored;
-{$ENDIF}
     property DatabaseFree;
     property DefaultIndex: Boolean read FDefaultIndex write FDefaultIndex 
             default True;
@@ -204,8 +204,8 @@ begin
   FMasterFieldsList := TStringList.Create;
   FDetailFieldsList := TStringList.Create;
   FMasterLink := TMasterDataLink.Create(Self);
-  FMasterLink.OnMasterChange := MasterChanged;
-  FMasterLink.OnMasterDisable := MasterDisabled;
+  FMasterLink.OnMasterChange := @MasterChanged;
+  FMasterLink.OnMasterDisable := @MasterDisabled;
   QRefresh.OnSQLChanging := nil;
   QDelete.OnSQLChanging := nil;
   QInsert.OnSQLChanging := nil;
@@ -225,7 +225,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TMDOTable.AddIndex(const Name, Fields: string; Options: TIndexOptions;
+procedure TMDOTable.AddIndex(const AName, AFields: string; Options: TIndexOptions;
         const DescFields: string = '');
 var
   Query: TMDOSQL;
@@ -240,38 +240,38 @@ begin
   try
     Query.Database := DataBase;
     Query.Transaction := Transaction;
-    FieldList := FormatFieldsList(Fields);
+    FieldList := FormatFieldsList(AFields);
     if (ixPrimary in Options) then
     begin
      Query.SQL.Text := 'Alter Table ' + {do not localize}
        QuoteIdentifier(Database.SQLDialect, FTableName) +
        ' Add CONSTRAINT ' +   {do not localize}
-       QuoteIdentifier(Database.SQLDialect, Name)
+       QuoteIdentifier(Database.SQLDialect, AName)
        + ' Primary Key (' + {do not localize}
-       FormatFieldsList(Fields) +
+       FormatFieldsList(AFields) +
        ')';
     end
     else if ([ixUnique, ixDescending] * Options = [ixUnique, ixDescending]) then
       Query.SQL.Text := 'Create unique Descending Index ' + {do not localize}
-                        QuoteIdentifier(Database.SQLDialect, Name) +
+                        QuoteIdentifier(Database.SQLDialect, AName) +
                         ' on ' + {do not localize}
                         QuoteIdentifier(Database.SQLDialect, FTableName) +
                         ' (' + FieldList + ')'
     else if (ixUnique in Options) then
       Query.SQL.Text := 'Create unique Index ' + {do not localize}
-                        QuoteIdentifier(Database.SQLDialect, Name) +
+                        QuoteIdentifier(Database.SQLDialect, AName) +
                         ' on ' + {do not localize}
                         QuoteIdentifier(Database.SQLDialect, FTableName) +
                         ' (' + FieldList + ')'
     else if (ixDescending in Options) then
       Query.SQL.Text := 'Create Descending Index ' + {do not localize}
-                        QuoteIdentifier(Database.SQLDialect, Name) +
+                        QuoteIdentifier(Database.SQLDialect, AName) +
                         ' on ' + {do not localize}
                         QuoteIdentifier(Database.SQLDialect, FTableName) +
                         ' (' + FieldList + ')'
     else
       Query.SQL.Text := 'Create Index ' + {do not localize}
-                        QuoteIdentifier(Database.SQLDialect, Name) +
+                        QuoteIdentifier(Database.SQLDialect, AName) +
                         ' on ' + {do not localize}
                         QuoteIdentifier(Database.SQLDialect, FTableName) +
                         ' (' + FieldList + ')';
@@ -437,6 +437,7 @@ begin
   inherited DataEvent(Event, Info);
 end;
 
+//TODO: Mark as unsuported
 {$IFNDEF MDO_FPC}
 procedure TMDOTable.DefChanged(Sender: TObject);
 begin
@@ -444,7 +445,7 @@ begin
 end;
 {$ENDIF}
 
-procedure TMDOTable.DeleteIndex(const Name: string);
+procedure TMDOTable.DeleteIndex(const AName: string);
 var
   Query: TMDOSQL;
   
@@ -455,7 +456,7 @@ var
       Query.Database := DataBase;
       Query.Transaction := Transaction;
       Query.SQL.Text := 'Drop index ' +  {do not localize}
-                         QuoteIdentifier(Database.SQLDialect, Name);
+                         QuoteIdentifier(Database.SQLDialect, AName);
       Query.Prepare;
       Query.ExecQuery;
       IndexDefs.Updated := False;
@@ -480,7 +481,7 @@ var
         ' AND RDB$CONSTRAINT_NAME = ' +
         '''' +
         FormatIdentifierValue(Database.SQLDialect,
-          QuoteIdentifier(DataBase.SQLDialect, Name)) +
+          QuoteIdentifier(DataBase.SQLDialect, AName)) +
         ''' ' +
         'AND RDB$CONSTRAINT_TYPE = ''PRIMARY KEY''';
       Query.Prepare;
@@ -491,7 +492,7 @@ var
         Query.SQL.Text := 'Alter Table ' +  {do not localize}
           QuoteIdentifier(DataBase.SQLDialect, FTableName) +
           ' Drop Constraint ' +
-          QuoteIdentifier(DataBase.SQLDialect, Name);
+          QuoteIdentifier(DataBase.SQLDialect, AName);
         Query.Prepare;
         Query.ExecQuery;
         IndexDefs.Updated := False;
@@ -517,7 +518,7 @@ var
         'AND RDB$INDEX_NAME = ' +
         '''' +
         FormatIdentifierValue(Database.SQLDialect,
-          QuoteIdentifier(DataBase.SQLDialect, Name)) +
+          QuoteIdentifier(DataBase.SQLDialect, AName)) +
         ''' ' +
         'AND RDB$CONSTRAINT_TYPE = ''PRIMARY KEY''';
       Query.Prepare;
@@ -542,7 +543,7 @@ begin
   if Active then
     CheckBrowseMode;
   IndexDefs.Update;
-  if (Pos('RDB$PRIMARY', Name) <> 0 ) then {do not localize} {mbcs ok}
+  if (Pos('RDB$PRIMARY', AName) <> 0 ) then {do not localize} {mbcs ok}
     DeleteByKey
   else if not DeleteByConstraint then
     DeleteByIndex;
@@ -829,6 +830,7 @@ begin
   Result := FMasterLink.DataSource;
 end;
 
+//TODO: Mark as unsuported
 {$IFNDEF MDO_FPC}
 procedure TMDOTable.GetDetailLinkFields(MasterFields, DetailFields: TList);
 var
@@ -1084,6 +1086,7 @@ begin
       FieldDefs.Clear;
       while (not Query.EOF) and (Query.Next <> nil) do
       begin
+          //TODO Change to Add(...
           with FieldDefs.AddFieldDef do
           begin
             {$IFNDEF MDO_FPC}
@@ -1415,7 +1418,7 @@ begin
     begin
       SetState(dsInactive);
       CloseCursor;
-      OpenCursor{$IFDEF MDO_FPC}(False){$ENDIF};
+      OpenCursor(False);
       SetState(dsBrowse);
     end;
   finally

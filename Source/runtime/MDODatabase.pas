@@ -34,11 +34,7 @@ unit MDODatabase;
 interface
 
 uses
-  {$IFDEF MDO_FPC}
   fpTimer,
-  {$ELSE}
-  Windows, DBLogDlg, Dialogs, Controls, StdCtrls, Forms, ExtCtrls,
-  {$ENDIF}
   SysUtils, Classes, MDOHeader, MDOExternals, DB, MDO;
 
 const
@@ -190,7 +186,7 @@ type
     FOnLogin: TMDODatabaseLoginEvent;
     FSQLDialect: Integer;
     FSQLObjects: TList;
-    FTimer: {$IFDEF MDO_FPC}TFPTimer{$ELSE}TTimer{$ENDIF};
+    FTimer: TFPTimer;
     FTraceFlags: TTraceFlags;
     FTransactions: TList;
     FUserNames: TStringList;
@@ -231,7 +227,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     function AddTransaction(TR: TMDOTransaction): Integer;
-    procedure ApplyUpdates(const DataSets: array of TDataSet);
+    procedure ApplyUpdates(const ADataSets: array of TDataSet);
     function Call(ErrCode: ISC_STATUS; RaiseError: Boolean): ISC_STATUS;
     procedure CheckActive;
     procedure CheckDatabaseName;
@@ -316,7 +312,7 @@ type
     FOnStartTransaction: TNotifyEvent;
     FSQLObjects: TList;
     FStreamedActive: Boolean;
-    FTimer: {$IFDEF MDO_FPC}TFPTimer{$ELSE}TTimer{$ENDIF};
+    FTimer: TFPTimer;
     FTPB: PChar;
     FTPBLength: Short;
     FTRParams: TStrings;
@@ -488,17 +484,17 @@ begin
   FDBName := '';
   FDBParams := TStringList.Create;
   FDBParamsChanged := True;
-  TStringList(FDBParams).OnChange := DBParamsChange;
-  TStringList(FDBParams).OnChanging := DBParamsChanging;
+  TStringList(FDBParams).OnChange := @DBParamsChange;
+  TStringList(FDBParams).OnChanging := @DBParamsChanging;
   FDPB := nil;
   FHandle := nil;
   FUserNames := nil;
   FInternalTransaction := TMDOTransaction.Create(self);
   FInternalTransaction.DefaultDatabase := Self;
-  FTimer := {$IFDEF MDO_FPC}TFPTimer{$ELSE}TTimer{$ENDIF}.Create(Self);
+  FTimer := TFPTimer.Create(Self);
   FTimer.Enabled := False;
   FTimer.Interval := 0;
-  FTimer.OnTimer := TimeoutConnection;
+  FTimer.OnTimer := @TimeoutConnection;
   FDBSQLDialect := 3;
   FSQLDialect := 3;
   FTraceFlags := [];
@@ -533,6 +529,7 @@ end;
 function TMDODataBase.AddSQLObject(ds: TMDOBase): Integer;
 begin
   result := 0;
+  //TODO: Pass events via custom routine
   {$IFNDEF MDO_FPC}
   if (ds.Owner is TMDOCustomDataSet) then
       RegisterClient(TDataSet(ds.Owner));
@@ -562,16 +559,16 @@ begin
     FTransactions[result] := TR;
 end;
 
-procedure TMDODataBase.ApplyUpdates(const DataSets: array of TDataSet);
+procedure TMDODataBase.ApplyUpdates(const ADataSets: array of TDataSet);
 var
   I: Integer;
   DS: TMDOCustomDataSet;
   TR: TMDOTransaction;
 begin
   TR := nil;
-  for I := 0 to High(DataSets) do
+  for I := 0 to High(ADataSets) do
   begin
-    DS := TMDOCustomDataSet(DataSets[I]);
+    DS := TMDOCustomDataSet(ADataSets[I]);
     if DS.Database <> Self then
       MDOError(mdoeUpdateWrongDB, [nil]);
     if TR = nil then
@@ -580,9 +577,9 @@ begin
       MDOError(mdoeUpdateWrongTR, [nil]);
   end;
   TR.CheckInTransaction;
-  for I := 0 to High(DataSets) do
+  for I := 0 to High(ADataSets) do
   begin
-    DS := TMDOCustomDataSet(DataSets[I]);
+    DS := TMDOCustomDataSet(ADataSets[I]);
     DS.ApplyUpdates;
   end;
   TR.CommitRetaining;
@@ -699,6 +696,7 @@ begin
   ValidateClientSQLDialect;
   if Assigned(FAfterConnect) then
     FAfterConnect(Self);
+  //TODO: Support for monitor
   {$IFNDEF MDO_FPC}
   if not (csDesigning in ComponentState) then
     MonitorHook.DBConnect(Self);
@@ -880,7 +878,7 @@ end;
 
 function TMDODataBase.GetSQLObject(Index: Integer): TMDOBase;
 begin
-  result := FSQLObjects[Index];
+  result := TMDOBase(FSQLObjects[Index]);
 end;
 
 function TMDODataBase.GetSQLObjectCount: Integer;
@@ -939,7 +937,7 @@ end;
 
 function TMDODataBase.GetTransaction(Index: Integer): TMDOTransaction;
 begin
-  result := FTransactions[Index];
+  result := TMDOTransaction(FTransactions[Index]);
 end;
 
 function TMDODataBase.GetTransactionCount: Integer;
@@ -1011,6 +1009,7 @@ begin
     FHandleIsShared := False;
   end;
 
+  //TODO: Support for monitor
   {$IFNDEF MDO_FPC}
   if not (csDesigning in ComponentState) then
     MonitorHook.DBDisconnect(Self);
@@ -1063,17 +1062,8 @@ begin
     end;
   except
     if csDesigning in ComponentState then
-    {$IFDEF MDO_DELPHI5}
-      if Assigned(Self) then
-    {$ENDIF}
-    {$IFDEF MDO_DELPHI6_UP}
       if Assigned(ApplicationHandleException) then
-    {$ENDIF}
-        {$IFDEF MDO_FPC}
         Classes.ApplicationHandleException(Self)
-        {$ELSE}
-        Application.HandleException(Self)
-        {$ENDIF}
     else
       raise;
   end;
@@ -1178,6 +1168,7 @@ begin
     ds := SQLObjects[Idx];
     FSQLObjects[Idx] := nil;
     ds.Database := nil;
+    //TODO: Pass events via custom routine
     {$IFNDEF MDO_FPC}
     if (ds.owner is TDataSet) then
       UnregisterClient(TDataSet(ds.Owner));
@@ -1192,6 +1183,7 @@ begin
   for i := 0 to FSQLObjects.Count - 1 do if FSQLObjects[i] <> nil then
   begin
     RemoveSQLObject(i);
+    //TODO: Pass events via custom routine
     {$IFNDEF MDO_FPC}
     if (TMDOBase(FSQLObjects[i]).owner is TDataSet) then
       UnregisterClient(TDataSet(TMDOBase(FSQLObjects[i]).owner));
@@ -1411,12 +1403,12 @@ begin
   FTPBLength := 0;
   FTRParams := TStringList.Create;
   FTRParamsChanged := True;
-  TStringList(FTRParams).OnChange := TRParamsChange;
-  TStringList(FTRParams).OnChanging := TRParamsChanging;
-  FTimer := {$IFDEF MDO_FPC}TFPTimer{$ELSE}TTimer{$ENDIF}.Create(Self);
+  TStringList(FTRParams).OnChange := @TRParamsChange;
+  TStringList(FTRParams).OnChanging := @TRParamsChanging;
+  FTimer := TFPTimer.Create(Self);
   FTimer.Enabled := False;
   FTimer.Interval := 0;
-  FTimer.OnTimer := TimeoutTransaction;
+  FTimer.OnTimer := @TimeoutTransaction;
   FDefaultAction := taCommit;
 end;
 
@@ -1617,6 +1609,7 @@ begin
         FAfterRollbackRetaining(Self);
     end;
   end;
+  //TODO: Monitor
   {$IFNDEF MDO_FPC}
   if not (csDesigning in ComponentState) then
   begin
@@ -1682,7 +1675,7 @@ end;
 
 function TMDOTransaction.GetDatabase(Index: Integer): TMDODatabase;
 begin
-  result := FDatabases[Index];
+  result := TMDODataBase(FDatabases[Index]);
 end;
 
 function TMDOTransaction.GetDatabaseCount: Integer;
@@ -1707,7 +1700,7 @@ end;
 
 function TMDOTransaction.GetSQLObject(Index: Integer): TMDOBase;
 begin
-  result := FSQLObjects[Index];
+  result := TMDOBase(FSQLObjects[Index]);
 end;
 
 function TMDOTransaction.GetSQLObjectCount: Integer;
@@ -1883,7 +1876,7 @@ end;
 procedure TMDOTransaction.StartTransaction;
 var
   pteb: PISC_TEB_ARRAY;
-  TPB: string;
+  ATPB: string;
   i: Integer;
 begin
   { Check that we're not already in a transaction.
@@ -1907,11 +1900,11 @@ begin
   if FTRParamsChanged then
   begin
     FTRParamsChanged := False;
-    GenerateTPB(FTRParams, TPB, FTPBLength);
+    GenerateTPB(FTRParams, ATPB, FTPBLength);
     if FTPBLength > 0 then
     begin
       MDOAlloc(FTPB, 0, FTPBLength);
-      Move(TPB[1], FTPB[0], FTPBLength);
+      Move(ATPB[1], FTPB[0], FTPBLength);
     end;
   end;
   
@@ -1939,6 +1932,7 @@ begin
     if Assigned(FOnStartTransaction) then
       FOnStartTransaction(Self);
 
+    //TODO: Monitor
     {$IFNDEF MDO_FPC}
     if not (csDesigning in ComponentState) then
       MonitorHook.TRStart(Self);
