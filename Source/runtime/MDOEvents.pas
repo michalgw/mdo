@@ -23,123 +23,380 @@
 {    Portions created by Inprise Corporation are Copyright (C) Inprise   }
 {       Corporation. All Rights Reserved.                                }
 {    Contributor(s): Jeff Overcash                                       }
-{                    Mercury Database Objects [info@mdolib.com]          }
+{                                                                        }
+{    IBX For Lazarus (Firebird Express)                                  }
+{    Contributor: Tony Whyman, MWA Software http://www.mwasoftware.co.uk }
+{    Portions created by MWA Software are copyright McCallum Whyman      }
+{    Associates Ltd 2011                                                 }
 {                                                                        }
 {************************************************************************}
 
-{$I ..\MDO.inc}
+{
+  This unit has been almost completely re-written as the original code was
+  not that robust - and I am not even sure if it worked. The IBPP C++ implementation
+  was used for guidance and inspiration. A permanent thread is used to receive
+  events from the asynchronous event handler. This then uses "Synchronize" to
+  process the event in the main thread.
+
+  Note that an error will occur if the TIBEvent's Registered property is set to
+  true before the Database has been opened.
+}
 
 unit MDOEvents;
+
+{$I ..\MDO.inc}
 
 interface
 
 uses
-  {$IFDEF UNIX}
-  cthreads,
-  {$ENDIF}
-  SysUtils, Classes, DB, MDOHeader, MDOExternals, MDO, MDODatabase;
+{$IFDEF WINDOWS }
+  Windows,
+{$ELSE}
+  unix,
+{$ENDIF}
+  Classes, MDOHeader, MDOExternals, MDO, MDODatabase;
 
 const
   MaxEvents = 15;
-  EventLength = 64;
 
 type
 
-  TEventAlert = procedure (Sender: TObject; EventName: string; EventCount: 
-          longint; var CancelAlerts: Boolean) of object;
-  TEventBuffer = array[ 0..MaxEvents-1, 0..EventLength-1] of char;
+  TEventAlert = procedure( Sender: TObject; EventName: string; EventCount: longint;
+                           var CancelAlerts: Boolean) of object;
 
-  TMDOEvents = class (TComponent)
+  { TMDOEvents }
+
+  TMDOEvents = class(TComponent)
   private
-    Buffer: TEventBuffer;
-    Changing: Boolean;
-    CS: TRTLCriticalSection;
-    EventBuffer: PChar;
-    EventBufferLen: Integer;
-    EventID: ISC_LONG;
-    FDatabase: TMDODatabase;
-    FEvents: TStrings;
     FIBLoaded: Boolean;
+    FBase: TMDOBase;
+    FEvents: TStrings;
     FOnEventAlert: TEventAlert;
-    FQueued: Boolean;
-    FRegistered: Boolean;
-    ProcessingEvents: Boolean;
-    RegisteredState: Boolean;
-    ResultBuffer: PChar;
-    procedure DoQueueEvents;
+    FEventHandler: TObject;
+    FRegistered: boolean;
     procedure EventChange(sender: TObject);
-    procedure SetDatabase(Value: TMDODatabase);
-    procedure UpdateResultBuffer(length: short; AUpdated: PChar);
-    procedure ValidateDatabase(Database: TMDODatabase);
+    function GetDatabase: TMDODatabase;
+    function GetDatabaseHandle: TISC_DB_HANDLE;
+    procedure SetDatabase( value: TMDODatabase);
+    procedure ValidateDatabase( Database: TMDODatabase);
+    procedure DoBeforeDatabaseDisconnect(Sender: TObject);
   protected
-    function GetNativeHandle: TISC_DB_HANDLE;
-    procedure HandleEvent;
-    procedure Loaded; override;
-    procedure Notification(AComponent: TComponent; Operation: TOperation); 
-            override;
-    procedure SetEvents(Value: TStrings);
-    procedure SetRegistered(Value: Boolean);
+    procedure Notification( AComponent: TComponent; Operation: TOperation); override;
+    procedure SetEvents( value: TStrings);
+    procedure SetRegistered( value: boolean);
+
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create( AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure CancelEvents;
-    procedure QueueEvents;
     procedure RegisterEvents;
     procedure UnRegisterEvents;
-    property Queued: Boolean read FQueued;
+    property DatabaseHandle: TISC_DB_HANDLE read GetDatabaseHandle;
   published
-    property Database: TMDODatabase read FDatabase write SetDatabase;
+    property Database: TMDODatabase read GetDatabase write SetDatabase;
     property Events: TStrings read FEvents write SetEvents;
-    property OnEventAlert: TEventAlert read FOnEventAlert write FOnEventAlert;
     property Registered: Boolean read FRegistered write SetRegistered;
+    property OnEventAlert: TEventAlert read FOnEventAlert write FOnEventAlert;
   end;
+
 
 implementation
 
 uses
-  MDOIntf;
+  MDOIntf, syncobjs, SysUtils;
 
-{ TMDOEvents }
+type
 
-function HandleEvent( param: Pointer): PtrInt;
+  TEventHandlerStates = (
+    stIdle,           {Events not monitored}
+    stHasEvb,         {Event Block Allocated but not queued}
+    stQueued,         {Waiting for Event}
+    stSignalled       {Event Callback signalled Event}
+   );
+
+  { TEventHandler }
+
+  TEventHandler = class(TThread)
+  private
+    FOwner: TMDOEvents;
+    FCriticalSection: TCriticalSection;   {protects race conditions in stQueued state}
+    {$IFDEF WINDOWS}
+    {Make direct use of Windows API as TEventObject don't seem to work under
+     Windows!}
+    FEventHandler: THandle;
+    {$ELSE}
+    FEventWaiting: TEventObject;
+    {$ENDIF}
+    FState: TEventHandlerStates;
+    FEventBuffer: PChar;
+    FEventBufferLen: integer;
+    FEventID: ISC_LONG;
+    FRegisteredState: Boolean;
+    FResultBuffer: PChar;
+    FEvents: TStringList;
+    FSignalFired: boolean;
+    procedure QueueEvents;
+    procedure CancelEvents;
+    procedure HandleEventSignalled(length: short; updated: PChar);
+    procedure DoEventSignalled;
+  protected
+    procedure Execute; override;
+  public
+    constructor Create(Owner: TMDOEvents);
+    destructor Destroy; override;
+    procedure Terminate;
+    procedure RegisterEvents(Events: TStrings);
+    procedure UnregisterEvents;
+  end;
+
+ {This procedure is used for the event call back - note the cdecl }
+
+procedure IBEventCallback( ptr: pointer; length: short; updated: PChar); cdecl;
 begin
-  { don't let exceptions propogate out of thread }
+  if (ptr = nil) or (length = 0) or (updated = nil) then
+    Exit;
+  { Handle events asynchronously in second thread }
+  TEventHandler(ptr).HandleEventSignalled(length,updated);
+end;
+
+
+
+{ TEventHandler }
+
+procedure TEventHandler.QueueEvents;
+var
+  callback: pointer;
+  DBH: TISC_DB_HANDLE;
+begin
+  if FState <> stHasEvb then
+    Exit;
+  FCriticalSection.Enter;
   try
-    TMDOEvents( param).HandleEvent;
-  except
-    Classes.ApplicationHandleException(nil);
+    callback := @IBEventCallback;
+    DBH := FOwner.DatabaseHandle;
+    if (isc_que_events( StatusVector, @DBH, @FEventID, FEventBufferLen,
+                     FEventBuffer, TISC_CALLBACK(callback), PVoid(Self)) <> 0) then
+      MDODataBaseError;
+    FState := stQueued
+  finally
+    FCriticalSection.Leave
   end;
 end;
 
-procedure FBEventCallback( ptr: pointer; length: short; updated: PChar); cdecl;
+procedure TEventHandler.CancelEvents;
 var
-  ThreadID: PtrUInt;
+  DBH: TISC_DB_HANDLE;
 begin
-  { Handle events asynchronously in second thread }
-  EnterCriticalSection( TMDOEvents( ptr).CS);
-  TMDOEvents( ptr).UpdateResultBuffer( length, updated);
-  if TMDOEvents( ptr).Queued then
-    BeginThread( nil, 8192, @HandleEvent, ptr, 0, ThreadID);
-  LeaveCriticalSection( TMDOEvents( ptr).CS);
+  if FState in [stQueued,stSignalled] then
+  begin
+    FCriticalSection.Enter;
+    try
+      DBH := FOwner.DatabaseHandle;
+      if (isc_Cancel_events( StatusVector, @DBH, @FEventID) <> 0) then
+          MDODataBaseError;
+      FState := stHasEvb;
+    finally
+      FCriticalSection.Leave
+    end;
+  end;
+
+  if FState = stHasEvb then
+  begin
+    isc_free( FEventBuffer);
+    FEventBuffer := nil;
+    isc_free( FResultBuffer);
+    FResultBuffer := nil;
+    FState := stIdle
+  end;
+  FSignalFired := false
+end;
+
+procedure TEventHandler.HandleEventSignalled(length: short; updated: PChar);
+begin
+  FCriticalSection.Enter;
+  try
+    if FState <> stQueued then
+      Exit;
+    Move(Updated[0], FResultBuffer[0], Length);
+    FState := stSignalled;
+    {$IFDEF WINDOWS}
+    SetEVent(FEventHandler);
+    {$ELSE}
+    FEventWaiting.SetEvent;
+    {$ENDIF}
+  finally
+    FCriticalSection.Leave
+  end;
+end;
+
+procedure TEventHandler.DoEventSignalled;
+var
+  i: integer;
+  CancelAlerts: boolean;
+  Status: array[0..19] of ISC_LONG; {Note in 64 implementation the ibase.h implementation
+                                     is different from Interbase 6.0 API documentatoin}
+begin
+    if FState <> stSignalled then
+      Exit;
+    isc_event_counts( @Status, FEventBufferLen, FEventBuffer, FResultBuffer);
+    CancelAlerts := false;
+    if not FSignalFired then
+      FSignalFired := true   {Ignore first time}
+    else
+    if assigned(FOwner.FOnEventAlert)  then
+    begin
+      for i := 0 to FEvents.Count - 1 do
+      begin
+        try
+        if (Status[i] <> 0) and not CancelAlerts then
+          FOwner.FOnEventAlert( self, FEvents[i], Status[i], CancelAlerts);
+        except
+          Classes.ApplicationHandleException(Self)
+        end;
+      end;
+    end;
+    FState := stHasEvb;
+  if  CancelAlerts then
+      CancelEvents
+    else
+      QueueEvents
+end;
+
+procedure TEventHandler.Execute;
+begin
+  while not Terminated do
+  begin
+    {$IFDEF WINDOWS}
+    WaitForSingleObject(FEventHandler,INFINITE);
+    {$ELSE}
+    FEventWaiting.WaitFor(INFINITE);
+    {$ENDIF}
+
+    if not Terminated and (FState = stSignalled) then
+      Synchronize(@DoEventSignalled)
+  end;
 end;
 
 
-{
-********************************** TMDOEvents **********************************
-}
-constructor TMDOEvents.Create(AOwner: TComponent);
+
+constructor TEventHandler.Create(Owner: TMDOEvents);
+var
+  PSa : PSecurityAttributes;
+{$IFDEF WINDOWS}
+  Sd : TSecurityDescriptor;
+  Sa : TSecurityAttributes;
+begin
+  InitializeSecurityDescriptor(@Sd,SECURITY_DESCRIPTOR_REVISION);
+  SetSecurityDescriptorDacl(@Sd,true,nil,false);
+  Sa.nLength := SizeOf(Sa);
+  Sa.lpSecurityDescriptor := @Sd;
+  Sa.bInheritHandle := true;
+  PSa := @Sa;
+{$ELSE}
+begin
+  PSa:= nil;
+{$ENDIF}
+  inherited Create(true);
+  FOwner := Owner;
+  FState := stIdle;
+  FCriticalSection := TCriticalSection.Create;
+  {$IFDEF WINDOWS}
+  FEventHandler := CreateEvent(PSa,false,true,nil);
+  {$ELSE}
+  FEventWaiting := TEventObject.Create(PSa,false,true,FOwner.Name+'.Events');
+  {$ENDIF}
+  FEvents := TStringList.Create;
+  FreeOnTerminate := true;
+  Resume
+end;
+
+destructor TEventHandler.Destroy;
+begin
+  if assigned(FCriticalSection) then FCriticalSection.Free;
+  {$IFDEF WINDOWS}
+  CloseHandle(FEventHandler);
+  {$ELSE}
+  if assigned(FEventWaiting) then FEventWaiting.Free;
+  {$ENDIF}
+  if assigned(FEvents) then FEvents.Free;
+  inherited Destroy;
+end;
+
+procedure TEventHandler.Terminate;
+begin
+  inherited Terminate;
+  {$IFDEF WINDOWS}
+  SetEvent(FEventHandler);
+  {$ELSE}
+  FEventWaiting.SetEvent;
+  {$ENDIF}
+  CancelEvents;
+end;
+
+procedure TEventHandler.RegisterEvents(Events: TStrings);
+var
+  i: integer;
+  EventNames: array of PChar;
+begin
+  UnregisterEvents;
+
+  if Events.Count = 0 then
+    exit;
+
+  setlength(EventNames,MaxEvents);
+  try
+    for i := 0 to Events.Count-1 do
+      EventNames[i] := PChar(Events[i]);
+    FEvents.Assign(Events);
+    FEventBufferlen := isc_event_block(@FEventBuffer,@FResultBuffer,
+                        Events.Count,
+                        EventNames[0],EventNames[1],EventNames[2],
+                        EventNames[3],EventNames[4],EventNames[5],
+                        EventNames[6],EventNames[7],EventNames[8],
+                        EventNames[9],EventNames[10],EventNames[11],
+                        EventNames[12],EventNames[13],EventNames[14]
+                        );
+    FState := stHasEvb;
+    FRegisteredState := true;
+    QueueEvents
+  finally
+    SetLength(EventNames,0)
+  end;
+end;
+
+procedure TEventHandler.UnregisterEvents;
+begin
+  if FRegisteredState then
+  begin
+    CancelEvents;
+    FRegisteredState := false;
+  end;
+end;
+
+{ TMDOEvents }
+
+procedure TMDOEvents.ValidateDatabase( Database: TMDODatabase);
+begin
+  if not assigned( Database) then
+    MDOError(mdoeDatabaseNameMissing, [nil]);
+  if not Database.Connected then
+    MDOError(mdoeDatabaseClosed, [nil]);
+end;
+
+constructor TMDOEvents.Create( AOwner: TComponent);
 begin
   inherited Create( AOwner);
   FIBLoaded := False;
   CheckFBLoaded;
   FIBLoaded := True;
-  InitCriticalSection(CS);
+  FBase := TMDOBase.Create(Self);
+  FBase.BeforeDatabaseDisconnect := @DoBeforeDatabaseDisconnect;
   FEvents := TStringList.Create;
   with TStringList( FEvents) do
   begin
     OnChange := @EventChange;
     Duplicates := dupIgnore;
   end;
+  FEventHandler := TEventHandler.Create(self)
 end;
 
 destructor TMDOEvents.Destroy;
@@ -147,47 +404,20 @@ begin
   if FIBLoaded then
   begin
     UnregisterEvents;
-    SetDatabase( nil);
+    SetDatabase(nil);
     TStringList(FEvents).OnChange := nil;
+    FBase.Free;
     FEvents.Free;
-    DoneCriticalsection(CS);
   end;
+  if assigned(FEventHandler) then
+    TEventHandler(FEventHandler).Terminate;
+  FEventHandler := nil;
   inherited Destroy;
 end;
 
-procedure TMDOEvents.CancelEvents;
-begin
-  if ProcessingEvents then
-    MDOError(mdoeInvalidCancellation, [nil]);
-  if FQueued then
-  begin
-    try
-      { wait for event handler to finish before cancelling events }
-      EnterCriticalSection( CS);
-      ValidateDatabase( Database);
-      FQueued := false;
-      Changing := true;
-      if (isc_Cancel_events( StatusVector, @FDatabase.Handle, @EventID) > 0) then
-        MDODatabaseError;
-    finally
-      LeaveCriticalSection( CS);
-    end;
-  end;
-end;
 
-procedure TMDOEvents.DoQueueEvents;
-var
-  callback: Pointer;
-begin
-  ValidateDatabase( DataBase);
-  callback := @FBEventCallback;
-  if (isc_que_events( StatusVector, @FDatabase.Handle, @EventID, EventBufferLen,
-                     EventBuffer, TISC_CALLBACK(callback), PVoid(Self)) > 0) then
-    MDODatabaseError;
-  FQueued := true;
-end;
 
-procedure TMDOEvents.EventChange(sender: TObject);
+procedure TMDOEvents.EventChange( sender: TObject);
 begin
   { check for blank event }
   if TStringList(Events).IndexOf( '') <> -1 then
@@ -200,207 +430,84 @@ begin
     TStringList(Events).OnChange := @EventChange;
     MDOError(mdoeMaximumEvents, [nil]);
   end;
-  if Registered then RegisterEvents;
+  if Registered then
+    TEventHandler(FEventHandler).RegisterEvents(Events);
 end;
 
-function TMDOEvents.GetNativeHandle: TISC_DB_HANDLE;
-begin
-  if assigned( FDatabase) and FDatabase.Connected then
-    Result := FDatabase.Handle
-  else result := nil;
-end;
-
-procedure TMDOEvents.HandleEvent;
-var
-  Status: PStatusVector;
-  CancelAlerts: Boolean;
-  i: Integer;
-begin
-  try
-    { prevent modification of vital data structures while handling events }
-    EnterCriticalSection( CS);
-    ProcessingEvents := true;
-    isc_event_counts( StatusVector, EventBufferLen, EventBuffer, ResultBuffer);
-    CancelAlerts := false;
-    if assigned(FOnEventAlert) and not Changing then
-    begin
-      for i := 0 to Events.Count-1 do
-      begin
-        try
-        Status := StatusVectorArray;
-        if (Status^[i] <> 0) and not CancelAlerts then
-            FOnEventAlert( self, Events[Events.Count-i-1], Status^[i], CancelAlerts);
-        except
-          Classes.ApplicationHandleException(nil);
-        end;
-      end;
-    end;
-    Changing := false;
-    if not CancelAlerts and FQueued then DoQueueEvents;
-  finally
-    ProcessingEvents := false;
-    LeaveCriticalSection( CS);
-  end;
-end;
-
-procedure TMDOEvents.Loaded;
-begin
-  inherited Loaded;
-  try
-    if RegisteredState then RegisterEvents;
-  except
-    if csDesigning in ComponentState then
-      Classes.ApplicationHandleException(nil)
-    else raise;
-  end;
-end;
-
-procedure TMDOEvents.Notification(AComponent: TComponent; Operation: 
-        TOperation);
+procedure TMDOEvents.Notification( AComponent: TComponent;
+                                        Operation: TOperation);
 begin
   inherited Notification( AComponent, Operation);
-  if (Operation = opRemove) and (AComponent = FDatabase) then
+  if (Operation = opRemove) and (AComponent = FBase.Database) then
   begin
     UnregisterEvents;
-    FDatabase := nil;
-  end;
-end;
-
-procedure TMDOEvents.QueueEvents;
-begin
-  if not FRegistered then
-    MDOError(mdoeNoEventsRegistered, [nil]);
-  if ProcessingEvents then
-    MDOError(mdoeInvalidQueueing, [nil]);
-  if not FQueued then
-  begin
-    try
-      { wait until current event handler is finished before queuing events }
-      EnterCriticalSection( CS);
-      DoQueueEvents;
-      Changing := true;
-    finally
-      LeaveCriticalSection( CS);
-    end;
+    FBase.Database := nil;
   end;
 end;
 
 procedure TMDOEvents.RegisterEvents;
-var
-  i: Integer;
-  bufptr: Pointer;
-  eventbufptr: Pointer;
-  resultbufptr: Pointer;
-  buflen: Integer;
-
-function ev(no: Integer): PChar;
-begin
-  if no < Events.Count then
-    Result := @Buffer[no][0]
-  else
-    Result := nil;
-end;
-
 begin
   ValidateDatabase( Database);
   if csDesigning in ComponentState then FRegistered := true
-  else begin
-    UnregisterEvents;
-    if Events.Count = 0 then exit;
-    for i := 0 to Events.Count-1 do
-      StrPCopy( @Buffer[i][0], Events[i]);
-    i := Events.Count;
-    bufptr := @buffer[0];
-    eventbufptr :=  @EventBuffer;
-    resultBufPtr := @ResultBuffer;
-    //TODO: Remove asm
-    (*
-    {$IFNDEF MDO_64BIT}
-    asm
-      mov ecx, dword ptr [i]
-      mov eax, dword ptr [bufptr]
-      @@1:
-      push eax
-      add  eax, EventLength
-      loop @@1
-      push dword ptr [i]
-      push dword ptr [resultBufPtr]
-      push dword ptr [eventBufPtr]
-      call [isc_event_block]
-      mov  dword ptr [bufLen], eax
-      mov eax, dword ptr [i]
-      shl eax, 2
-      add eax, 12
-      add esp, eax
-    end;
-    {$ENDIF}
-    *)
-    buflen := isc_event_block(eventbufptr, resultbufptr, i, [ev(0),ev(1),ev(2),ev(3),ev(4),ev(5),
-      ev(6),ev(7),ev(8),ev(9),ev(10),ev(11),ev(12),ev(13),ev(14)]);
-    EventBufferlen := Buflen;
-    FRegistered := true;
-    QueueEvents;
-  end;
-end;
-
-procedure TMDOEvents.SetDatabase(Value: TMDODatabase);
-begin
-  if value <> FDatabase then
+  else
   begin
-    UnregisterEvents;
-    if assigned( value) and value.Connected then ValidateDatabase( value);
-    FDatabase := value;
+    TEventHandler(FEventHandler).RegisterEvents(Events);
+    FRegistered := true;
   end;
 end;
 
-procedure TMDOEvents.SetEvents(Value: TStrings);
+procedure TMDOEvents.SetEvents( value: TStrings);
 begin
   FEvents.Assign( value);
 end;
 
-procedure TMDOEvents.SetRegistered(Value: Boolean);
+procedure TMDOEvents.SetDatabase( value: TMDODatabase);
 begin
-  if (csReading in ComponentState) then
-    RegisteredState := value
-  else if FRegistered <> value then
-    if value then RegisterEvents else UnregisterEvents;
+  if value <> FBase.Database then
+  begin
+    if Registered then UnregisterEvents;
+    if assigned( value) and value.Connected then ValidateDatabase( value);
+    FBase.Database := value;
+  end;
 end;
 
-procedure TMDOEvents.UnRegisterEvents;
+function TMDOEvents.GetDatabase: TMDODatabase;
 begin
-  if ProcessingEvents then
-    MDOError(mdoeInvalidRegistration, [nil]);
+  Result := FBase.Database
+end;
+
+procedure TMDOEvents.SetRegistered( value: Boolean);
+begin
+  if not assigned(FBase) or (FBase.Database = nil) then
+    Exit;
+
+  if value then RegisterEvents else UnregisterEvents;
+end;
+
+procedure TMDOEvents.UnregisterEvents;
+begin
+  if not FRegistered then
+    Exit;
   if csDesigning in ComponentState then
     FRegistered := false
-  else if not (csLoading in ComponentState) then
+  else
   begin
-    CancelEvents;
-    if FRegistered then
-    begin
-      isc_free( EventBuffer);
-      EventBuffer := nil;
-      isc_free( ResultBuffer);
-      ResultBuffer := nil;
-    end;
+    TEventHandler(FEventHandler).UnRegisterEvents;
     FRegistered := false;
   end;
 end;
 
-procedure TMDOEvents.UpdateResultBuffer(length: short; AUpdated: PChar);
-var
-  i: Integer;
+procedure TMDOEvents.DoBeforeDatabaseDisconnect(Sender: TObject);
 begin
-  for i := 0 to length-1 do
-    ResultBuffer[i] := AUpdated[i];
+  UnregisterEvents;
 end;
 
-procedure TMDOEvents.ValidateDatabase(Database: TMDODatabase);
+function TMDOEvents.GetDatabaseHandle: TISC_DB_HANDLE;
 begin
-  if not assigned( Database) then
-    MDOError(mdoeDatabaseNameMissing, [nil]);
-  if not Database.Connected then
-    MDOError(mdoeDatabaseClosed, [nil]);
+  ValidateDatabase(FBase.Database);
+  Result := FBase.Database.Handle;
 end;
 
 
 end.
+
