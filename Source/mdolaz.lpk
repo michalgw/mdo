@@ -17,16 +17,11 @@
           <UseAnsiStrings Value="False"/>
         </SyntaxOptions>
       </Parsing>
-      <Linking>
-        <Debugging>
-          <DebugInfoType Value="dsDwarf2Set"/>
-        </Debugging>
-      </Linking>
     </CompilerOptions>
     <Description Value="Mercury Database Objects
 (runtime library)"/>
     <Version Build="1"/>
-    <Files Count="29">
+    <Files Count="30">
       <Item1>
         <Filename Value="runtime\MDOUtils.pas"/>
         <UnitName Value="MDOUtils"/>
@@ -143,6 +138,10 @@
         <Filename Value="MDO.inc"/>
         <Type Value="Include"/>
       </Item29>
+      <Item30>
+        <Filename Value="runtime\mdowait.pas"/>
+        <UnitName Value="mdowait"/>
+      </Item30>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

@@ -219,7 +219,7 @@ uses MDOQuery, MDOStoredProc, MDOUpdateSQL, MDOCustomDataSet,
   MDOIntf, MDOSQL, MDOSQLMonitor, MDODatabaseInfo, MDOEvents,
   MDOServices, MDOInstall, MDODatabaseEdit, MDOTransactionEdit,
   MDOBatchMove, MDOExtract, MDOServiceEditor, MDOCSVDataExport,
-  MDOHTMLDataExport, MDOSQLEdit, MDOGeneratorLinkEditor;
+  MDOHTMLDataExport, MDOSQLEdit, MDOGeneratorLinkEditor, MDOLCLWait;
 
 procedure Register;
 
@@ -236,7 +236,8 @@ begin
       TMDODatabaseInfo,
       TMDOSQLMonitor,
       TMDOEvents,
-      TMDOScript
+      TMDOScript,
+      TMDOLCLWait
       ]);
 
   //if (TryFBLoad) and (GetFBClientVersion >= 6) then

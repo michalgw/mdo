@@ -241,6 +241,7 @@ type
     FUpdatesPending: Boolean;
     function AdjustCurrentRecord(Buffer: Pointer; GetMode: TGetMode): 
             TGetResult;
+    //TODO: Change result type to PtrInt
     function AdjustPosition(FCache: PChar; Offset: DWORD; Origin: Integer): 
             Integer;
     procedure AdjustRecordOnInsert(Buffer: Pointer);
@@ -626,7 +627,7 @@ var
 
 implementation
 
-uses MDOIntf, MDOQuery;
+uses MDOIntf, MDOQuery, MDOWait;
 
 type
 
@@ -1586,10 +1587,11 @@ end;
 
 procedure TMDOCustomDataSet.FetchAll;
 var
-  SetCursor: Boolean;
+  //SetCursor: Boolean;
   CurBookmark: TBookmark;
 begin
   //TODO: Cursor hour glass handler
+  GetWaitHandler.Start;
   {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
@@ -1608,6 +1610,7 @@ begin
     end;
   finally
     //TODO: Cursor hour glass handler
+    GetWaitHandler.Stop;
     {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
@@ -1951,7 +1954,7 @@ begin
         if not Accept and (GetMode = gmCurrent) then
           GetMode := gmPrior;
       except
-  //        Application.HandleException(Self);
+        Classes.ApplicationHandleException(Self);
       end;
     end;
     RestoreState(SaveState);
@@ -2119,9 +2122,10 @@ end;
 procedure TMDOCustomDataSet.InternalDelete;
 var
   Buff: PChar;
-  SetCursor: Boolean;
+  //SetCursor: Boolean;
 begin
   //TODO: Cursor hour glass handler
+  GetWaitHandler.Start;
   {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
@@ -2152,6 +2156,7 @@ begin
       MDOError(mdoeCannotDelete, [nil]);
   finally
     //TODO: Cursor hour glass handler
+    GetWaitHandler.Stop;
     {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
@@ -2179,10 +2184,11 @@ end;
 procedure TMDOCustomDataSet.InternalExecQuery;
 var
   DidActivate: Boolean;
-  SetCursor: Boolean;
+  //SetCursor: Boolean;
 begin
   DidActivate := False;
   //TODO: Cursor hour glass handler
+  GetWaitHandler.Start;
   {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
@@ -2205,6 +2211,7 @@ begin
     if DidActivate then
       DeactivateTransaction;
     //TODO: Cursor hour glass handler
+    GetWaitHandler.Stop;
     {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
@@ -2726,8 +2733,8 @@ begin
 end;
 
 procedure TMDOCustomDataSet.InternalOpen;
-var
-  SetCursor: Boolean;
+//var
+  //SetCursor: Boolean;
   
   function RecordDataLength(n: Integer): Long;
   begin
@@ -2736,6 +2743,7 @@ var
   
 begin
   //TODO: Cursor hour glass handler
+  GetWaitHandler.Start;
   {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
@@ -2802,6 +2810,7 @@ begin
       FQSelect.ExecQuery;
   finally
     //TODO: Cursor hour glass handler
+    GetWaitHandler.Stop;
     {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
@@ -2813,10 +2822,11 @@ procedure TMDOCustomDataSet.InternalPost;
 var
   Qry: TMDOSQL;
   Buff: PChar;
-  SetCursor: Boolean;
+  //SetCursor: Boolean;
   bInserting: Boolean;
 begin
   //TODO: Cursor hour glass handler
+  GetWaitHandler.Start;
   {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
@@ -2859,6 +2869,7 @@ begin
       Inc(FRecordCount);
   finally
     //TODO: Cursor hour glass handler
+    GetWaitHandler.Stop;
     {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
@@ -2910,13 +2921,14 @@ end;
 
 procedure TMDOCustomDataSet.InternalPrepare;
 var
-  SetCursor: Boolean;
+  //SetCursor: Boolean;
   DidActivate: Boolean;
 begin
   if FInternalPrepared then
     Exit;
   DidActivate := False;
   //TODO: Cursor hour glass handler
+  GetWaitHandler.Start;
   {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
@@ -2979,6 +2991,7 @@ begin
     if DidActivate then
       DeactivateTransaction;
     //TODO: Cursor hour glass handler
+    GetWaitHandler.Stop;
     {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
@@ -2995,11 +3008,12 @@ end;
 procedure TMDOCustomDataSet.InternalRefreshRow;
 var
   Buff: PChar;
-  SetCursor: Boolean;
+  //SetCursor: Boolean;
   ofs: DWORD;
   Qry: TMDOSQL;
 begin
   //TODO: Cursor hour glass handler
+  GetWaitHandler.Start;
   {$IFNDEF MDO_FPC}
   SetCursor := (GetCurrentThreadID = MainThreadID) and (Screen.Cursor = crDefault);
   if SetCursor then
@@ -3049,6 +3063,7 @@ begin
       MDOError(mdoeCannotRefresh, [nil]);
   finally
     //TODO: Cursor hour glass handler
+    GetWaitHandler.Stop;
     {$IFNDEF MDO_FPC}
     if SetCursor and (Screen.Cursor = crHourGlass) then
       Screen.Cursor := crDefault;
