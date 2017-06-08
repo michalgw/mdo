@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="4">
+    <PathDelim Value="\"/>
+    <Name Value="rxsortmdopkg"/>
+    <Type Value="RunAndDesignTime"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <OtherUnitFiles Value="."/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+    </CompilerOptions>
+    <Files Count="3">
+      <Item1>
+        <Filename Value="exsortmdo.pas"/>
+        <UnitName Value="exsortmdo"/>
+      </Item1>
+      <Item2>
+        <Filename Value="rxsortmdo.pas"/>
+        <UnitName Value="RxSortMDO"/>
+      </Item2>
+      <Item3>
+        <Filename Value="rxsortmdoreg.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="rxsortmdoreg"/>
+      </Item3>
+    </Files>
+    <RequiredPkgs Count="5">
+      <Item1>
+        <PackageName Value="SynEdit"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="rxnew"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="LCL"/>
+      </Item3>
+      <Item4>
+        <PackageName Value="mdolaz"/>
+      </Item4>
+      <Item5>
+        <PackageName Value="FCL"/>
+      </Item5>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
