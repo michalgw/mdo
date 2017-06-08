@@ -35,7 +35,6 @@ object MDOSQLEditForm: TMDOSQLEditForm
       ItemHeight = 0
       OnClick = ListBoxTablesClick
       OnDblClick = ListBoxTablesDblClick
-      Options = [lboDrawFocusRect]
       TabOrder = 0
     end
     object ListBoxFields: TListBox
@@ -48,7 +47,6 @@ object MDOSQLEditForm: TMDOSQLEditForm
       ItemHeight = 0
       MultiSelect = True
       OnDblClick = ListBoxFieldsDblClick
-      Options = [lboDrawFocusRect]
       TabOrder = 1
     end
     object SplitterLeft: TSplitter
@@ -691,85 +689,6 @@ object MDOSQLEditForm: TMDOSQLEditForm
     MouseLinkColor.Foreground = clBlue
     LineHighlightColor.Background = clNone
     LineHighlightColor.Foreground = clNone
-    inline TSynGutterPartList
-      object TSynGutterMarks
-        Width = 24
-        MouseActions = <>
-      end
-      object TSynGutterLineNumber
-        Width = 17
-        MouseActions = <>
-        MarkupInfo.Background = clBtnFace
-        MarkupInfo.Foreground = clNone
-        DigitCount = 2
-        ShowOnlyLineNumbersMultiplesOf = 1
-        ZeroStart = False
-        LeadingZeros = False
-      end
-      object TSynGutterChanges
-        Width = 4
-        MouseActions = <>
-        ModifiedColor = 59900
-        SavedColor = clGreen
-      end
-      object TSynGutterSeparator
-        Width = 2
-        MouseActions = <>
-        MarkupInfo.Background = clWhite
-        MarkupInfo.Foreground = clGray
-      end
-      object TSynGutterCodeFolding
-        MouseActions = <        
-          item
-            Button = mbRight
-            Command = emcCodeFoldContextMenu
-          end        
-          item
-            ShiftMask = [ssShift]
-            Button = mbMiddle
-            ClickCount = ccAny
-            ClickDir = cdDown
-            Command = emcCodeFoldCollaps
-          end        
-          item
-            Shift = [ssShift]
-            ShiftMask = [ssShift]
-            Button = mbMiddle
-            ClickCount = ccAny
-            ClickDir = cdDown
-            Command = emcCodeFoldCollaps
-            Option = 1
-          end        
-          item
-            ClickCount = ccAny
-            ClickDir = cdDown
-            Command = emcNone
-          end>
-        MarkupInfo.Background = clNone
-        MarkupInfo.Foreground = clGray
-        MouseActionsExpanded = <        
-          item
-            ClickCount = ccAny
-            ClickDir = cdDown
-            Command = emcCodeFoldCollaps
-          end>
-        MouseActionsCollapsed = <        
-          item
-            Shift = [ssCtrl]
-            ShiftMask = [ssCtrl]
-            ClickCount = ccAny
-            ClickDir = cdDown
-            Command = emcCodeFoldExpand
-          end        
-          item
-            ShiftMask = [ssCtrl]
-            ClickCount = ccAny
-            ClickDir = cdDown
-            Command = emcCodeFoldExpand
-            Option = 1
-          end>
-      end
-    end
   end
   object ImageListMain: TImageList
     Left = 320
