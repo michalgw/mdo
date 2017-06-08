@@ -36,7 +36,7 @@ uses
   {$IFDEF UNIX}
   cthreads,
   {$ENDIF}
-  SysUtils, Classes, MDOHeader, MDOExternals, MDOUtils, DB, MDOConst;
+  SysUtils, Classes, MDOExternals, MDOUtils, DB, MDOConst;
 
 type
   TTraceFlag = (tfQPrepare, tfQExecute, tfQFetch, tfError, tfStmt, tfConnect,
