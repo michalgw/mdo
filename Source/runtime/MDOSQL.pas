@@ -143,7 +143,7 @@ type
     constructor Create(Query: TMDOSQL);
     destructor Destroy; override;
     procedure AddName(FieldName: String; Idx: Integer);
-    function ByName(Idx: String): TMDOXSQLVAR;
+    function ByName(Idx: String; AFind: Boolean = False): TMDOXSQLVAR;
     property AsXSQLDA: PXSQLDA read GetXSQLDA;
     property Count: Integer read FCount write SetCount;
     property Modified: Boolean read GetModified;
@@ -1412,10 +1412,10 @@ begin
   FXSQLVARs[Idx].FIndex := Idx;
 end;
 
-function TMDOXSQLDA.ByName(Idx: String): TMDOXSQLVAR;
+function TMDOXSQLDA.ByName(Idx: String; AFind: Boolean): TMDOXSQLVAR;
 begin
   result := GetXSQLVARByName(Idx);
-  if result = nil then
+  if (result = nil) and (not AFind) then
     MDOError(mdoeFieldNotFound, [Idx]);
 end;
 
