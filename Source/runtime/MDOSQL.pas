@@ -819,7 +819,8 @@ begin
           result := AsDouble;
       SQL_INT64:
         if FXSQLVAR^.sqlscale = 0 then
-          MDOError(mdoeInvalidDataConversion, [nil])
+          //MDOError(mdoeInvalidDataConversion, [nil])
+          Result := AsInt64
         else if FXSQLVAR^.sqlscale >= (-4) then
           result := AsCurrency
         else
