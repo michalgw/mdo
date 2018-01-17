@@ -3587,6 +3587,23 @@ end;
 procedure TMDOCustomDataSet.RefreshParams;
 var
   DataSet: TDataSet;
+
+  function ParamsChanged: Boolean;
+  var
+    I: Integer;
+    F: TField;
+  begin
+    I := 0;
+    Result := False;
+    while (I < Params.Count) and (not Result) do
+    begin
+      F := DataSource.DataSet.FindField(Params[I].Name);
+      if F <> nil then
+        Result := F.Value <> Params[I].Value;
+      Inc(I);
+    end;
+  end;
+
 begin
   DisableControls;
   try
@@ -3594,7 +3611,7 @@ begin
     begin
       DataSet := FDataLink.DataSource.DataSet;
       if DataSet <> nil then
-        if DataSet.Active and (DataSet.State <> dsSetKey) then
+        if DataSet.Active and (DataSet.State <> dsSetKey) and ParamsChanged then
         begin
           Close;
           Open;
