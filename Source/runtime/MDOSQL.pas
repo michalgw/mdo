@@ -1270,6 +1270,8 @@ begin
       MDOError(mdoeNotSupported, [nil]);
     varByRef, varDispatch, varError, varUnknown, varVariant:
       MDOError(mdoeNotPermitted, [nil]);
+    varInt64:
+      AsInt64 := Value;
   end;
 end;
 
