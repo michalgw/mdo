@@ -1528,7 +1528,7 @@ const
   blr_sql_time                   =         13;
   blr_int64                      =         16;
   blr_date                       =         blr_timestamp;
-
+  blr_bool                       =         23;
 
   blr_inner                      =          0;
   blr_left                       =          1;
@@ -2990,6 +2990,8 @@ const
   SQL_TYPE_DATE                  =        570;
   SQL_INT64                      =        580;
   SQL_DATE                       =        SQL_TIMESTAMP;
+  SQL_BOOLEAN                    =        32764;
+  SQL_NULL                       =        32766;
 
 (*******************)
 (** Blob Subtypes **)

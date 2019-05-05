@@ -53,6 +53,7 @@ type
     function AdjustScale(Value: Int64; Scale: Integer): Double;
     function AdjustScaleToCurrency(Value: Int64; Scale: Integer): Currency;
     function AdjustScaleToInt64(Value: Int64; Scale: Integer): Int64;
+    function GetAsBoolean: Boolean;
     function GetAsCurrency: Currency;
     function GetAsDateTime: TDateTime;
     function GetAsDouble: Double;
@@ -69,6 +70,7 @@ type
     function GetIsNullable: Boolean;
     function GetSize: Integer;
     function GetSQLType: Integer;
+    procedure SetAsBoolean(Value: Boolean);
     procedure SetAsCurrency(Value: Currency);
     procedure SetAsDate(Value: TDateTime);
     procedure SetAsDateTime(Value: TDateTime);
@@ -93,6 +95,7 @@ type
     procedure SaveToFile(const FileName: String);
     procedure SaveToStream(Stream: TStream);
     procedure Clear;
+    property AsBoolean: Boolean read GetAsBoolean write SetAsBoolean;
     property AsCurrency: Currency read GetAsCurrency write SetAsCurrency;
     property AsDate: TDateTime read GetAsDateTime write SetAsDate;
     property AsDateTime: TDateTime read GetAsDateTime write SetAsDateTime;
@@ -427,6 +430,37 @@ begin
     result := Val;
 end;
 
+function TMDOXSQLVAR.GetAsBoolean: Boolean;
+begin
+  Result := False;
+  if not IsNull then
+    case FXSQLVAR^.sqltype and (not 1) of
+      SQL_BOOLEAN:
+        Result := PBoolean(FXSQLVAR^.sqldata)^;
+      SQL_TEXT, SQL_VARYING: begin
+        try
+          Result := StrToBool(AsString);
+        except
+          on E: Exception do MDOError(mdoeInvalidDataConversion, [nil]);
+        end;
+      end;
+      SQL_SHORT:
+        Result := AdjustScale(Int64(PShort(FXSQLVAR^.sqldata)^),
+                              FXSQLVAR^.sqlscale) <> 0;
+      SQL_LONG:
+        Result := AdjustScale(Int64(PLong(FXSQLVAR^.sqldata)^),
+                              FXSQLVAR^.sqlscale) <> 0;
+      SQL_INT64:
+        Result := AdjustScale(PInt64(FXSQLVAR^.sqldata)^, FXSQLVAR^.sqlscale) <> 0;
+      SQL_FLOAT:
+        Result := PFloat(FXSQLVAR^.sqldata)^ <> 0;
+      SQL_DOUBLE, SQL_D_FLOAT:
+        result := PDouble(FXSQLVAR^.sqldata)^ <> 0;
+      else
+        MDOError(mdoeInvalidDataConversion, [nil]);
+    end;
+end;
+
 procedure TMDOXSQLVAR.Assign(Source: TMDOXSQLVAR);
 var
   szBuff: PChar;
@@ -537,6 +571,8 @@ begin
                                       FXSQLVAR^.sqlscale);
         SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
           result := GetAsDouble;
+        SQL_BOOLEAN:
+          Result := PByte(FXSQLVAR^.sqldata)^;
         else
           MDOError(mdoeInvalidDataConversion, [nil]);
       end;
@@ -629,6 +665,8 @@ begin
         result := PFloat(FXSQLVAR^.sqldata)^;
       SQL_DOUBLE, SQL_D_FLOAT:
         result := PDouble(FXSQLVAR^.sqldata)^;
+      SQL_BOOLEAN:
+        Result := PByte(FXSQLVAR^.sqldata)^;
       else
         MDOError(mdoeInvalidDataConversion, [nil]);
     end;
@@ -673,6 +711,8 @@ begin
                                     FXSQLVAR^.sqlscale);
       SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
         result := Trunc(AsDouble);
+      SQL_BOOLEAN:
+        Result := PByte(FXSQLVAR^.sqldata)^;
       else
         MDOError(mdoeInvalidDataConversion, [nil]);
     end;
@@ -700,6 +740,8 @@ begin
         result := Trunc(AdjustScale(PInt64(FXSQLVAR^.sqldata)^, FXSQLVAR^.sqlscale));
       SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
         result := Trunc(AsDouble);
+      SQL_BOOLEAN:
+        Result := PByte(FXSQLVAR^.sqldata)^;
       else
         MDOError(mdoeInvalidDataConversion, [nil]);
     end;
@@ -749,7 +791,7 @@ begin
       SQL_ARRAY:
         result := '(Array)'; {do not localize}
       SQL_BLOB: begin
-        ss := TStringStream.Create('');
+        ss := TStringStream.Create('', CP_NONE);
         SaveToStream(ss);
         result := ss.DataString;
         ss.Free;
@@ -791,6 +833,8 @@ begin
           result := FloatToStr(AsDouble);
       SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
         result := FloatToStr(AsDouble);
+      SQL_BOOLEAN:
+        Result := BoolToStr(PBoolean(FXSQLVAR^.sqldata)^);
       else
         MDOError(mdoeInvalidDataConversion, [nil]);
     end;
@@ -827,6 +871,8 @@ begin
           result := AsDouble;
       SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
         result := AsDouble;
+      SQL_BOOLEAN:
+        Result := AsBoolean;
       else
         MDOError(mdoeInvalidDataConversion, [nil]);
     end;
@@ -855,6 +901,26 @@ end;
 function TMDOXSQLVAR.GetSQLType: Integer;
 begin
   result := FXSQLVAR^.sqltype and (not 1);
+end;
+
+procedure TMDOXSQLVAR.SetAsBoolean(Value: Boolean);
+var
+  i: Integer;
+  xvar: TMDOXSQLVAR;
+begin
+  if IsNullable then
+    IsNull := False;
+  for i := 0 to FParent.FCount - 1 do
+    if FParent.FNames[i] = FName then
+    begin
+      xvar := FParent[i];
+      xvar.FXSQLVAR^.sqltype := SQL_BOOLEAN or (xvar.FXSQLVAR^.sqltype and 1);
+      xvar.FXSQLVAR^.sqllen := SizeOf(Boolean);
+      xvar.FXSQLVAR^.sqlscale := 0;
+      MDOAlloc(xvar.FXSQLVAR^.sqldata, 0, xvar.FXSQLVAR^.sqllen);
+      PBoolean(xvar.FXSQLVAR^.sqldata)^ := Value;
+      xvar.FModified := True;
+    end;
 end;
 
 procedure TMDOXSQLVAR.LoadFromFile(const FileName: String);

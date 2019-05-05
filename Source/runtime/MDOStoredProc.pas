@@ -90,7 +90,6 @@ type
     property AfterTransactionEnd;
     property BeforeDatabaseDisconnect;
     property BeforeTransactionEnd;
-	property BooleanFields;
     property DatabaseFree;
     property Filtered;
     property OnFilterRecord;
@@ -180,6 +179,7 @@ begin
         DataType := ftString
       else DataType := ftBlob;
     SQL_BLOB, SQL_ARRAY, SQL_QUAD: DataType := ftBlob;
+    SQL_BOOLEAN: DataType := ftBoolean;
     end;
     FParams.CreateParam(DataType, Trim(QSelect.Fields[i].Name), ptOutput);
   end;
@@ -214,6 +214,7 @@ begin
         DataType := ftString
       else DataType := ftBlob;
     SQL_BLOB, SQL_ARRAY, SQL_QUAD: DataType := ftBlob;
+    SQL_BOOLEAN: DataType := ftBoolean;
     end;
     FParams.CreateParam(DataType, Trim(QSelect.Params[i].Name), ptInput);
   end;
@@ -378,7 +379,7 @@ end;
 
 function TMDOStoredProc.PSGetTableName: string;
 begin
-  { ! }
+  Result := FProcName;
 end;
 
 procedure TMDOStoredProc.PSSetCommandText(const CommandText: string);
@@ -434,12 +435,12 @@ begin
       case Params[j].DataType of
         ftString:
           SQLParams[i].AsString := Params[j].AsString;
-        ftBoolean, ftSmallint, ftWord:
+        ftSmallint, ftWord:
           SQLParams[i].AsShort := Params[j].AsSmallInt;
         ftInteger:
           SQLParams[i].AsLong := Params[j].AsInteger;
-  {        ftLargeInt:
-            SQLParams[i].AsInt64 := Params[j].AsLargeInt; }
+        ftLargeInt:
+          SQLParams[i].AsInt64 := Params[j].AsLargeInt;
         ftFloat, ftCurrency:
          SQLParams[i].AsDouble := Params[j].AsFloat;
         ftBCD:
@@ -452,6 +453,8 @@ begin
           SQLParams[i].AsDateTime := Params[j].AsDateTime;
         ftBlob, ftMemo:
           SQLParams[i].AsString := Params[j].AsString;
+        ftBoolean:
+          SQLParams[i].AsBoolean := Params[j].AsBoolean;
         else
           MDOError(mdoeNotSupported, [nil]);
       end;

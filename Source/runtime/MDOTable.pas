@@ -155,7 +155,6 @@ type
     property AfterTransactionEnd;
     property BeforeDatabaseDisconnect;
     property BeforeTransactionEnd;
-    property BooleanFields;
     property BufferChunks;
     property CachedUpdates;
     property Constraints stored ConstraintsStored;
@@ -306,7 +305,7 @@ var
             FieldList := FieldList +
               QuoteIdentifier(DataBase.SQLDialect, Name) +
               ' CHAR(' + IntToStr(Size) + ')'; {do not localize}
-          ftBoolean, ftSmallint, ftWord:
+          ftSmallint, ftWord:
             FieldList := FieldList +
               QuoteIdentifier(DataBase.SQLDialect, Name) +
               ' SMALLINT'; {do not localize}
@@ -366,6 +365,10 @@ var
             FieldList := FieldList +
               QuoteIdentifier(DataBase.SQLDialect, Name) +
               ' BLOB SUB_TYPE 0'; {do not localize}
+          ftBoolean:
+            FieldList := FieldList +
+              QuoteIdentifier(DataBase.SQLDialect, Name) +
+              ' BOOLEAN'; {do not localize}
           ftUnknown, ftADT, ftArray, ftReference, ftDataSet,
           ftCursor, ftWideString, ftAutoInc:
             MDOError(mdoeFieldUnsupportedType,[nil]);
@@ -1104,10 +1107,7 @@ begin
               begin
                 sqlscale := Query.Current.ByName('RDB$FIELD_SCALE').AsInteger; {do not localize}
                 if (sqlscale = 0) then
-                  if (BooleanFields and IsBooleanField(Name, FTableName)) then
-                    DataType := ftBoolean
-                  else
-                    DataType := ftSmallInt
+                  DataType := ftSmallInt
                 else
                 begin
                   DataType := ftBCD;
@@ -1153,6 +1153,7 @@ begin
                 DataType := ftUnknown;
                 Size := sizeof (TISC_QUAD);
               end;
+              blr_bool: DataType := ftBoolean
               else
                 DataType := ftUnknown;
             end;

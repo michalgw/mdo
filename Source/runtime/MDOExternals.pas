@@ -78,6 +78,7 @@ type
   PISC_STATUS          = ^ISC_STATUS;
   PPISC_STATUS         = ^PISC_STATUS;
   PUISC_STATUS         = ^UISC_STATUS;
+  FB_BOOLEAN           = Boolean;
 
   { C Date/Time Structure }
   TCTimeStructure = record

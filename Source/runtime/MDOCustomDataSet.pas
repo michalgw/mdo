@@ -134,6 +134,8 @@ type
 
   TMDOBooleanField = class(TBooleanField)
   protected
+    function GetDataSize: Integer; override;
+    function GetAsBoolean: Boolean; override;
     procedure SetAsBoolean(AValue: Boolean); override;
   end;
   
@@ -194,7 +196,6 @@ type
     FBEnd: DWord;
     FBlobCacheOffset: Integer;
     FBlobStreamList: TList;
-    FBooleanFields: Boolean;
     FBPos: DWord;
     FBufferCache: PChar;
     FBufferChunks: Integer;
@@ -357,7 +358,6 @@ type
     procedure InternalSetToRecord(Buffer: PChar); override;
     procedure InternalUnPrepare; virtual;
     function IsCursorOpen: Boolean; override;
-    function IsBooleanField(AField, ARelation: String): Boolean;
     procedure PSEndTransaction(Commit: Boolean); override;
     function PSExecuteStatement(const ASQL: string; AParams: TParams; 
             ResultSet: Pointer = nil): Integer; override;
@@ -386,7 +386,6 @@ type
             FBeforeDatabaseDisconnect write FBeforeDatabaseDisconnect;
     property BeforeTransactionEnd: TNotifyEvent read FBeforeTransactionEnd
             write FBeforeTransactionEnd;
-    property BooleanFields: Boolean read FBooleanFields write FBooleanFields;
     property BufferChunks: Integer read FBufferChunks write SetBufferChunks;
     property CachedUpdates: Boolean read FCachedUpdates write SetCachedUpdates;
     property DatabaseFree: TNotifyEvent read FDatabaseFree write FDatabaseFree;
@@ -537,7 +536,6 @@ type
     property BeforePost;
     property BeforeScroll;
     property BeforeTransactionEnd;
-    property BooleanFields;
     property BufferChunks;
     property CachedUpdates;
     property DatabaseFree;
@@ -770,15 +768,20 @@ end;
 
 { TMDOBooleanField }
 
-procedure TMDOBooleanField.SetAsBoolean(AValue: Boolean);
-var
-  buf: Integer;
+function TMDOBooleanField.GetDataSize: Integer;
 begin
-  if AValue then
-    buf := 1
-  else
-    buf := 0;
-  SetData(@buf);
+  Result := SizeOf(Boolean);
+end;
+
+function TMDOBooleanField.GetAsBoolean: Boolean;
+begin
+  if not GetData(@Result) then
+    Result := False;
+end;
+
+procedure TMDOBooleanField.SetAsBoolean(AValue: Boolean);
+begin
+  SetData(@AValue);
 end;
 
 { TMDODataLink }
@@ -873,7 +876,6 @@ begin
     if AOwner is TMDOTransaction then
       Transaction := TMDOTransaction(AOwner);
   FGeneratorLink := TMDOGeneratorLink.Create(Self);
-  FBooleanFields := False;
 end;
 
 destructor TMDOCustomDataSet.Destroy;
@@ -1629,6 +1631,7 @@ var
   LocalInt: Integer;
   LocalInt64: Int64;
   LocalCurrency: Currency;
+  LocalBoolean: Boolean;
   FieldsLoaded: Integer;
 begin
   p := PRecordData(Buffer);
@@ -1763,6 +1766,13 @@ begin
               LocalData := @Qry.Current.Vars[i].Data^.sqldata[2];
               //LocalData := @Qry.Current[i].Data^.sqldata[2];
           end;
+        end;
+        SQL_BOOLEAN:
+        begin
+          rdFields[j].fdDataSize := SizeOf(Boolean);
+          if RecordNumber >= 0 then
+            LocalBoolean := Qry.Current[i].AsBoolean;
+          LocalData := PChar(@LocalBoolean);
         end;
         else { SQL_TEXT, SQL_BLOB, SQL_ARRAY, SQL_QUAD }
         begin
@@ -2531,10 +2541,7 @@ begin
           SQL_SHORT:
           begin
             if (sqlscale = 0) then
-              if (FBooleanFields and IsBooleanField(FieldName, RelationName)) then
-                FieldType := ftBoolean
-              else
-                FieldType := ftSmallInt
+              FieldType := ftSmallInt
             else begin
               FieldType := ftBCD;
               FieldPrecision := 4;
@@ -2583,6 +2590,7 @@ begin
             FieldSize := sizeof (TISC_QUAD);
             FieldType := ftUnknown;
           end;
+          SQL_BOOLEAN: FieldType := ftBoolean;
           else
             FieldType := ftUnknown;
         end;
@@ -3194,7 +3202,7 @@ begin
         else case cur_field.DataType of
           ftString:
             cur_param.AsString := cur_field.AsString;
-          ftBoolean, ftSmallint, ftWord:
+          ftSmallint, ftWord:
             cur_param.AsShort := cur_field.AsInteger;
           ftInteger:
             cur_param.AsLong := cur_field.AsInteger;
@@ -3221,6 +3229,8 @@ begin
               s.free;
             end;
           end;
+          ftBoolean:
+            cur_param.AsBoolean := cur_field.AsBoolean;
           else
             MDOError(mdoeNotSupported, [nil]);
         end;
@@ -3247,30 +3257,6 @@ end;
 function TMDOCustomDataSet.IsCursorOpen: Boolean;
 begin
   result := FOpen;
-end;
-
-function TMDOCustomDataSet.IsBooleanField(AField, ARelation: String): Boolean;
-const
-  CheckBoolSQL = 'SELECT COUNT(*) ' +
-                 'FROM RDB$RELATION_FIELDS RF ' +
-                 'WHERE (RF.RDB$FIELD_NAME = :FIELD) ' +
-                 'AND (RF.RDB$RELATION_NAME = :RELATION) ' +
-                 'AND (RF.RDB$FIELD_SOURCE = :BOOLNAME) ';
-var
-  QueryCB: TMDOSQL;
-begin
-  QueryCB := TMDOSQL.Create(Self);
-  QueryCB.Database := DataBase;
-  QueryCB.Transaction := Database.InternalTransaction;
-  QueryCB.SQL.Text := CheckBoolSQL;
-  QueryCB.Prepare;
-  QueryCB.ParamByName('FIELD').AsString := AField;
-  QueryCB.ParamByName('RELATION').AsString := ARelation;
-  QueryCB.ParamByName('BOOLNAME').AsString := MDO_BOOL_DOMAIN;
-  QueryCB.ExecQuery;
-  Result := (QueryCB.Fields[0].AsInteger = 1);
-  QueryCB.Close;
-  QueryCB.Free;
 end;
 
 function TMDOCustomDataSet.IsSequenced: Boolean;
@@ -3647,7 +3633,8 @@ begin
   begin
     Buff := PRecordData(GetActiveBuf);
     InternalRevertRecord(Buff^.rdRecordNumber);
-    ReadRecordCache(Buff^.rdRecordNumber, PChar(Buff), False);
+    if Buff^.rdRecordNumber > -1 then
+      ReadRecordCache(Buff^.rdRecordNumber, PChar(Buff), False);
     DataEvent(deRecordChange, 0);
   end;
 end;
@@ -3875,6 +3862,8 @@ begin
             SQL_TIMESTAMP:
               //TODO: check 64bit routine
               Qry.Params[i].AsDateTime := TimeStampToDateTime(MSecsToTimeStamp({$IFDEF MDO_64BIT}trunc{$ENDIF}(PDouble(data)^)));
+            SQL_BOOLEAN:
+              Qry.Params[i].AsBoolean := PBoolean(data)^;
           end;
         end;
       end;

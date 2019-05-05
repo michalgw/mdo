@@ -101,7 +101,6 @@ type
     property AfterTransactionEnd;
     property BeforeDatabaseDisconnect;
     property BeforeTransactionEnd;
-    property BooleanFields;
     property BufferChunks;
     property CachedUpdates;
     property Constraints stored ConstraintsStored;
@@ -389,7 +388,7 @@ begin
         end;
         ftString:
           SQLParams[i].AsString := Params[i].AsString;
-        ftBoolean, ftSmallint, ftWord:
+        ftSmallint, ftWord:
           SQLParams[i].AsShort := Params[i].AsSmallInt;
         ftInteger:
           SQLParams[i].AsLong := Params[i].AsInteger;
@@ -407,6 +406,8 @@ begin
           SQLParams[i].AsDateTime := Params[i].AsDateTime;
         ftBlob, ftMemo:
           SQLParams[i].AsString := Params[i].AsString;
+        ftBoolean:
+          SQLParams[i].AsBoolean := Params[i].AsBoolean;
         else
           MDOError(mdoeNotSupported, [nil]);
       end;
