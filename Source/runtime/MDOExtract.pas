@@ -123,7 +123,7 @@ type
     PrivString : String;
   end;
 
-  TSQLTypes = Array[0..13] of TSQLType;
+  TSQLTypes = Array[0..14] of TSQLType;
 
 const
 
@@ -157,7 +157,8 @@ const
     (SqlType : blr_sql_time; TypeName : 'TIME'),		{ NTX: keyword }
     (SqlType : blr_sql_date; TypeName : 'DATE'),		{ NTX: keyword }
     (SqlType : blr_timestamp; TypeName : 'TIMESTAMP'),		{ NTX: keyword }
-    (SqlType : blr_int64; TypeName : 'INT64'));
+    (SqlType : blr_int64; TypeName : 'INT64'),
+    (Sqltype : blr_bool; TypeName : 'BOOLEAN'));
 
   SubTypes : Array[0..8] of String = (
     'UNKNOWN',			{ NTX: keyword }
@@ -1247,19 +1248,6 @@ procedure TMDOExtract.ListCreateDb(TargetDb : String = '');
     qryDB : TMDOSQL;
     FileFlags, FileLength, FileSequence, FileStart : Integer;
   
-    function GetLongDatabaseInfo(DatabaseInfoCommand: Integer): LongInt;
-    var
-      local_buffer: array[0..MDOLocalBufferLength - 1] of Char;
-      length: Integer;
-      _DatabaseInfoCommand: Char;
-    begin
-      _DatabaseInfoCommand := Char(DatabaseInfoCommand);
-      FDatabaseInfo.Call(isc_database_info(StatusVector, @FDatabase.Handle, 1, @_DatabaseInfoCommand,
-                             MDOLocalBufferLength, local_buffer), True);
-      length := isc_vax_integer(@local_buffer[1], 2);
-      result := isc_vax_integer(@local_buffer[3], length);
-    end;
-  
 begin
   NoDb := FALSE;
   First := TRUE;
@@ -1428,16 +1416,16 @@ begin
     begin
       Buffer := Buffer + PrintSet(SetUsed);
       Buffer := Buffer + Format('NUM_LOG_BUFFERS = %d',
-          [GetLongDatabaseInfo(isc_info_num_wal_buffers)]);
+          [TMDODatabaseInfo.GetLongDatabaseInfo(FDatabase, isc_info_num_wal_buffers)]);
       Buffer := Buffer + PrintSet(SetUsed);
       Buffer := Buffer + Format('LOG_BUFFER_SIZE = %d',
-          [GetLongDatabaseInfo(isc_info_wal_buffer_size)]);
+          [TMDODatabaseInfo.GetLongDatabaseInfo(FDatabase, isc_info_wal_buffer_size)]);
       Buffer := Buffer + PrintSet(SetUsed);
       Buffer := Buffer + Format('GROUP_COMMIT_WAIT_TIME = %d',
-          [GetLongDatabaseInfo(isc_info_wal_grpc_wait_usecs)]);
+          [TMDODatabaseInfo.GetLongDatabaseInfo(FDatabase, isc_info_wal_grpc_wait_usecs)]);
       Buffer := Buffer + PrintSet(SetUsed);
       Buffer := Buffer + Format('CHECK_POINT_LENGTH = %d',
-          [GetLongDatabaseInfo(isc_info_wal_ckpt_length)]);
+          [TMDODatabaseInfo.GetLongDatabaseInfo(FDatabase, isc_info_wal_ckpt_length)]);
       FMetaData.Add(Buffer);
   
     end;
@@ -1460,6 +1448,7 @@ procedure TMDOExtract.ListData(ObjectName : String);
   
   const
     SelectSQL = 'SELECT * FROM %s';
+    FBBOOLSTR: array[Boolean] of String = ('FALSE', 'TRUE');
   var
     qrySelect : TMDOSQL;
     Line : String;
@@ -1510,6 +1499,12 @@ begin
               Line := Line + ', ';
           end;
           SQL_ARRAY, SQL_BLOB : ;
+          SQL_BOOLEAN:
+          begin
+            Line := Line + FBBOOLSTR[qrySelect.Fields[i].AsBoolean];
+            if i <> (qrySelect.Current.Count - 1) then
+              Line := Line + ', ';
+          end
           else
             MDOError(mdoeInvalidDataConversion, [nil]);
         end;
