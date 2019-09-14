@@ -9,8 +9,19 @@ uses
   contnrs, db;
 
 type
-  TLR_MDO = class(TComponent)
+  TlrMDOGetTransactionEvent = procedure(Sender: TObject; var ATransaction: TMDOTransaction) of object;
 
+  { TLR_MDO }
+
+  TLR_MDO = class(TComponent)
+  private
+    FOnGetTransaction: TlrMDOGetTransactionEvent;
+    FTransaction: TMDOTransaction;
+  public
+    constructor Create(AOwner: TComponent); override;
+  published
+    property OnGetTransaction: TlrMDOGetTransactionEvent read FOnGetTransaction write FOnGetTransaction;
+    property Transaction: TMDOTransaction read FTransaction write FTransaction;
   end;
 
   TQueryParam = class
@@ -95,9 +106,20 @@ uses
   LR_Utils, DBPropEdits, PropEdits, Controls, Graphics, LResources,
   lr_mdoeditparams, Forms;
 
+var
+  lrMDOComponent: TLR_MDO = nil;
+
 procedure Register;
 begin
   RegisterComponents('LazReport',[TLR_MDO]);
+end;
+
+{ TLR_MDO }
+
+constructor TLR_MDO.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  lrMDOComponent := Self;
 end;
 
 { TQueryParamList }
@@ -263,6 +285,7 @@ end;
 procedure TlrMDODataSet.SetDatabase(AValue: String);
 var
   D: TComponent;
+  T: TMDOTransaction;
 begin
   if FDatabase = AValue then Exit;
   FDatabase := AValue;
@@ -270,8 +293,17 @@ begin
   DataSet.Active:=false;
   D:=frFindComponent(TMDODataSet(DataSet).Owner, FDatabase);
   if Assigned(D) and (D is TMDODataBase)then
+  begin
     TMDODataSet(DataSet).DataBase:=TMDODataBase(D);
-
+    if Assigned(lrMDOComponent) then
+    begin
+      T := lrMDOComponent.Transaction;
+      if Assigned(lrMDOComponent.OnGetTransaction) then
+        lrMDOComponent.OnGetTransaction(Self, T);
+      if T <> nil then
+        TMDODataSet(DataSet).Transaction := T;
+    end;
+  end;
 end;
 
 procedure TlrMDODataSet.SetSQL(AValue: String);
