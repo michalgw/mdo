@@ -40,8 +40,11 @@ var
   BLOB_get: TBLOB_get;
   BLOB_put: TBLOB_put;
   isc_sqlcode: Tisc_sqlcode;
+  isc_sqlcode_s: Tisc_sqlcode_s;
   isc_sql_interprete: Tisc_sql_interprete;
   isc_interprete: Tisc_interprete;
+  fb_interpret: Tfb_interpret;
+  fb_sqlstate: Tfb_sqlstate;
   isc_vax_integer: Tisc_vax_integer;
   isc_blob_info: Tisc_blob_info;
   isc_open_blob2: Tisc_open_blob2;
@@ -85,6 +88,8 @@ var
   isc_que_events: Tisc_que_events;
   isc_event_counts: Tisc_event_counts;
   isc_event_block: Tisc_event_block;
+  isc_event_block_a: Tisc_event_block_a;
+  isc_event_block_s: Tisc_event_block_s;
   isc_free: Tisc_free;
   isc_add_user   : Tisc_add_user;
   isc_delete_user: Tisc_delete_user;
@@ -249,8 +254,11 @@ begin
     BLOB_get := TBLOB_get(GetProcAddr('BLOB_get')); {do not localize}
     BLOB_put := TBLOB_put(GetProcAddr('BLOB_put')); {do not localize}
     isc_sqlcode := Tisc_sqlcode(GetProcAddr('isc_sqlcode')); {do not localize}
+    isc_sqlcode_s := Tisc_sqlcode_s(GetProcAddr('isc_sqlcode_s')); {do not localize}
     isc_sql_interprete := Tisc_sql_interprete(GetProcAddr('isc_sql_interprete')); {do not localize}
     isc_interprete := Tisc_interprete(GetProcAddr('isc_interprete')); {do not localize}
+    fb_interpret := Tfb_interpret(GetProcAddr('fb_interpret')); {do not localize}
+    fb_sqlstate := Tfb_sqlstate(GetProcAddr('fb_sqlstate')); {do not localize}
     isc_vax_integer := Tisc_vax_integer(GetProcAddr('isc_vax_integer')); {do not localize}
     isc_blob_info := Tisc_blob_info(GetProcAddr('isc_blob_info')); {do not localize}
     isc_open_blob2 := Tisc_open_blob2(GetProcAddr('isc_open_blob2')); {do not localize}
@@ -283,6 +291,8 @@ begin
     isc_que_events := Tisc_que_events(GetProcAddr('isc_que_events')); {do not localize}
     isc_event_counts := Tisc_event_counts(GetProcAddr('isc_event_counts')); {do not localize}
     isc_event_block := Tisc_event_block(GetProcAddr('isc_event_block')); {do not localize}
+    isc_event_block_a := Tisc_event_block_a(GetProcAddr('isc_event_block_a')); {do not localize}
+    isc_event_block_s := Tisc_event_block_s(GetProcAddr('isc_event_block_s')); {do not localize}
     isc_free := Tisc_free(GetProcAddr('isc_free')); {do not localize}
     isc_add_user := Tisc_add_user(GetProcAddr('isc_add_user')); {do not localize}
     isc_delete_user := Tisc_delete_user(GetProcAddr('isc_delete_user')); {do not localize}

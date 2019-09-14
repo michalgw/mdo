@@ -96,7 +96,16 @@ type
   TISC_WIN_HANDLE               = PVoid;
   PISC_WIN_HANDLE               = ^TISC_WIN_HANDLE;
   TISC_CALLBACK                 = procedure;
-  ISC_SVC_HANDLE               = ISC_LONG;
+  ISC_SVC_HANDLE                = ISC_LONG;
+
+  FB_SHUTDOWN_CALLBACK          = function(const reason, mask: Int; args: Pointer): Int; cdecl;
+
+const
+  FB_SQLSTATE_LENGTH            = 5;
+  FB_SQLSTATE_SIZE              = FB_SQLSTATE_LENGTH + 1;
+
+type
+  FB_SQLSTATE_STRING = array[0..FB_SQLSTATE_SIZE - 1] of Char;
 
   (*******************************************************************)
   (* Time & Date Support                                             *)
@@ -589,6 +598,19 @@ Tisc_event_block = function     (event_buffer               : PPChar;
                                  event_list                 : array of PChar}): ISC_LONG;
                                 varargs; cdecl;
 
+Tisc_event_block_a = function     (event_buffer               : PPChar;
+         result_buffer              : PPChar;
+         id_count                   : UShort;
+         event_list                 : PPChar): ISC_LONG;
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
+Tisc_event_block_s = function     (event_buffer               : PPChar;
+         result_buffer              : PPChar;
+         id_count                   : UShort;
+         event_list                 : PPChar;
+         return_count               : PUShort): ISC_LONG;
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
 Tisc_event_counts = procedure   (status_vector             : PISC_STATUS;
          buffer_length             : Short;
          event_buffer              : PChar;
@@ -633,6 +655,11 @@ Tisc_get_slice = function       (status_vector             : PISC_STATUS;
 
 Tisc_interprete = function      (buffer                    : PChar;
          status_vector             : PPISC_STATUS): ISC_STATUS;
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
+Tfb_interpret = function        (buffer : PChar;
+         buffer_len                : LongWord;
+         status_vector             : PPISC_STATUS): ISC_LONG;
                                 {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 Tisc_open_blob = function       (status_vector             : PISC_STATUS;
@@ -713,9 +740,20 @@ Tisc_start_transaction = function (status_vector           : PISC_STATUS;
                                  tpb_address               : PChar): ISC_STATUS;
                                 cdecl;
 
+Tfb_disconnect_transaction = function(status_vector : PISC_STATUS;
+                                 tran_handle        : PISC_TR_HANDLE): ISC_STATUS;
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
 Tisc_sqlcode = function        (status_vector             : PISC_STATUS): ISC_LONG;
                                 {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
+Tisc_sqlcode_s = procedure     (status_vector             : PISC_STATUS;
+                                code                      : PULong);
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
+Tfb_sqlstate = procedure       (buffer                     : PChar;
+                                 status_vector             : PISC_STATUS);
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 Tisc_sql_interprete = procedure (sqlcode                   : Short;
          buffer                    : PChar;
@@ -1187,6 +1225,17 @@ Tisc_embed_dsql_fetch2 = function  (status_vector         : PISC_STATUS;
                                 {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 (*$endif*)
 
+Tisc_embed_dsql_fetch_a = function(status_vector          : PISC_STATUS;
+				isc_arg2                  : PInt;
+				isc_arg3                  : PChar;
+                                isc_arg4                  : UShort;
+                                isc_arg5                  : PXSQLDA): ISC_STATUS;
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
+Tisc_embed_dsql_length = procedure(isc_arg1               : PChar;
+                                isc_arg2                  : PUShort);
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
 Tisc_embed_dsql_open = function (status_vector             : PISC_STATUS;
                                  tran_handle               : PISC_TR_HANDLE;
                                  isc_arg3                  : PChar;
@@ -1306,6 +1355,13 @@ Tisc_print_blr = function       (isc_arg1                  : PChar;
                                  isc_arg4                  : Short): ISC_STATUS;
                                 {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
+Tfb_print_blr = function       (isc_arg1                  : PChar;
+                                 isc_arg2                  : ULong;
+                                 isc_arg3                  : TISC_CALLBACK;
+                                 isc_arg4                  : PVoid;
+                                 isc_arg5                  : Short): ISC_STATUS;
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
 Tisc_set_debug = procedure     (isc_arg1                  : Int);
                                 {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
@@ -1363,6 +1419,67 @@ Tisc_service_start = function  (status_vector             : PISC_STATUS;
                                 recv_handle               : PISC_SVC_HANDLE;
                                 isc_arg4                  : UShort;
                                 isc_arg5                  : PChar): ISC_STATUS;
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
+(*************************)
+(** Shutdown and cancel **)
+(*************************)
+
+Tfb_shutdown = function         (timeout: UInt; const reason: int): Int;
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
+Tfb_shutdown_callback = function(status_vector            : PISC_STATUS;
+                                callback                  : FB_SHUTDOWN_CALLBACK;
+                                const mask                : Int;
+				data                      : Pointer): ISC_STATUS;
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
+Tfb_cancel_operation = function(status_vector             : PISC_STATUS;
+                                dbhandle                  : PISC_DB_HANDLE;
+                                opt                       : UShort): ISC_STATUS;
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
+(*************************)
+(** Ping the connection **)
+(*************************)
+
+Tfb_ping = function             (status_vector            : PISC_STATUS;
+                                db_handle                 : PISC_DB_HANDLE): ISC_STATUS;
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
+(**********************)
+(** Object interface **)
+(**********************)
+
+Tfb_get_database_handle = function(status_vector          : PISC_STATUS;
+                                db_handle                 : PISC_DB_HANDLE;
+                                handle                    : Pointer): ISC_STATUS;
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
+Tfb_get_transaction_handle = function(status_vector       : PISC_STATUS;
+                                trans_handle              : PISC_TR_HANDLE;
+                                handle                    : Pointer): ISC_STATUS;
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
+(**********************************)
+(** Client information functions **)
+(**********************************)
+
+Tisc_get_client_version = procedure(version : PChar);
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
+Tisc_get_client_major_version = function(): Int;
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
+Tisc_get_client_minor_version = function(): Int;
+                                {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
+
+(*********************************************)
+(** Set callback for database crypt plugins **)
+(*********************************************)
+
+Tfb_database_crypt_callback = function(status_vector      : PISC_STATUS;
+                                data                      : Pointer): ISC_STATUS;
                                 {$IFNDEF UNIX} stdcall {$ELSE} cdecl {$ENDIF};
 
 (*********************************)
@@ -1527,8 +1644,18 @@ const
   blr_sql_date                   =         12;
   blr_sql_time                   =         13;
   blr_int64                      =         16;
-  blr_date                       =         blr_timestamp;
+  blr_blob2                      =         17;
+  blr_domain_name                =         18;
+  blr_domain_name2               =         19;
+  blr_not_nullable               =         20;
+  blr_column_name                =         21;
+  blr_column_name2               =         22;
   blr_bool                       =         23;
+
+  blr_domain_type_of             =          0;
+  blr_domain_full                =          1;
+
+  blr_date                       =         blr_timestamp;
 
   blr_inner                      =          0;
   blr_left                       =          1;
@@ -1540,9 +1667,14 @@ const
   blr_exception                  =          2;
   blr_trigger_code               =          3;
   blr_default_code               =          4;
+  blr_raise                      =          5;
+  blr_exception_msg              =          6;
+  blr_exception_params           =          7;
+  blr_sql_state                  =          8;
 
   blr_version4                   =          4;
   blr_version5                   =          5;
+
   blr_eoc                        =         76;
   blr_end                        =         -1;
 
@@ -1590,6 +1722,7 @@ const
   blr_user_name                  =         44;
   blr_null                       =         45;
 
+  blr_equiv                      =         46;
   blr_eql                        =         47;
   blr_neq                        =         48;
   blr_gtr                        =         49;
@@ -1608,8 +1741,8 @@ const
   blr_unique                     =         62;
   blr_like                       =         63;
 
-  blr_stream                     =         65;
-  blr_set_index                  =         66;
+  blr_stream                     =         65; // removed in fb 3
+  blr_set_index                  =         66; // removed in fb 3
   blr_rse                        =         67;
   blr_first                      =         68;
   blr_project                    =         69;
@@ -1722,6 +1855,8 @@ const
   blr_extract_second             = 5;
   blr_extract_weekday            = 6;
   blr_extract_yearday            = 7;
+  blr_extract_millisecond        = 8;
+  blr_extract_week               = 9;
 
   blr_current_date               = 160;
   blr_current_timestamp          = 161;
@@ -1764,6 +1899,9 @@ const
   blr_cursor_stmt                  = 167;
   blr_current_timestamp2           = 168;
   blr_current_time2                = 169;
+  blr_agg_list                     = 170;
+  blr_agg_list_distinct            = 171;
+  blr_modify2                      = 172;
 
   blr_savepoint_set                = 0;
   blr_savepoint_release            = 1;
@@ -1773,6 +1911,63 @@ const
   blr_cursor_open                  = 0;
   blr_cursor_close                 = 1;
   blr_cursor_fetch                 = 2;
+  blr_cursor_fetch_scroll          = 3;
+
+  blr_scroll_forward               = 0;
+  blr_scroll_backward              = 1;
+  blr_scroll_bof                   = 2;
+  blr_scroll_eof                   = 3;
+  blr_scroll_absolute              = 4;
+  blr_scroll_relative              = 5;
+
+  blr_init_variable                = 184;
+  blr_recurse                      = 185;
+  blr_sys_function                 = 186;
+
+  blr_auto_trans                   = 187;
+  blr_similar                      = 188;
+  blr_exec_stmt                    = 189;
+
+  blr_exec_stmt_inputs             =  1;
+  blr_exec_stmt_outputs            =  2;
+  blr_exec_stmt_sql                =  3;
+  blr_exec_stmt_proc_block         =  4;
+  blr_exec_stmt_data_src           =  5;
+  blr_exec_stmt_user               =  6;
+  blr_exec_stmt_pwd                =  7;
+  blr_exec_stmt_tran               =  8;
+  blr_exec_stmt_tran_clone         =  9;
+  blr_exec_stmt_privs              =  10;
+  blr_exec_stmt_in_params          =  11;
+  blr_exec_stmt_in_params2         =  12;
+  blr_exec_stmt_out_params         =  13;
+  blr_exec_stmt_role               =  14;
+
+  blr_stmt_expr                    =  190;
+  blr_derived_expr                 =  191;
+
+  blr_procedure3                   =  192;
+  blr_exec_proc2                   =  193;
+  blr_function2                    =  194;
+  blr_window                       =  195;
+  blr_partition_by                 =  196;
+  blr_continue_loop                =  197;
+  blr_procedure4                   =  198;
+  blr_agg_function                 =  199;
+  blr_substring_similar            =  200;
+  blr_bool_as_value                =  201;
+  blr_coalesce                     =  202;
+  blr_decode                       =  203;
+  blr_exec_subproc                 =  204;
+  blr_subproc_decl                 =  205;
+  blr_subproc                      =  206;
+  blr_subfunc_decl                 =  207;
+  blr_subfunc                      =  208;
+  blr_record_version2              =  209;
+  blr_gen_id2                      =  210;
+
+  blr_local_timestamp              =  214;
+  blr_local_time                   =  215;
 
 (*  These verbs were added in 6.0,
   primarily to support 64-bit integers
@@ -1794,6 +1989,8 @@ const
 (************************************)
 
   isc_dpb_version1               =          1;
+  isc_dpb_version2               =          2;
+
   isc_dpb_cdd_pathname           =          1;
   isc_dpb_allocation             =          2;
   isc_dpb_journal                =          3;
@@ -1864,7 +2061,37 @@ const
   isc_dpb_set_db_charset	 =         68;
   isc_dpb_gsec_attach            =         69;
   isc_dpb_address_path		 =         70;
-  isc_dpb_last_dpb_constant      =         isc_dpb_address_path;
+  isc_dpb_process_id             =         71;
+  isc_dpb_no_db_triggers         =         72;
+  isc_dpb_trusted_auth           =         73;
+  isc_dpb_process_name           =         74;
+  isc_dpb_trusted_role           =         75;
+  isc_dpb_org_filename           =         76;
+  isc_dpb_utf8_filename          =         77;
+  isc_dpb_ext_call_depth         =         78;
+  isc_dpb_auth_block             =         79;
+  isc_dpb_client_version         =         80;
+  isc_dpb_remote_protocol        =         81;
+  isc_dpb_host_name              =         82;
+  isc_dpb_os_user                =         83;
+  isc_dpb_specific_auth_data     =         84;
+  isc_dpb_auth_plugin_list       =         85;
+  isc_dpb_auth_plugin_name       =         86;
+  isc_dpb_config                 =         87;
+  isc_dpb_nolinger               =         88;
+  isc_dpb_reset_icu              =         89;
+  isc_dpb_map_attach             =         90;
+
+  isc_dpb_last_dpb_constant      =         isc_dpb_map_attach;
+
+  isc_dpb_address                =          1;
+
+  isc_dpb_addr_protocol          =          1;
+  isc_dpb_addr_endpoint          =          2;
+  isc_dpb_addr_flags             =          3;
+
+  isc_dpb_addr_flag_conn_compressed =       1;
+  isc_dpb_addr_flag_conn_encrypted  =       2;
 
 (***********************************)
 (** isc_dpb_verify specific flags **)
@@ -1943,10 +2170,12 @@ const
   isc_bpb_source_interp          =          4;
   isc_bpb_target_interp          =          5;
   isc_bpb_filter_parameter       =          6;
+  isc_bpb_storage                =          7;
 
   isc_bpb_type_segmented         =          0;
   isc_bpb_type_stream            =          1;
-
+  isc_bpb_storage_main           =          0;
+  isc_bpb_storage_temp           =          1;
 
 (***********************************)
 (** Service parameter block stuff **)
@@ -1969,6 +2198,8 @@ const
   isc_spb_version1                                = 1;
   isc_spb_current_version                         = 2;
   isc_spb_version		                  = isc_spb_current_version;
+  isc_spb_version3                                = 3;
+
   isc_spb_user_name_mapped_to_server              = isc_dpb_user_name;
   isc_spb_sys_user_name_mapped_to_server          = isc_dpb_sys_user_name;
   isc_spb_sys_user_name_enc_mapped_to_server      = isc_dpb_sys_user_name_enc;
@@ -1978,9 +2209,28 @@ const
   isc_spb_dbname_mapped_to_server                 = 106;
   isc_spb_verbose_mapped_to_server                = 107;
   isc_spb_options_mapped_to_server                = 108;
+  isc_spb_address_path                            = 109;
+  isc_spb_process_id                              = 110;
+  isc_spb_trusted_auth                            = 111;
+  isc_spb_process_name                            = 112;
+  isc_spb_trusted_role                            = 113;
+  isc_spb_verbint                                 = 114;
+  isc_spb_auth_block                              = 115;
+  isc_spb_auth_plugin_name                        = 116;
+  isc_spb_auth_plugin_list                        = 117;
+  isc_spb_utf8_filename                           = 118;
+  isc_spb_client_version                          = 119;
+  isc_spb_remote_protocol                         = 120;
+  isc_spb_host_name                               = 121;
+  isc_spb_os_user                                 = 122;
+  isc_spb_config                                  = 123;
+  isc_spb_expected_db                             = 124;
+
   isc_spb_connect_timeout_mapped_to_server        = isc_dpb_connect_timeout;
   isc_spb_dummy_packet_interval_mapped_to_server  = isc_dpb_dummy_packet_interval;
   isc_spb_sql_role_name_mapped_to_server          = isc_dpb_sql_role_name;
+
+  isc_spb_specific_auth_data                      = isc_spb_trusted_auth;
 
 (***********************************)
 (** Information call declarations **)
@@ -1997,6 +2247,7 @@ const
   isc_info_truncated             =          2;
   isc_info_error                 =          3;
   isc_info_data_not_ready	 =          4;
+  isc_info_length                =          126;
   isc_info_flag_end		 =          127;
 
 (********************************)
@@ -2071,6 +2322,30 @@ const
   isc_info_next_transaction      =         107;
   isc_info_db_provider           =         108;
   isc_info_active_transactions   =         109;
+  isc_info_active_tran_count     =         110;
+  isc_info_creation_date         =         111;
+  isc_info_db_file_size          =         112;
+  fb_info_page_contents          =         113;
+  fb_info_implementation         =         114;
+  fb_info_page_warns             =         115;
+  fb_info_record_warns           =         116;
+  fb_info_bpage_warns            =         117;
+  fb_info_dpage_warns            =         118;
+  fb_info_ipage_warns            =         119;
+  fb_info_ppage_warns            =         120;
+  fb_info_tpage_warns            =         121;
+  fb_info_pip_errors             =         122;
+  fb_info_pip_warns              =         123;
+  fb_info_pages_used             =         124;
+  fb_info_pages_free             =         125;
+  fb_info_conn_flags             =         132;
+
+  fb_info_crypt_key              =         133;
+  fb_info_crypt_state            =         134;
+
+
+  fb_info_crypt_encrypted        =         1;
+  fb_info_crypt_process          =         2;
 
 (****************************************)
 (** Database information return values **)
@@ -2129,6 +2404,28 @@ const
   isc_info_db_impl_linux_sparc   =         65;
   isc_info_db_impl_linux_amd64   =         66;
 
+  isc_info_db_impl_freebsd_amd64 =         67;
+
+  isc_info_db_impl_winnt_amd64   =         68;
+  isc_info_db_impl_linux_ppc     =         69;
+  isc_info_db_impl_darwin_x86    =         70;
+  isc_info_db_impl_linux_mipsel  =         71;
+  isc_info_db_impl_linux_mips    =         72;
+  isc_info_db_impl_darwin_x64    =         73;
+  isc_info_db_impl_sun_amd64     =         74;
+  isc_info_db_impl_linux_arm     =         75;
+  isc_info_db_impl_linux_ia64    =         76;
+  isc_info_db_impl_darwin_ppc64  =         77;
+  isc_info_db_impl_linux_s390x   =         78;
+  isc_info_db_impl_linux_s390    =         79;
+  isc_info_db_impl_linux_sh      =         80;
+  isc_info_db_impl_linux_sheb    =         81;
+  isc_info_db_impl_linux_hppa    =         82;
+  isc_info_db_impl_linux_alpha   =         83;
+  isc_info_db_impl_linux_arm64   =         84;
+  isc_info_db_impl_linux_ppc64el =         85;
+  isc_info_db_impl_linux_ppc64   =         86;
+  isc_info_db_impl_linux_m68k    =         87;
 
 
   isc_info_db_class_access         =          1;
@@ -2204,6 +2501,13 @@ const
   isc_info_rsb_once              =         20;
   isc_info_rsb_procedure         =         21;
   isc_info_rsb_skip              =         22;
+  isc_info_rsb_virt_sequential   =         23;
+  isc_info_rsb_recursive         =         24;
+  isc_info_rsb_window            =         25;
+  isc_info_rsb_singular          =         26;
+  isc_info_rsb_writelock         =         27;
+  isc_info_rsb_buffer            =         28;
+  isc_info_rsb_hash              =         29;
 
 (************************)
 (** Bitmap expressions **)
@@ -2235,6 +2539,23 @@ const
 (***********************************)
 
   isc_info_tra_id                =          4;
+  isc_info_tra_oldest_interesting =         5;
+  isc_info_tra_oldest_snapshot   =          6;
+  isc_info_tra_oldest_active     =          7;
+  isc_info_tra_isolation         =          8;
+  isc_info_tra_access            =          9;
+  isc_info_tra_lock_timeout      =         10;
+  fb_info_tra_dbpath             =         11;
+
+  isc_info_tra_consistency       =          1;
+  isc_info_tra_concurrency       =          2;
+  isc_info_tra_read_committed    =          3;
+
+  isc_info_tra_no_rec_version    =          0;
+  isc_info_tra_rec_version       =          1;
+
+  isc_info_tra_readonly          =          0;
+  isc_info_tra_readwrite         =          1;
 
 (*******************************)
 (** Service information items **)
@@ -2291,7 +2612,8 @@ const
   isc_action_svc_set_mapping    = 27;
   isc_action_svc_drop_mapping   = 28;
   isc_action_svc_display_user_adm = 29;
-  isc_action_svc_last           = 30;
+  isc_action_svc_validate       = 30;
+  isc_action_svc_last           = 31;
 
 (*****************************************)
 (** Service information items           **)
@@ -2316,6 +2638,9 @@ const
   isc_info_svc_limbo_trans	= 66; (* Retrieve the limbo transactions *)
   isc_info_svc_running		= 67; (* Checks to see if a service is running on an attachment *)
   isc_info_svc_get_users	= 68; (* Returns the user information from isc_action_svc_display_users *)
+  isc_info_svc_auth_block       = 69;
+  isc_info_svc_stdin            = 78;
+
 
 (*****************************************)
 (* Parameters for isc_action_{add|delete|modify)_user *)
@@ -2329,6 +2654,7 @@ const
   isc_spb_sec_firstname         = 10;
   isc_spb_sec_middlename        = 11;
   isc_spb_sec_lastname          = 12;
+  isc_spb_sec_admin             = 13;
 
 (*****************************************)
 (* Parameters for isc_action_svc_(add|remove)_license, *)
@@ -2347,6 +2673,8 @@ const
   isc_spb_bkp_file               = 5;
   isc_spb_bkp_factor             = 6;
   isc_spb_bkp_length             = 7;
+  isc_spb_bkp_skip_data          = 8;
+  isc_spb_bkp_stat               = 15;
   isc_spb_bkp_ignore_checksums   = $01;
   isc_spb_bkp_ignore_limbo       = $02;
   isc_spb_bkp_metadata_only      = $04;
@@ -2355,6 +2683,7 @@ const
   isc_spb_bkp_non_transportable  = $20;
   isc_spb_bkp_convert            = $40;
   isc_spb_bkp_expand             = $80;
+  isc_spb_bkp_no_triggers        = $8000;
 
 (*****************************************)
 (* Parameters for isc_action_svc_properties *)
@@ -2371,6 +2700,17 @@ const
   isc_spb_prp_set_sql_dialect	      = 14;
   isc_spb_prp_activate		      = $0100;
   isc_spb_prp_db_online		      = $0200;
+  isc_spb_prp_nolinger                = $0400;
+  isc_spb_prp_force_shutdown          = 41;
+  isc_spb_prp_attachments_shutdown    = 42;
+  isc_spb_prp_transactions_shutdown   = 43;
+  isc_spb_prp_shutdown_mode           = 44;
+  isc_spb_prp_online_mode             = 45;
+
+  isc_spb_prp_sm_normal               =  0;
+  isc_spb_prp_sm_multi                =  1;
+  isc_spb_prp_sm_single               =  2;
+  isc_spb_prp_sm_full                 =  3;
 
 (*****************************************)
 (* Parameters for isc_spb_prp_reserve_space *)
@@ -2415,6 +2755,13 @@ const
   isc_spb_tra_advise_commit	       = 30;
   isc_spb_tra_advise_rollback	       = 31;
   isc_spb_tra_advise_unknown	       = 33;
+  isc_spb_tra_id_64                    = 46;
+  isc_spb_single_tra_id_64             = 47;
+  isc_spb_multi_tra_id_64              = 48;
+  isc_spb_rpr_commit_trans_64          = 49;
+  isc_spb_rpr_rollback_trans_64        = 50;
+  isc_spb_rpr_recover_two_phase_64     = 51;
+
   isc_spb_rpr_validate_db	       = $01;
   isc_spb_rpr_sweep_db		       = $02;
   isc_spb_rpr_mend_db		       = $04;
@@ -2423,15 +2770,21 @@ const
   isc_spb_rpr_ignore_checksum	       = $20;
   isc_spb_rpr_kill_shadows	       = $40;
   isc_spb_rpr_full		       = $80;
+  isc_spb_rpr_icu                      = $0800;
 
 (*****************************************)
 (* Parameters for isc_action_svc_restore  *)
 (*****************************************)
 
+  isc_spb_res_skip_data                = isc_spb_bkp_skip_data;
   isc_spb_res_buffers		       = 9;
   isc_spb_res_page_size		       = 10;
   isc_spb_res_length		       = 11;
   isc_spb_res_access_mode	       = 12;
+  isc_spb_res_fix_fss_data             = 13;
+  isc_spb_res_fix_fss_metadata         = 14;
+  isc_spb_res_stat                     = isc_spb_bkp_stat;
+  isc_spb_res_metadata_only            = isc_spb_bkp_metadata_only;
   isc_spb_res_deactivate_idx	       = $0100;
   isc_spb_res_no_shadow		       = $0200;
   isc_spb_res_no_validity	       = $0400;
@@ -2439,6 +2792,12 @@ const
   isc_spb_res_replace		       = $1000;
   isc_spb_res_create		       = $2000;
   isc_spb_res_use_all_space	       = $4000;
+
+  isc_spb_val_tab_incl                 = 1;
+  isc_spb_val_tab_excl                 = 2;
+  isc_spb_val_idx_incl                 = 3;
+  isc_spb_val_idx_excl                 = 4;
+  isc_spb_val_lock_timeout             = 5;
 
 (*****************************************)
 (* Parameters for isc_spb_res_access_mode  *)
@@ -2466,7 +2825,12 @@ const
   isc_spb_sts_record_versions   = $20;
   isc_spb_sts_table             = $40;
   isc_spb_sts_nocreation        = $80;
+  isc_spb_sts_encryption        = $100;
 
+  isc_spb_nbk_level             = 5;
+  isc_spb_nbk_file              = 6;
+  isc_spb_nbk_direct            = 7;
+  isc_spb_nbk_no_triggers       = $01;
 
 (***************************)
 (** SQL information items **)
@@ -2494,6 +2858,9 @@ const
   isc_info_sql_records           =         23;
   isc_info_sql_batch_fetch       =         24;
   isc_info_sql_relation_alias    =         25;
+  isc_info_sql_explain_plan      =         26;
+  isc_info_sql_stmt_flags        =         27;
+
 
 (***********************************)
 (** SQL information return values **)
@@ -3011,7 +3378,8 @@ const
   isc_blob_format                =          6;
   isc_blob_tra                   =          7;
   isc_blob_extfile               =          8;
-  isc_blob_max_predefined_subtype=          9;
+  isc_blob_debug_info            =          9;
+  isc_blob_max_predefined_subtype=          10;
 
 (** the range 20-30 is reserved for dBASE and Paradox types **)
 
@@ -3020,6 +3388,37 @@ const
   isc_blob_graphic               =         22;
   isc_blob_dbase_ole             =         23;
   isc_blob_typed_binary          =         24;
+
+  fb_shut_confirmation           =          1;
+  fb_shut_preproviders           =          2;
+  fb_shut_postproviders          =          4;
+  fb_shut_finish                 =          8;
+  fb_shut_exit                   =         16;
+
+  fb_shutrsn_svc_stopped         =         -1;
+  fb_shutrsn_no_connection       =         -2;
+  fb_shutrsn_app_stopped         =         -3;
+
+  fb_shutrsn_signal              =         -5;
+  fb_shutrsn_services            =         -6;
+  fb_shutrsn_exit_called         =         -7;
+
+  fb_cancel_disable              =          1;
+  fb_cancel_enable               =          2;
+  fb_cancel_raise                =          3;
+  fb_cancel_abort                =          4;
+
+  fb_dbg_version                 =          1;
+  fb_dbg_end                     =        255;
+  fb_dbg_map_src2blr             =          2;
+  fb_dbg_map_varname             =          3;
+  fb_dbg_map_argument            =          4;
+  fb_dbg_subproc                 =          5;
+  fb_dbg_subfunc                 =          6;
+  fb_dbg_map_curname             =          7;
+
+  fb_dbg_arg_input               =          0;
+  fb_dbg_arg_output              =          1;
 
 {$IFDEF IB5_ONLY}
 (** SQLDA_LENGTH is defined in C as a macro, but in Pascal we must defined it
