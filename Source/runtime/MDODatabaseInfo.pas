@@ -38,6 +38,8 @@ uses
 
 type
 
+  { TMDODatabaseInfo }
+
   TMDODatabaseInfo = class (TComponent)
   protected
     FBackoutCount: TStringList;
@@ -88,8 +90,8 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    function Call(ErrCode: ISC_STATUS; RaiseError: Boolean): ISC_STATUS;
-    function GetLongDatabaseInfo(DatabaseInfoCommand: Integer): Long;
+    class function Call(ErrCode: ISC_STATUS; RaiseError: Boolean): ISC_STATUS;
+    class function GetLongDatabaseInfo(ADatabase: TMDODataBase; DatabaseInfoCommand: Integer): Long;
     property Allocation: Long read GetAllocation;
     property BackoutCount: TStringList read GetBackoutCount;
     property BaseLevel: Long read GetBaseLevel;
@@ -169,7 +171,7 @@ begin
   inherited Destroy;
 end;
 
-function TMDODatabaseInfo.Call(ErrCode: ISC_STATUS; RaiseError: Boolean): 
+class function TMDODatabaseInfo.Call(ErrCode: ISC_STATUS; RaiseError: Boolean):
         ISC_STATUS;
 begin
   result := ErrCode;
@@ -179,7 +181,7 @@ end;
 
 function TMDODatabaseInfo.GetAllocation: Long;
 begin
-  result := GetLongDatabaseInfo(isc_info_allocation);
+  result := GetLongDatabaseInfo(FDatabase, isc_info_allocation);
 end;
 
 function TMDODatabaseInfo.GetBackoutCount: TStringList;
@@ -200,7 +202,7 @@ end;
 
 function TMDODatabaseInfo.GetCurrentMemory: Long;
 begin
-  result := GetLongDatabaseInfo(isc_info_current_memory);
+  result := GetLongDatabaseInfo(FDatabase, isc_info_current_memory);
 end;
 
 function TMDODatabaseInfo.GetDBFileName: string;
@@ -281,12 +283,12 @@ end;
 
 function TMDODatabaseInfo.GetFetches: Long;
 begin
-  result := GetLongDatabaseInfo(isc_info_fetches);
+  result := GetLongDatabaseInfo(FDatabase, isc_info_fetches);
 end;
 
 function TMDODatabaseInfo.GetForcedWrites: Long;
 begin
-  result := GetLongDatabaseInfo(isc_info_forced_writes);
+  result := GetLongDatabaseInfo(FDatabase, isc_info_forced_writes);
 end;
 
 function TMDODatabaseInfo.GetInsertCount: TStringList;
@@ -294,15 +296,15 @@ begin
   result := GetOperationCounts(isc_info_insert_count,FInsertCount);
 end;
 
-function TMDODatabaseInfo.GetLongDatabaseInfo(DatabaseInfoCommand: Integer): 
-        Long;
+class function TMDODatabaseInfo.GetLongDatabaseInfo(ADatabase: TMDODataBase;
+  DatabaseInfoCommand: Integer): Long;
 var
   local_buffer: array[0..MDOLocalBufferLength - 1] of Char;
   length: Integer;
   _DatabaseInfoCommand: Char;
 begin
   _DatabaseInfoCommand := Char(DatabaseInfoCommand);
-  Call(isc_database_info(StatusVector, @FDatabase.Handle, 1, @_DatabaseInfoCommand,
+  Call(isc_database_info(StatusVector, @ADatabase.Handle, 1, @_DatabaseInfoCommand,
                          MDOLocalBufferLength, local_buffer), True);
   length := isc_vax_integer(@local_buffer[1], 2);
   result := isc_vax_integer(@local_buffer[3], length);
@@ -310,32 +312,32 @@ end;
 
 function TMDODatabaseInfo.GetMarks: Long;
 begin
-  result := GetLongDatabaseInfo(isc_info_marks);
+  result := GetLongDatabaseInfo(FDatabase, isc_info_marks);
 end;
 
 function TMDODatabaseInfo.GetMaxMemory: Long;
 begin
-  result := GetLongDatabaseInfo(isc_info_max_memory);
+  result := GetLongDatabaseInfo(FDatabase, isc_info_max_memory);
 end;
 
 function TMDODatabaseInfo.GetNoReserve: Long;
 begin
-  result := GetLongDatabaseInfo(isc_info_no_reserve);
+  result := GetLongDatabaseInfo(FDatabase, isc_info_no_reserve);
 end;
 
 function TMDODatabaseInfo.GetNumBuffers: Long;
 begin
-  result := GetLongDatabaseInfo(isc_info_num_buffers);
+  result := GetLongDatabaseInfo(FDatabase, isc_info_num_buffers);
 end;
 
 function TMDODatabaseInfo.GetODSMajorVersion: Long;
 begin
-  result := GetLongDatabaseInfo(isc_info_ods_version);
+  result := GetLongDatabaseInfo(FDatabase, isc_info_ods_version);
 end;
 
 function TMDODatabaseInfo.GetODSMinorVersion: Long;
 begin
-  result := GetLongDatabaseInfo(isc_info_ods_minor_version);
+  result := GetLongDatabaseInfo(FDatabase, isc_info_ods_minor_version);
 end;
 
 function TMDODatabaseInfo.GetOperationCounts(DBInfoCommand: Integer; 
@@ -370,7 +372,7 @@ end;
 
 function TMDODatabaseInfo.GetPageSize: Long;
 begin
-  result := GetLongDatabaseInfo(isc_info_page_size);
+  result := GetLongDatabaseInfo(FDatabase, isc_info_page_size);
 end;
 
 function TMDODatabaseInfo.GetPurgeCount: TStringList;
@@ -385,12 +387,12 @@ end;
 
 function TMDODatabaseInfo.GetReadOnly: Long;
 begin
-  result := GetLongDatabaseInfo(isc_info_db_read_only);
+  result := GetLongDatabaseInfo(FDatabase, isc_info_db_read_only);
 end;
 
 function TMDODatabaseInfo.GetReads: Long;
 begin
-  result := GetLongDatabaseInfo(isc_info_reads);
+  result := GetLongDatabaseInfo(FDatabase, isc_info_reads);
 end;
 
 function TMDODatabaseInfo.GetReadSeqCount: TStringList;
@@ -413,7 +415,7 @@ end;
 
 function TMDODatabaseInfo.GetSweepInterval: Long;
 begin
-  result := GetLongDatabaseInfo(isc_info_sweep_interval);
+  result := GetLongDatabaseInfo(FDatabase, isc_info_sweep_interval);
 end;
 
 function TMDODatabaseInfo.GetUpdateCount: TStringList;
@@ -460,7 +462,7 @@ end;
 
 function TMDODatabaseInfo.GetWrites: Long;
 begin
-  result := GetLongDatabaseInfo(isc_info_writes);
+  result := GetLongDatabaseInfo(FDatabase, isc_info_writes);
 end;
 
 
