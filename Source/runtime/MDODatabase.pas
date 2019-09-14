@@ -109,7 +109,27 @@ const
     'gstat_attach',
     'set_db_charset',
     'gsec_attach',
-    'address_path'
+    'address_path',
+    'process_id',
+    'no_db_triggers',
+    'trusted_auth',
+    'process_name',
+    'trusted_role',
+    'org_filename',
+    'utf8_filename',
+    'ext_call_depth',
+    'auth_block',
+    'client_version',
+    'remote_protocol',
+    'host_name',
+    'os_user',
+    'specific_auth_data',
+    'auth_plugin_list',
+    'auth_plugin_name',
+    'config',
+    'nolinger',
+    'reset_icu',
+    'map_attach'
   );
 
   TPBPrefix = 'isc_tpb_';
