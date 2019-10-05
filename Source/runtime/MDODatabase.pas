@@ -2135,7 +2135,11 @@ begin
       isc_dpb_user_name, isc_dpb_password, isc_dpb_password_enc,
       isc_dpb_sys_user_name, isc_dpb_license, isc_dpb_encrypt_key,
       isc_dpb_lc_messages, isc_dpb_lc_ctype,
-      isc_dpb_sql_role_name, isc_dpb_sql_dialect:
+      isc_dpb_sql_role_name, isc_dpb_sql_dialect, isc_dpb_process_name,
+      isc_dpb_trusted_role, isc_dpb_org_filename, isc_dpb_auth_block,
+      isc_dpb_client_version, isc_dpb_remote_protocol, isc_dpb_host_name,
+      isc_dpb_os_user, isc_dpb_specific_auth_data, isc_dpb_auth_plugin_list,
+      isc_dpb_auth_plugin_name, isc_dpb_config:
       begin
         if DPBVal = isc_dpb_sql_dialect then
           ParamValue[1] := Char(Ord(ParamValue[1]) - 48);
@@ -2162,7 +2166,8 @@ begin
                Char(isc_dpb_records);
         Inc(DPBLength, 3);
       end;
-      isc_dpb_sweep_interval:
+      isc_dpb_sweep_interval, isc_dpb_process_id, isc_dpb_no_db_triggers,
+      isc_dpb_ext_call_depth:
       begin
         pval := StrToInt(ParamValue);
         DPB := DPB +
@@ -2175,7 +2180,8 @@ begin
         Inc(DPBLength, 6);
       end;
       isc_dpb_activate_shadow, isc_dpb_delete_shadow, isc_dpb_begin_log,
-      isc_dpb_quit_log:
+      isc_dpb_quit_log, isc_dpb_trusted_auth, isc_dpb_utf8_filename,
+      isc_dpb_nolinger, isc_dpb_reset_icu, isc_dpb_map_attach:
       begin
         DPB := DPB +
                Char(DPBVal) +
