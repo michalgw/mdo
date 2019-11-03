@@ -1317,7 +1317,7 @@ begin
   else case VarType(Value) of
     varEmpty, varNull:
       IsNull := True;
-    varSmallint, varInteger, varByte:
+    varSmallint, varInteger, varByte, varShortint, varWord:
       AsLong := Value;
     varSingle, varDouble:
       AsDouble := Value;
@@ -1336,7 +1336,7 @@ begin
       MDOError(mdoeNotSupported, [nil]);
     varByRef, varDispatch, varError, varUnknown, varVariant:
       MDOError(mdoeNotPermitted, [nil]);
-    varInt64:
+    varInt64, varLongWord, varQWord:
       AsInt64 := Value;
   end;
 end;
