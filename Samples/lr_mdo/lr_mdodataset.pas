@@ -24,6 +24,8 @@ type
     property Transaction: TMDOTransaction read FTransaction write FTransaction;
   end;
 
+  { TQueryParam }
+
   TQueryParam = class
     ParamType:TFieldType;
     ParamName:string;
@@ -35,6 +37,7 @@ type
   TQueryParamList = class(TFPObjectList)
     function ParamByName(AParamName:string):TQueryParam;
     function Add(AParamType:TFieldType; const AParamName, AParamValue:string):TQueryParam;
+    procedure Assign(AList: TQueryParamList);
   end;
 
   { TlrMDODataSet }
@@ -57,6 +60,7 @@ type
     destructor Destroy; override;
     procedure LoadFromXML(XML: TLrXMLConfig; const Path: String); override;
     procedure SaveToXML(XML: TLrXMLConfig; const Path: String); override;
+    procedure Assign(Source: TPersistent); override;
   published
     property Database: String read FDatabase write SetDatabase;
     property SQL: String read GetSQL write SetSQL;
@@ -89,6 +93,7 @@ type
     destructor Destroy; override;
     procedure LoadFromXML(XML: TLrXMLConfig; const Path: String); override;
     procedure SaveToXML(XML: TLrXMLConfig; const Path: String); override;
+    procedure Assign(Source: TPersistent); override;
   published
     property Connected: Boolean read GetConnected write SetConnected;
     property DatabaseName: String read GetDatabaseName write SetDatabaseName;
@@ -148,6 +153,16 @@ begin
   Result.ParamType:=AParamType;
   Result.ParamName:=AParamName;
   Result.ParamValue:=AParamValue;
+end;
+
+procedure TQueryParamList.Assign(AList: TQueryParamList);
+var
+  I: Integer;
+begin
+  Clear;
+  for I := 0 to AList.Count - 1 do
+    Add(TQueryParam(AList[I]).ParamType, TQueryParam(AList[I]).ParamName,
+      TQueryParam(AList[I]).ParamValue);
 end;
 
 { TlrMDODataBase }
@@ -273,6 +288,20 @@ begin
   XML.SetValue(Path + 'Password/Value', FDatabase.Params.Values['password']);
   XML.SetValue(Path + 'SQLRole/Value', FDatabase.Params.Values['sql_role']);
   XML.SetValue(Path + 'CharSet/Value', FDatabase.Params.Values['lc_ctype']);
+end;
+
+procedure TlrMDODataBase.Assign(Source: TPersistent);
+begin
+  inherited Assign(Source);
+  if Source is TlrMDODataBase then
+  begin
+    DatabaseName := TlrMDODataBase(Source).DatabaseName;
+    UserName := TlrMDODataBase(Source).UserName;
+    Password := TlrMDODataBase(Source).Password;
+    Role := TlrMDODataBase(Source).Role;
+    CharSet := TlrMDODataBase(Source).CharSet;
+    Connected := TlrMDODataBase(Source).Connected;
+  end;
 end;
 
 { TlrMDODataSet }
@@ -498,6 +527,17 @@ begin
     XML.SetValue(Path+'Params/Item'+IntToStr(i)+'/Name', P.ParamName);
     XML.SetValue(Path+'Params/Item'+IntToStr(i)+'/Value', P.ParamValue);
     XML.SetValue(Path+'Params/Item'+IntToStr(i)+'/ParamType', Fieldtypenames[P.ParamType]);
+  end;
+end;
+
+procedure TlrMDODataSet.Assign(Source: TPersistent);
+begin
+  inherited Assign(Source);
+  if Source is TlrMDODataSet then
+  begin
+    Database := TlrMDODataSet(Source).Database;
+    SQL := TlrMDODataSet(Source).SQL;
+    Params.Assign(TlrMDODataSet(Source).Params);
   end;
 end;
 
