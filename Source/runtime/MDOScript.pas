@@ -116,6 +116,8 @@ type
     property Writes: Int64 read FWrites;
   end;
   
+  { TMDOScript }
+
   TMDOScript = class (TComponent)
   private
     FAutoDDL: Boolean;
@@ -133,6 +135,7 @@ type
     FOnParamCheck: TMDOScriptParamCheck;
     FOnParse: TMDOSQLParseStmt;
     FOnStatement: TMDOSQLParseBeforeStmt;
+    FParamCheck: Boolean;
     FSQLDialect: Integer;
     FSQLParser: TMDOSQLParser;
     FStats: TMDOScriptStats;
@@ -190,6 +193,7 @@ type
     property OnParseError: TMDOSQLParseError read FOnError write FOnError;
     property OnStatement: TMDOSQLParseBeforeStmt read FOnStatement write
             FOnStatement;
+    property ParamCheck: Boolean read FParamCheck write FParamCheck;
     property Script: TStrings read GetScript write SetScript;
     property Statistics: Boolean read FStatsOn write SetStatsOn default true;
     property Terminator: string read FTerminator write SetTerminator;
@@ -784,6 +788,7 @@ begin
   if not Assigned(FDataset) then
     FDMLQuery := TMDOSQL.Create(FDatabase);
   try
+    FDMLQuery.ParamCheck := FParamCheck;
     FStats.Clear;
     if FStatsOn and Assigned(FDatabase) and FDatabase.Connected then
       FStats.Start;
