@@ -615,6 +615,7 @@ begin
   FStats := TMDOScriptStats.Create;
   FStats.Database := FDatabase;
   FSQLDialect := 3;
+  FParamCheck := True;
 end;
 
 destructor TMDOScript.Destroy;
