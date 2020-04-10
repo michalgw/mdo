@@ -2250,7 +2250,7 @@ end;
 
 function TMDOSQL.GetSQLParams: TMDOXSQLDA;
 begin
-  if not Prepared then
+  if not Prepared and ParamCheck then
     Prepare;
   result := FSQLParams;
 end;
