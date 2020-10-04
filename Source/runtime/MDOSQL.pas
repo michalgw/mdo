@@ -2447,8 +2447,16 @@ begin
             end;
             '?', ':':
             begin
-              iCurState := ParamState;
-              AddToProcessedSQL('?');
+              if cNextChar = ':' then
+              begin
+                AddToProcessedSQL(cCurChar);
+                Inc(I, 2);
+              end
+              else
+              begin
+                iCurState := ParamState;
+                AddToProcessedSQL('?');
+              end;
             end;
             '/':
             if (cNextChar = '*') then
