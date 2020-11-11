@@ -190,7 +190,10 @@ type
   private
     FAfterDatabaseDisconnect: TNotifyEvent;
     FAfterTransactionEnd: TNotifyEvent;
+    FAfterUpdateTransactionEnd: TNotifyEvent;
     FBase: TMDOBase;
+    FUpdateBase: TMDOBase;
+    FBeforeUpdateTransactionEnd: TNotifyEvent;
     FBeforeDatabaseDisconnect: TNotifyEvent;
     FBeforeTransactionEnd: TNotifyEvent;
     FBEnd: DWord;
@@ -240,6 +243,7 @@ type
     FUpdateObject: TMDODataSetUpdateObject;
     FUpdateRecordTypes: TMDOUpdateRecordTypes;
     FUpdatesPending: Boolean;
+    FUpdateTransactionFree: TNotifyEvent;
     function AdjustCurrentRecord(Buffer: Pointer; GetMode: TGetMode): 
             TGetResult;
     //TODO: Change result type to PtrInt
@@ -255,10 +259,13 @@ type
     procedure CopyRecordBuffer(Source, Dest: Pointer);
     procedure DoAfterDatabaseDisconnect(Sender: TObject);
     procedure DoAfterTransactionEnd(Sender: TObject);
+    procedure DoAfterUpdateTransactionEnd(Sender: TObject);
     procedure DoBeforeDatabaseDisconnect(Sender: TObject);
     procedure DoBeforeTransactionEnd(Sender: TObject);
+    procedure DoBeforeUpdateTransactionEnd(Sender: TObject);
     procedure DoDatabaseFree(Sender: TObject);
     procedure DoTransactionFree(Sender: TObject);
+    procedure DoUpdateTransactionFree(Sender: TObject);
     procedure FetchCurrentRecordToBuffer(Qry: TMDOSQL; RecordNumber: Integer; 
             Buffer: PChar);
     function GetDatabase: TMDODataBase;
@@ -273,6 +280,8 @@ type
     function GetStatementType: TMDOSQLTypes;
     function GetTransaction: TMDOTransaction;
     function GetTRHandle: PISC_TR_HANDLE;
+    function GetUpdateTransaction: TMDOTransaction;
+    function GetUpdateTRHandle: PISC_TR_HANDLE;
     procedure InternalDeleteRecord(Qry: TMDOSQL; Buff: Pointer); virtual;
     function InternalGetRecord(Buffer: PChar; GetMode: TGetMode; DoCheck: 
             Boolean): TGetResult; virtual;
@@ -300,6 +309,7 @@ type
     procedure SetUpdateMode(const Value: TUpdateMode);
     procedure SetUpdateObject(Value: TMDODataSetUpdateObject);
     procedure SetUpdateRecordTypes(Value: TMDOUpdateRecordTypes);
+    procedure SetUpdateTransaction(AValue: TMDOTransaction);
     procedure SQLChanging(Sender: TObject); virtual;
     procedure WriteCache(FCache: PChar; Offset: DWORD; Origin: Integer; Buffer:
             PChar);
@@ -382,10 +392,14 @@ type
             FAfterDatabaseDisconnect write FAfterDatabaseDisconnect;
     property AfterTransactionEnd: TNotifyEvent read FAfterTransactionEnd write
             FAfterTransactionEnd;
+    property AfterUpdateTransactionEnd: TNotifyEvent read FAfterUpdateTransactionEnd write
+            FAfterUpdateTransactionEnd;
     property BeforeDatabaseDisconnect: TNotifyEvent read
             FBeforeDatabaseDisconnect write FBeforeDatabaseDisconnect;
     property BeforeTransactionEnd: TNotifyEvent read FBeforeTransactionEnd
             write FBeforeTransactionEnd;
+    property BeforeUpdateTransactionEnd: TNotifyEvent read FBeforeUpdateTransactionEnd
+            write FBeforeUpdateTransactionEnd;
     property BufferChunks: Integer read FBufferChunks write SetBufferChunks;
     property CachedUpdates: Boolean read FCachedUpdates write SetCachedUpdates;
     property DatabaseFree: TNotifyEvent read FDatabaseFree write FDatabaseFree;
@@ -410,6 +424,8 @@ type
     property StatementType: TMDOSQLTypes read GetStatementType;
     property TransactionFree: TNotifyEvent read FTransactionFree write
             FTransactionFree;
+    property UpdateTransactionFree: TNotifyEvent read FUpdateTransactionFree write
+            FUpdateTransactionFree;
     property UniDirectional: Boolean read FUniDirectional write
             SetUniDirectional default False;
     property UpdateMode: TUpdateMode read FUpdateMode write SetUpdateMode
@@ -450,11 +466,14 @@ type
     property DBHandle: PISC_DB_HANDLE read GetDBHandle;
     property LoadDefaults: Boolean read FLoadDefaults write FLoadDefaults;
     property TRHandle: PISC_TR_HANDLE read GetTRHandle;
+    property UpdateTRHandle: PISC_TR_HANDLE read GetUpdateTRHandle;
     property UpdateObject: TMDODataSetUpdateObject read FUpdateObject write 
             SetUpdateObject;
     property UpdateRecordTypes: TMDOUpdateRecordTypes read FUpdateRecordTypes 
             write SetUpdateRecordTypes;
     property UpdatesPending: Boolean read FUpdatesPending;
+    property UpdateTransaction: TMDOTransaction read GetUpdateTransaction write
+            SetUpdateTransaction;
   published
     property AfterCancel;
     property AfterClose;
@@ -525,6 +544,7 @@ type
     property AfterPost;
     property AfterScroll;
     property AfterTransactionEnd;
+    property AfterUpdateTransactionEnd;
     property AutoCalcFields;
     property BeforeCancel;
     property BeforeClose;
@@ -536,6 +556,7 @@ type
     property BeforePost;
     property BeforeScroll;
     property BeforeTransactionEnd;
+    property BeforeUpdateTransactionEnd;
     property BufferChunks;
     property CachedUpdates;
     property DatabaseFree;
@@ -556,7 +577,9 @@ type
     property RefreshSQL;
     property SelectSQL;
     property TransactionFree;
+    property UpdateTransactionFree;
     property UniDirectional;
+    property UpdateTransaction;
   end;
 
   { TMDODSBlobStream }
@@ -838,6 +861,7 @@ begin
   CheckFBLoaded;
   FFBLoaded := True;
   FBase := TMDOBase.Create(Self);
+  FUpdateBase := TMDOBase.Create(Self);
   FCurrentRecord := -1;
   FDeletedRecords := 0;
   FUniDirectional := False;
@@ -868,8 +892,11 @@ begin
   FBase.AfterDatabaseDisconnect := @DoAfterDatabaseDisconnect;
   FBase.OnDatabaseFree := @DoDatabaseFree;
   FBase.BeforeTransactionEnd := @DoBeforeTransactionEnd;
+  FUpdateBase.BeforeTransactionEnd := @DoBeforeUpdateTransactionEnd;
   FBase.AfterTransactionEnd := @DoAfterTransactionEnd;
+  FUpdateBase.AfterTransactionEnd := @DoAfterUpdateTransactionEnd;
   FBase.OnTransactionFree := @DoTransactionFree;
+  FUpdateBase.OnTransactionFree := @DoUpdateTransactionFree;
   if AOwner is TMDODatabase then
     Database := TMDODatabase(AOwner)
   else
@@ -884,6 +911,7 @@ begin
   begin
     FreeAndNil(FDataLink);
     FreeAndNil(FBase);
+    FreeAndNil(FUpdateBase);
     ClearBlobCache;
     FreeAndNil(FBlobStreamList);
     FreeMem(FBufferCache);
@@ -919,6 +947,8 @@ begin
     Transaction.StartTransaction;
     FDidActivate := True;
   end;
+  if Assigned(UpdateTransaction) and (not UpdateTransaction.Active) then
+    UpdateTransaction.StartTransaction;
 end;
 
 function TMDOCustomDataSet.AdjustCurrentRecord(Buffer: Pointer; GetMode: 
@@ -1108,8 +1138,16 @@ var
 begin
   if State in [dsEdit, dsInsert] then
     Post;
-  FBase.CheckDatabase;
-  FBase.CheckTransaction;
+  if (FUpdateBase.Database <> nil) and (FUpdateBase.Transaction <> nil) then
+  begin
+    FUpdateBase.CheckDatabase;
+    FUpdateBase.CheckTransaction;
+  end
+  else
+  begin
+    FBase.CheckDatabase;
+    FBase.CheckTransaction;
+  end;
   DisableControls;
   CurBookmark := Bookmark;
   CurUpdateTypes := FUpdateRecordTypes;
@@ -1353,20 +1391,23 @@ begin
     FBlobStreamList.Add(Pointer(fs));
     fs.Mode := bmReadWrite;
     fs.Database := Database;
-    fs.Transaction := Transaction;
+    if Mode = bmRead then
+      fs.Transaction := Transaction
+    else
+      fs.Transaction := UpdateTransaction;
     fs.BlobID :=
       PISC_QUAD(@Buff[PRecordData(Buff)^.rdFields[FMappedFieldPosition[Field.FieldNo - 1]].fdDataOfs])^;
     if (CachedUpdates) then
     begin
-      bTr := not Transaction.InTransaction;
+      bTr := not fs.Transaction.InTransaction;
       bDB := not Database.Connected;
       if bDB then
         Database.Open;
       if bTr then
-        Transaction.StartTransaction;
+        fs.Transaction.StartTransaction;
       fs.Seek(0, soFromBeginning);
       if bTr then
-        Transaction.Commit;
+        fs.Transaction.Commit;
       if bDB then
         Database.Close;
     end;
@@ -1399,6 +1440,8 @@ begin
   FInternalPrepared := False;
   if Transaction.InTransaction then
     Transaction.ApplyDefaultAction;
+  if Assigned(UpdateTransaction) and UpdateTransaction.InTransaction then
+    UpdateTransaction.ApplyDefaultAction;
   FDidActivate := False;
 end;
 
@@ -1418,6 +1461,12 @@ procedure TMDOCustomDataSet.DoAfterTransactionEnd(Sender: TObject);
 begin
   if Assigned(FAfterTransactionEnd) then
     FAfterTransactionEnd(Sender);
+end;
+
+procedure TMDOCustomDataSet.DoAfterUpdateTransactionEnd(Sender: TObject);
+begin
+  if Assigned(FAfterUpdateTransactionEnd) then
+    FAfterUpdateTransactionEnd(Sender);
 end;
 
 procedure TMDOCustomDataSet.DoBeforeDatabaseDisconnect(Sender: TObject);
@@ -1491,6 +1540,24 @@ begin
     FQRefresh.FreeHandle;
   if Assigned(FBeforeTransactionEnd) then
     FBeforeTransactionEnd(Sender);
+end;
+
+procedure TMDOCustomDataSet.DoBeforeUpdateTransactionEnd(Sender: TObject);
+begin
+  if Active then
+    Active := False;
+  if FQSelect <> nil then
+    FQSelect.FreeHandle;
+  if FQDelete <> nil then
+    FQDelete.FreeHandle;
+  if FQInsert <> nil then
+    FQInsert.FreeHandle;
+  if FQModify <> nil then
+    FQModify.FreeHandle;
+  if FQRefresh <> nil then
+    FQRefresh.FreeHandle;
+  if Assigned(FBeforeUpdateTransactionEnd) then
+    FBeforeUpdateTransactionEnd(Sender);
 end;
 
 procedure TMDOCustomDataSet.DoDatabaseFree(Sender: TObject);
@@ -1585,6 +1652,12 @@ procedure TMDOCustomDataSet.DoTransactionFree(Sender: TObject);
 begin
   if Assigned(FTransactionFree) then
     FTransactionFree(Sender);
+end;
+
+procedure TMDOCustomDataSet.DoUpdateTransactionFree(Sender: TObject);
+begin
+  if Assigned(FUpdateTransactionFree) then
+    FUpdateTransactionFree(Sender);
 end;
 
 procedure TMDOCustomDataSet.FetchAll;
@@ -2021,6 +2094,19 @@ end;
 function TMDOCustomDataSet.GetTRHandle: PISC_TR_HANDLE;
 begin
   result := FBase.TRHandle;
+end;
+
+function TMDOCustomDataSet.GetUpdateTransaction: TMDOTransaction;
+begin
+  if Assigned(FUpdateBase) then
+    Result := FUpdateBase.Transaction
+  else
+    Result := nil;
+end;
+
+function TMDOCustomDataSet.GetUpdateTRHandle: PISC_TR_HANDLE;
+begin
+  Result := FUpdateBase.TRHandle;
 end;
 
 procedure TMDOCustomDataSet.InitRecord(Buffer: PChar);
@@ -2947,6 +3033,11 @@ begin
     DidActivate := ActivateTransaction;
     FBase.CheckDatabase;
     FBase.CheckTransaction;
+    if FUpdateBase.Transaction <> nil then
+    begin
+      FUpdateBase.CheckDatabase;
+      FUpdateBase.CheckTransaction;
+    end;
     if trim(FQSelect.SQL.Text) <> '' then
     begin
       if not FQSelect.Prepared then
@@ -3364,8 +3455,17 @@ end;
 procedure TMDOCustomDataSet.PSEndTransaction(Commit: Boolean);
 begin
   if Commit then
-    Transaction.Commit else
+  begin
+    Transaction.Commit;
+    if Assigned(UpdateTransaction) and UpdateTransaction.Active then
+      UpdateTransaction.Commit;
+  end
+  else
+  begin
     Transaction.Rollback;
+    if Assigned(UpdateTransaction) and UpdateTransaction.Active then
+      UpdateTransaction.Rollback;
+  end;
 end;
 
 function TMDOCustomDataSet.PSExecuteStatement(const ASQL: string; AParams: 
@@ -3463,6 +3563,8 @@ procedure TMDOCustomDataSet.PSStartTransaction;
 begin
   ActivateConnection;
   Transaction.StartTransaction;
+  if Assigned(UpdateTransaction) then
+    UpdateTransaction.StartTransaction;
 end;
 
 function TMDOCustomDataSet.PSUpdateRecord(UpdateKind: TUpdateKind; Delta: 
@@ -3705,11 +3807,23 @@ begin
 end;
 
 procedure TMDOCustomDataSet.SetDatabase(Value: TMDODataBase);
+var
+  ClearTrans: Boolean;
 begin
   if (FBase.Database <> Value) then
   begin
     CheckDatasetClosed;
     FBase.Database := Value;
+    ClearTrans := not Assigned(FUpdateBase.Transaction);
+    if Assigned(FUpdateBase.Database) and (FUpdateBase.Database <> Value) then
+    begin
+      UpdateTransaction := nil;
+      FUpdateBase.Database := nil;
+    end
+    else
+      FUpdateBase.Database := Value;
+    if ClearTrans then
+      FUpdateBase.Transaction := nil;
     FQDelete.Database := Value;
     FQInsert.Database := Value;
     FQRefresh.Database := Value;
@@ -3926,11 +4040,14 @@ begin
   begin
     CheckDatasetClosed;
     FBase.Transaction := Value;
-    FQDelete.Transaction := Value;
-    FQInsert.Transaction := Value;
     FQRefresh.Transaction := Value;
     FQSelect.Transaction := Value;
-    FQModify.Transaction := Value;
+    if FUpdateBase.Transaction = nil then
+    begin
+      FQDelete.Transaction := Value;
+      FQInsert.Transaction := Value;
+      FQModify.Transaction := Value;
+    end;
   end;
 end;
 
@@ -3982,6 +4099,32 @@ begin
   FUpdateRecordTypes := Value;
   if Active then
     First;
+end;
+
+procedure TMDOCustomDataSet.SetUpdateTransaction(AValue: TMDOTransaction);
+begin
+  if FUpdateBase.Transaction <> AValue then
+  begin
+    CheckDatasetClosed;
+    FUpdateBase.Transaction := AValue;
+    if AValue = nil then
+    begin
+      if FBase.Transaction <> nil then
+      begin
+        QDelete.Transaction := FBase.Transaction;
+        QInsert.Transaction := FBase.Transaction;
+        QModify.Transaction := FBase.Transaction;
+      end;
+      FUpdateBase.Database := nil;
+    end
+    else
+    begin
+      FUpdateBase.Database := Database;
+      QDelete.Transaction := AValue;
+      QInsert.Transaction := AValue;
+      QModify.Transaction := AValue;
+    end;
+  end;
 end;
 
 procedure TMDOCustomDataSet.SQLChanging(Sender: TObject);
@@ -4238,7 +4381,10 @@ begin
   SQL := TMDOSQL.Create(FDataSet);
   try
     SQL.Database := FDataSet.Database;
-    SQL.Transaction := FDataSet.Transaction;
+    if FDataSet.UpdateTransaction <> nil then
+      SQL.Transaction := FDataSet.UpdateTransaction
+    else
+      SQL.Transaction := FDataSet.Transaction;
     SQL.SQL.Add(Format('SELECT GEN_ID(%s, %d) FROM RDB$DATABASE ', [FGenerator, FIncrementBy]));
     try
       SQL.ExecQuery;

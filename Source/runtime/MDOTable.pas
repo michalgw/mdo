@@ -153,8 +153,10 @@ type
     property Active;
     property AfterDatabaseDisconnect;
     property AfterTransactionEnd;
+    property AfterUpdateTransactionEnd;
     property BeforeDatabaseDisconnect;
     property BeforeTransactionEnd;
+    property BeforeUpdateTransactionEnd;
     property BufferChunks;
     property CachedUpdates;
     property Constraints stored ConstraintsStored;
@@ -178,8 +180,10 @@ type
     property TableTypes: TMDOTableTypes read FTableTypes write SetTableTypes 
             default [];
     property TransactionFree;
+    property UpdateTransactionFree;
     property UniDirectional;
     property UpdateObject;
+    property UpdateTransaction;
   end;
   
 implementation
@@ -238,7 +242,10 @@ begin
   Query := TMDOSQL.Create(self);
   try
     Query.Database := DataBase;
-    Query.Transaction := Transaction;
+    if Assigned(UpdateTransaction) then
+      Query.Transaction := UpdateTransaction
+    else
+      Query.Transaction := Transaction;
     FieldList := FormatFieldsList(AFields);
     if (ixPrimary in Options) then
     begin
@@ -391,7 +398,10 @@ var
     Query := TMDOSQL.Create(self);
     try
       Query.Database := Database;
-      Query.transaction := Transaction;
+      if Assigned(UpdateTransaction) then
+        Query.Transaction := UpdateTransaction
+      else
+        Query.Transaction := Transaction;
       Query.SQL.Text := 'Create Table ' +
         QuoteIdentifier(DataBase.SQLDialect, FTableName) +
         ' (' + FieldList; {do not localize}
@@ -457,7 +467,10 @@ var
     Query := TMDOSQL.Create(self);
     try
       Query.Database := DataBase;
-      Query.Transaction := Transaction;
+      if Assigned(UpdateTransaction) then
+        Query.Transaction := UpdateTransaction
+      else
+        Query.Transaction := Transaction;
       Query.SQL.Text := 'Drop index ' +  {do not localize}
                          QuoteIdentifier(Database.SQLDialect, AName);
       Query.Prepare;
@@ -560,7 +573,10 @@ begin
   Query := TMDOSQL.Create(self);
   try
     Query.Database := DataBase;
-    Query.Transaction := Transaction;
+    if Assigned(UpdateTransaction) then
+      Query.Transaction := UpdateTransaction
+    else
+      Query.Transaction := Transaction;
     Query.SQL.Text := 'drop table ' +  {do not localize}
       QuoteIdentifier(DataBase.SQLDialect, FTableName);
     Query.Prepare;
@@ -589,7 +605,10 @@ begin
   Query := TMDOSQL.Create(self);
   try
     Query.Database := DataBase;
-    Query.Transaction := Transaction;
+    if Assigned(UpdateTransaction) then
+      Query.Transaction := UpdateTransaction
+    else
+      Query.Transaction := Transaction;
     Query.SQL.Text := 'delete from ' + {do not localize}
       QuoteIdentifier(DataBase.SQLDialect, FTableName);
     Query.Prepare;

@@ -128,7 +128,10 @@ begin
     if (FDataSet is TMDOCustomDataSet) then
     begin
       FQueries[UpdateKind].Database := TMDOCustomDataSet(FDataSet).DataBase;
-      FQueries[UpdateKind].Transaction := TMDOCustomDataSet(FDataSet).Transaction;
+      if Assigned(TMDOCustomDataSet(FDataSet).UpdateTransaction) then
+        FQueries[UpdateKind].Transaction := TMDOCustomDataSet(FDataSet).UpdateTransaction
+      else
+        FQueries[UpdateKind].Transaction := TMDOCustomDataSet(FDataSet).Transaction;
     end;
   end;
   Result := FQueries[UpdateKind];

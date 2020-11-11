@@ -99,8 +99,10 @@ type
     property Active;
     property AfterDatabaseDisconnect;
     property AfterTransactionEnd;
+    property AfterUpdateTransactionEnd;
     property BeforeDatabaseDisconnect;
     property BeforeTransactionEnd;
+    property BeforeUpdateTransactionEnd;
     property BufferChunks;
     property CachedUpdates;
     property Constraints stored ConstraintsStored;
@@ -114,8 +116,10 @@ type
     property Params: TParams read FParams write SetParamsList stored False;
     property SQL: TStrings read FSQL write SetQuery;
     property TransactionFree;
+    property UpdateTransactionFree;
     property UniDirectional default False;
     property UpdateObject;
+    property UpdateTransaction;
   end;
   
 implementation
