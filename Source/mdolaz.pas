@@ -4,6 +4,7 @@
 
 unit mdolaz;
 
+{$warn 5023 off : no warning about unused units}
 interface
 
 uses
@@ -12,7 +13,7 @@ uses
   MDOErrorCodes, MDOEvents, MDOExternals, MDOExtract, MDOHeader, 
   MDOHTMLDataExport, MDOInstall, MDOInstallHeader, MDOIntf, MDOMisc, MDOQuery, 
   MDOScript, MDOServices, MDOSQL, MDOSQLMonitor, MDOStoredProc, MDOTable, 
-  MDOUpdateSQL, MDOWait;
+  MDOUpdateSQL, MDOWait, mdotools;
 
 implementation
 

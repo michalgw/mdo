@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
-  <Package Version="4">
+  <Package Version="5">
     <PathDelim Value="\"/>
     <Name Value="mdolaz"/>
     <AddToProjectUsesSection Value="True"/>
@@ -21,7 +21,7 @@
     <Description Value="Mercury Database Objects
 (runtime library)"/>
     <Version Build="1"/>
-    <Files Count="30">
+    <Files Count="31">
       <Item1>
         <Filename Value="runtime\MDOUtils.pas"/>
         <UnitName Value="MDOUtils"/>
@@ -142,7 +142,12 @@
         <Filename Value="runtime\mdowait.pas"/>
         <UnitName Value="mdowait"/>
       </Item30>
+      <Item31>
+        <Filename Value="runtime\mdotools.pas"/>
+        <UnitName Value="mdotools"/>
+      </Item31>
     </Files>
+    <CompatibilityMode Value="True"/>
     <RequiredPkgs Count="1">
       <Item1>
         <PackageName Value="FCL"/>
@@ -154,7 +159,6 @@
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
-      <IgnoreBinaries Value="False"/>
     </PublishOptions>
     <CustomOptions Items="ExternHelp" Version="2">
       <_ExternHelp Items="Count"/>
