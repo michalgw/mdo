@@ -1594,7 +1594,7 @@ begin
         end;
         case sqltype and (not 1) of
           SQL_TEXT, SQL_TYPE_DATE, SQL_TYPE_TIME, SQL_TIMESTAMP,
-          SQL_BLOB, SQL_ARRAY, SQL_QUAD, SQL_SHORT,
+          SQL_BLOB, SQL_ARRAY, SQL_QUAD, SQL_SHORT, SQL_BOOLEAN,
           SQL_LONG, SQL_INT64, SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT: begin
             if (sqllen = 0) then
               { Make sure you get a valid pointer anyway
