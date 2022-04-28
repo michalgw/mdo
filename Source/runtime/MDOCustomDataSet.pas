@@ -639,6 +639,16 @@ const
       { ftFMTBcd} TMDOBCDField,
       { ftFixedWideString} TWideStringField,
       { ftWideMemo} TWideMemoField
+      {$IFDEF FPC_FULLVERSION >= 30200}
+      ,
+      { ftOraTimeStamp} Nil,
+      { ftOraInterval} Nil,
+      { ftLongWord} TLongWordField,
+      { ftShortint} TShortintField,
+      { ftByte} TByteField,
+      { ftExtended} TExtendedField,
+      { ftSingle} TSingleField
+      {$ENDIF}
     );
 
 var
@@ -1391,10 +1401,10 @@ begin
     FBlobStreamList.Add(Pointer(fs));
     fs.Mode := bmReadWrite;
     fs.Database := Database;
-    if Mode = bmRead then
-      fs.Transaction := Transaction
+    if (Mode in [bmReadWrite, bmWrite]) and Assigned(UpdateTransaction) then
+      fs.Transaction := UpdateTransaction
     else
-      fs.Transaction := UpdateTransaction;
+      fs.Transaction := Transaction;
     fs.BlobID :=
       PISC_QUAD(@Buff[PRecordData(Buff)^.rdFields[FMappedFieldPosition[Field.FieldNo - 1]].fdDataOfs])^;
     if (CachedUpdates) then
