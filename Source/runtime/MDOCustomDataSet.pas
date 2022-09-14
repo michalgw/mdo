@@ -639,7 +639,7 @@ const
       { ftFMTBcd} TMDOBCDField,
       { ftFixedWideString} TWideStringField,
       { ftWideMemo} TWideMemoField
-      {$IFDEF FPC_FULLVERSION >= 30200}
+      {$IF Declared(ftOraTimeStamp)}
       ,
       { ftOraTimeStamp} Nil,
       { ftOraInterval} Nil,
