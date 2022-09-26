@@ -73,8 +73,7 @@ type
     function GetNumBuffers: Long;
     function GetODSMajorVersion: Long;
     function GetODSMinorVersion: Long;
-    function GetOperationCounts(DBInfoCommand: Integer; FOperation: 
-            TStringList): TStringList;
+    function GetOperationCounts(DBInfoCommand: Integer; var FOperation: TStringList): TStringList;
     function GetPageSize: Long;
     function GetPurgeCount: TStringList;
     function GetReadIdxCount: TStringList;
@@ -341,7 +340,7 @@ begin
 end;
 
 function TMDODatabaseInfo.GetOperationCounts(DBInfoCommand: Integer; 
-        FOperation: TStringList): TStringList;
+  var FOperation: TStringList): TStringList;
 var
   local_buffer: array[0..MDOHugeLocalBufferLength - 1] of Char;
   DatabaseInfoCommand: Char;
