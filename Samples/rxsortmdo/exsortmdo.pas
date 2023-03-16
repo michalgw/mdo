@@ -48,7 +48,7 @@ type
   end;
 
 implementation
-uses MDOCustomDataSet, synRegExpr, strUtils, MDOSQL;
+uses MDOCustomDataSet, RegExpr, strUtils, MDOSQL;
 
 
 procedure TMDODataSetSortEngine.Sort(FieldName: string; ADataSet: TDataSet;
