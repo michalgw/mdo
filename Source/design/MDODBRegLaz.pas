@@ -462,13 +462,13 @@ var
 begin
   SQL := TStringList.Create;
   try
-    SQL.Assign(TStrings(GetOrdValue));
+    SQL.Assign(TStrings(GetObjectValue));
     SQLText := SQL.Text;
     if (MDOSQLEdit.EditSQL(SQLText, FGetTableNamesProc, FGetFieldNamesProc)) and
       (SQL.Text <> SQLText) then
     begin
       SQL.Text := SQLText;
-      SetOrdValue(LongInt(SQL));
+      SetPtrValue(SQL);
     end;
   finally
     SQL.free;
@@ -686,9 +686,9 @@ var
 begin
   Events := TStringList.Create;
   try
-    Events.Assign(TStrings(GetOrdValue));
+    Events.Assign(TStrings(GetObjectValue));
     if EditAlerterEvents(Events) then
-      SetOrdValue(longint(Events));
+      SetPtrValue(Events);
   finally
     Events.Free;
   end;
