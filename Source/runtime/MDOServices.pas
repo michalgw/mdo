@@ -100,7 +100,7 @@ type
     FParams: TStrings;
     FParamsChanged: Boolean;
     FProtocol: TProtocol;
-    FQueryParams: string;
+    FQueryParams: RawByteString;
     FQuerySPB: PChar;
     FQuerySPBLength: Short;
     FServerName: string;
@@ -110,7 +110,7 @@ type
     FTraceFlags: TTraceFlags;
     function Call(ErrCode: ISC_STATUS; RaiseError: Boolean): ISC_STATUS;
     procedure CheckServerName;
-    procedure GenerateSPB(sl: TStrings; var SPB: String; var SPBLength: Short);
+    procedure GenerateSPB(sl: TStrings; var SPB: RawByteString; var SPBLength: Short);
     function GetActive: Boolean;
     function GetServiceParamBySPB(const Idx: Integer): string;
     function IndexOfSPBConst(st: String): Integer;
@@ -135,7 +135,7 @@ type
     property OutputBuffer: PChar read FOutputBuffer;
     property OutputBufferOption: TOutputBufferOption read FOutputBufferOption 
             write FOutputBufferOption;
-    property ServiceQueryParams: string read FQueryParams write FQueryParams;
+    property ServiceQueryParams: RawByteString read FQueryParams write FQueryParams;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -239,7 +239,7 @@ type
   
   TMDOControlService = class (TMDOCustomService)
   private
-    FStartParams: string;
+    FStartParams: RawByteString;
     FStartSPB: PChar;
     FStartSPBLength: Integer;
     function GetIsServiceRunning: Boolean;
@@ -248,7 +248,7 @@ type
     procedure ServiceStartAddParam(Value: Integer; param: Integer); overload;
     procedure ServiceStartAddParam(Value: string; param: Integer); overload;
     procedure SetServiceStartOptions; virtual;
-    property ServiceStartParams: string read FStartParams write FStartParams;
+    property ServiceStartParams: RawByteString read FStartParams write FStartParams;
   public
     constructor Create(AOwner: TComponent); override;
     procedure ServiceStart; virtual;
@@ -264,7 +264,7 @@ type
     property Action: Integer read FAction write SetAction;
   public
     constructor create(AOwner: TComponent); override;
-    function GetNextChunk: string;
+    function GetNextChunk: TBytes;
     function GetNextLine: string;
     property Eof: Boolean read FEof;
   published
@@ -534,7 +534,7 @@ end;
 
 procedure TMDOCustomService.Attach;
 var
-  SPB: string;
+  SPB: RawByteString;
   ConnectString: string;
 begin
   CheckInactive;
@@ -613,7 +613,7 @@ begin
   MonitorHook.ServiceDetach(Self);
 end;
 
-procedure TMDOCustomService.GenerateSPB(sl: TStrings; var SPB: String; var 
+procedure TMDOCustomService.GenerateSPB(sl: TStrings; var SPB: RawByteString; var 
         SPBLength: Short);
 var
   i, j, SPBVal, SPBServerVal: UShort;
@@ -1997,14 +1997,14 @@ begin
   FAction := 0;
 end;
 
-function TMDOControlAndQueryService.GetNextChunk: string;
+function TMDOControlAndQueryService.GetNextChunk: TBytes;
 var
   Length: Integer;
 begin
   if (FEof = True) then
   begin
-    result := '';
-    exit;
+    Result := [];
+    Exit;
   end;
   if (FAction = 0) then
     MDOError(mdoeQueryParamsError, [nil]);
@@ -2020,8 +2020,8 @@ begin
       FEof := True
     else
       MDOError(mdoeOutputParsingError, [nil]);
-  OutputBuffer[3 + Length] := #0;
-  result := String(PChar(@OutputBuffer[3]));
+  SetLength(Result, Length);
+  Move(OutputBuffer[3], Result[0], Length);
 end;
 
 function TMDOControlAndQueryService.GetNextLine: string;
