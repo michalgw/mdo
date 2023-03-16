@@ -4354,7 +4354,7 @@ begin
   TMDOCustomDataSet(FField.DataSet).RecordModified(True);
   TBlobField(FField).Modified := true;
   result := FBlobStream.Write(Buffer, Count);
-  TMDOCustomDataSet(FField.DataSet).DataEvent(deFieldChange, Longint(FField));
+  TMDOCustomDataSet(FField.DataSet).DataEvent(deFieldChange, PtrInt(FField));
 end;
 
 { TMDOGeneratorLink }

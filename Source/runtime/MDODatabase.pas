@@ -1844,7 +1844,7 @@ begin
     for i := 0 to FSQLObjects.Count - 1 do
       if (FSQLObjects[i] <> nil) and
          (TMDOBase(FSQLObjects[i]).Database = nil) then
-        SetOrdProp(TMDOBase(FSQLObjects[i]).Owner, 'Database', Integer(Value));
+        SetOrdProp(TMDOBase(FSQLObjects[i]).Owner, 'Database', PtrInt(Value));
   end;
   FDefaultDatabase := Value;
 end;
