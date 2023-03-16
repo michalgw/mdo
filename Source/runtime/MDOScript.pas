@@ -359,7 +359,7 @@ begin
   end;
   if (Token = 'INSERT') or (Token = 'DELETE') or {do not localize}
   (Token = 'SELECT') or (Token = 'UPDATE') or {do not localize}
-  (Token = 'EXECUTE') or {do not localize}
+  (Token = 'EXECUTE') or (Token = 'MERGE') or {do not localize}
   ((Token = 'EXECUTE') and (Token1 = 'PROCEDURE')) then {do not localize}
     Result := stmtDML
   else if Token = 'INPUT' then {do not localize}
