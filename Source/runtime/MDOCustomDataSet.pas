@@ -645,9 +645,15 @@ const
       { ftOraInterval} Nil,
       { ftLongWord} TLongWordField,
       { ftShortint} TShortintField,
-      { ftByte} TByteField,
-      { ftExtended} TExtendedField,
+      { ftByte} TByteField
+      {$IF Declared(ftExtended)}
+      ,
+      { ftExtended} {$IF Declared(TExtendedField)}TExtendedField{$ELSE}nil{$ENDIF}
+      {$IF Declared(ftSingle)}
+      ,
       { ftSingle} TSingleField
+      {$ENDIF}
+      {$ENDIF}
       {$ENDIF}
     );
 
