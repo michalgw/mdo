@@ -278,11 +278,11 @@ begin
             {probably just got deleted }
           else
           if F < 0 then
-            IBError(ibxeCannotCreateSharedResource,['Error accessing IPC File - ' +
+            MDOError(mdoeCannotCreateSharedResource,['Error accessing IPC File - ' +
                                                  StrError(fpgetErrno)]);
         end
         else
-            IBError(ibxeCannotCreateSharedResource,['Error creating IPC File  - ' +
+            MDOError(mdoeCannotCreateSharedResource,['Error creating IPC File  - ' +
                                                  StrError(fpgetErrno)]);
       end
       else
@@ -294,13 +294,13 @@ begin
       FSharedMemoryID := shmget(IPC_PRIVATE,MemSize, IPC_CREAT or
                            S_IRUSR or S_IWUSR or S_IRGRP or S_IWGRP);
       if FSharedMemoryID < 0 then
-          IBError(ibxeCannotCreateSharedResource,['Cannot create shared memory segment - ' +
+          MDOError(mdoeCannotCreateSharedResource,['Cannot create shared memory segment - ' +
                                                  StrError(fpgetErrno)]);
 
       FSemaphoreSetID := semget(IPC_PRIVATE, cNumberOfSemaphores,IPC_CREAT or
                            S_IRUSR or S_IWUSR or S_IRGRP or S_IWGRP);
       if FSemaphoreSetID < 0 then
-          IBError(ibxeCannotCreateSharedResource,['Cannot create shared semaphore set - ' +
+          MDOError(mdoeCannotCreateSharedResource,['Cannot create shared semaphore set - ' +
                                                  StrError(fpgetErrno)]);
 
       fpWrite(F,FSharedMemoryID,sizeof(FSharedMemoryID));
@@ -324,7 +324,7 @@ var ds: TShmid_ds;
     arg: tsemun;
 begin
   if shmctl(FSharedMemoryID,IPC_STAT,@ds) < 0 then
-    IBError(ibxeSV5APIError,['Error getting shared memory info' + strError(fpgetErrno)]);
+    MDOError(mdoeSV5APIError,['Error getting shared memory info' + strError(fpgetErrno)]);
   if ds.shm_nattch = 0 then  { we are the last one out - so, turn off the lights }
   begin
     shmctl(FSharedMemoryID,IPC_RMID,nil);
@@ -340,7 +340,7 @@ begin
   GetSharedMemory(MemSize);
   FBuffer := shmat(FSharedMemoryID,nil,0);
   if PtrInt(FBuffer) = -1 then
-    IBError(ibxeCannotCreateSharedResource,[StrError(Errno)]);
+    MDOError(mdoeCannotCreateSharedResource,[StrError(Errno)]);
   FBufPtr := FBuffer;
   FUnused := MemSize
 end;
@@ -355,7 +355,7 @@ end;
 function TSharedMemory.Allocate(Size: integer): PChar;
 begin
   if Size > FUnused then
-      IBError(ibxeCannotCreateSharedResource, ['Not enough shared memory']);
+      MDOError(mdoeCannotCreateSharedResource, ['Not enough shared memory']);
   Result := FBufPtr;
 
   if Size = 0 then
@@ -409,7 +409,7 @@ var args :TSEMun;
 begin
   Result := semctl(FSemaphoreSetID,SemNum,SEM_GETVAL,args);
   if Result < 0 then
-     IBError(ibxeSV5APIError,['GetSemValue: '+strError(GetLastErrno)]);
+     MDOError(mdoeSV5APIError,['GetSemValue: '+strError(GetLastErrno)]);
 end;
 
 procedure TIpcCommon.SemInit(SemNum, AValue: cint);
@@ -418,7 +418,7 @@ begin
   //writeln('Initialising ',SemNum,' to ',AValue);
   args.val := AValue;
   if semctl(FSemaphoreSetID,SemNum,SEM_SETVAL,args)  < 0 then
-     IBError(ibxeCannotCreateSharedResource,['Unable to initialise Semaphone ' +
+     MDOError(mdoeCannotCreateSharedResource,['Unable to initialise Semaphone ' +
                           IntToStr(SemNum) + '- ' + StrError(GetLastErrno)]);
 
 end;

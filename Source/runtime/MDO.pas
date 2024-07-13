@@ -182,7 +182,8 @@ type
     mdoeDPBConstantUnknownEx,
     mdoeTPBConstantUnknownEx,
     mdoeGeneratorNotDefined,
-    mdoeThreadFailed
+    mdoeThreadFailed,
+    mdoeSV5APIError
     );
 
   TStatusVector              = array[0..19] of ISC_STATUS;
@@ -317,7 +318,8 @@ const
     SDPBConstantUnknownEx,
     STPBConstantUnknownEx,
     SGeneratorNotDefined,
-    SThreadFailed
+    SThreadFailed,
+    SSV5APIError
   );
 
 // LoginDialog procedure for database

@@ -178,6 +178,7 @@ resourcestring
   STPBConstantUnknownEx = 'TPB Constant (%s) is unknown';
 
   SThreadFailed = '%s Thread failed with Exception: %s';
+  SSV5APIError = 'SV5 API API Error - %s';
 
 implementation
 

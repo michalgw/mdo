@@ -14,7 +14,7 @@
 
 unit MDODBRegLaz;
 
-{$I MDO.INC}
+{$I MDO.inc}
 
 interface
 
