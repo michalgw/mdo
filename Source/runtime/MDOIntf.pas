@@ -217,10 +217,10 @@ var
 
 procedure LoadFBLibrary;
 
-  function GetProcAddr(ProcName: String): Pointer;
+  function GetProcAddr(ProcName: String; Check: Boolean = True): Pointer;
   begin
     Result := GetProcAddress(FBLibrary, ProcName);
-    if not Assigned(Result) then
+    if Check and (not Assigned(Result)) then
       RaiseLastOSError;
   end;
 
@@ -291,8 +291,8 @@ begin
     isc_que_events := Tisc_que_events(GetProcAddr('isc_que_events')); {do not localize}
     isc_event_counts := Tisc_event_counts(GetProcAddr('isc_event_counts')); {do not localize}
     isc_event_block := Tisc_event_block(GetProcAddr('isc_event_block')); {do not localize}
-    isc_event_block_a := Tisc_event_block_a(GetProcAddr('isc_event_block_a')); {do not localize}
-    isc_event_block_s := Tisc_event_block_s(GetProcAddr('isc_event_block_s')); {do not localize}
+    isc_event_block_a := Tisc_event_block_a(GetProcAddr('isc_event_block_a', False)); {do not localize}
+    isc_event_block_s := Tisc_event_block_s(GetProcAddr('isc_event_block_s', False)); {do not localize}
     isc_free := Tisc_free(GetProcAddr('isc_free')); {do not localize}
     isc_add_user := Tisc_add_user(GetProcAddr('isc_add_user')); {do not localize}
     isc_delete_user := Tisc_delete_user(GetProcAddr('isc_delete_user')); {do not localize}
