@@ -91,6 +91,8 @@ type
     tm_wday : integer;  { Weekday (0--6) Sunday = 0) }
     tm_yday : integer;  { Day of year (0--365) }
     tm_isdst : integer; { 0 if daylight savings time is not in effect) }
+    tm_gmtoff : integer;
+    tm_zone : PAnsiChar;
   end;
   PCTimeStructure = ^TCTimeStructure;
   TM              = TCTimeStructure;
